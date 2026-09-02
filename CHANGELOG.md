@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Synthetic tests for all Docker classifier states and conflicting preflight rejection.
 - Phase 6B Docker official repository setup, package installation, fresh-host `daemon.json` default, and functional verification.
 - Phase 7 verification summary, component opt-out warnings, reboot-required warnings, platform verification, and idempotent target metadata at `/var/lib/server-bootstrap/metadata.json`.
+- Phase 8 Python stdlib `./bootstrap` wrapper with `check`, `apply`, and `verify`, explicit SSH host-key trust, apply confirmation, and XDG state log paths.
 
 ## [0.0.1] - 2026-09-01
 

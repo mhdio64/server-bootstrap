@@ -59,5 +59,8 @@ jobs:
       - name: Phase 1 synthetic preflight tests
         run: ./tests/synthetic/run-phase1-preflight-tests.sh
 
+      - name: Wrapper unit tests
+        run: python -m unittest discover -s tests/unit -p 'test_*.py'
+
       - name: Repository whitespace check
         run: git diff --check
