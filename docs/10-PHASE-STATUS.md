@@ -2,14 +2,14 @@
 
 Target release: `v0.1.0`
 
-Current state: **Phase 0 implemented on feature branch; awaiting review and merge**
+Current state: **Phase 1 implemented on feature branch; awaiting review and merge**
 
 ## Status table
 
 | Phase | Name | Status |
 |---|---|---|
-| 0 | Repository foundation | IMPLEMENTED (PR pending review) |
-| 1 | Orchestration + global preflight + common | PENDING |
+| 0 | Repository foundation | MERGED |
+| 1 | Orchestration + global preflight + common | IMPLEMENTED (PR pending review) |
 | 2 | Admin user | PENDING |
 | 3 | SSH hardening | PENDING |
 | 4 | Firewall (`iptables-nft`) | PENDING |
@@ -23,14 +23,10 @@ Current state: **Phase 0 implemented on feature branch; awaiting review and merg
 
 ## Current approval boundary
 
-Phase 0 implementation is complete on branch `chore/repository-foundation`.
+Phase 1 implementation is complete on branch `feat/phase-1-orchestration-common`.
 
-Phase 0 does not implement target-host bootstrap behavior from later phases.
+Phase 1 delivers orchestration, global preflight, and the `common` role only.
 
-After Phase 0 PR review and merge, **Phase 1 requires separate human approval** before implementation begins.
+After Phase 1 PR review and merge, **Phase 2 requires separate human approval** before implementation begins.
 
 The next phase is not automatically authorized by completion of the current phase.
-
-## Migration note
-
-Prior Phase 0 work existed in `ansible-server-bootstrap` on branch `chore/repository-foundation`. That work was audited and selectively migrated into this canonical repository with updated naming and interview decisions incorporated.

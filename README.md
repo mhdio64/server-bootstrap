@@ -19,11 +19,11 @@ The MVP is intentionally narrow. It must be real and safe enough for actual DevO
 
 ## Current status
 
-**Phase 0 — Repository foundation** is in progress on the development branch.
+**Phase 1 — Orchestration, global preflight, and common role** is in progress on the development branch.
 
-The repository contains the approved specification, architecture decisions, safety model, testing strategy, Cursor workflow, and phased implementation plan. Phase 0 adds licensing, versioning, development tooling, baseline CI, and placeholder playbooks for static validation only.
+Phase 0 foundation is merged on `main`. Phase 1 adds the three-play orchestration entrypoint (`preflight` → `apply` → `verify`), global preflight checks, and the `common` role for Ubuntu 24.04 baseline configuration.
 
-Target-host bootstrap behavior begins in Phase 1.
+Target-host admin user, SSH, firewall, security, and Docker behavior begin in later phases.
 
 Start with:
 
@@ -69,13 +69,18 @@ ansible-playbook verify.yml --syntax-check
 git diff --check
 ```
 
-## Repository layout (Phase 0)
+## Repository layout (Phase 1)
 
 ```text
 server-bootstrap/
 ├── ansible.cfg
-├── site.yml              # placeholder until Phase 1+
-├── verify.yml            # placeholder until Phase 7+
+├── site.yml              # preflight + apply orchestration
+├── verify.yml            # post-apply verification (common only for now)
+├── roles/
+│   └── common/
+├── tasks/preflight/
+├── examples/minimal/
+├── tests/synthetic/
 ├── inventory/
 ├── requirements-dev.txt
 ├── .ansible-lint
@@ -87,7 +92,7 @@ server-bootstrap/
 └── docs/
 ```
 
-Roles, examples, tests, and wrapper scripts are added in later approved phases.
+Roles, wrapper scripts, and full verification are added in later approved phases.
 
 ## Optional developer tooling
 
