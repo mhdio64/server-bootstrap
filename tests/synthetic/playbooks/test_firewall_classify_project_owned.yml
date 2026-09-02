@@ -1,0 +1,34 @@
+---
+- name: Synthetic | project-owned firewall state must classify as project_owned
+  hosts: localhost
+  gather_facts: false
+  vars:
+    firewall_has_project_chain_v4: true
+    firewall_input_policy_v4: DROP
+    firewall_foreign_input_rules_v4: []
+  tasks:
+    - name: Synthetic | classify IPv4 firewall state
+      ansible.builtin.set_fact:
+        firewall_state_v4: >-
+          {{
+            'project_owned' if (firewall_has_project_chain_v4 | bool)
+            else (
+              'foreign'
+              if (
+                firewall_foreign_input_rules_v4 | length > 0
+                or (
+                  firewall_input_policy_v4 not in ['ACCEPT', 'DROP']
+                )
+                or (
+                  firewall_input_policy_v4 == 'DROP'
+                  and not (firewall_has_project_chain_v4 | bool)
+                )
+              )
+              else 'fresh_default'
+            )
+          }}
+
+    - name: Synthetic | expect project_owned classification
+      ansible.builtin.assert:
+        that:
+          - firewall_state_v4 == 'project_owned'

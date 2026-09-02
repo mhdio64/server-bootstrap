@@ -19,11 +19,11 @@ The MVP is intentionally narrow. It must be real and safe enough for actual DevO
 
 ## Current status
 
-**Phase 3 — SSH hardening** is in progress on the development branch.
+**Phase 4 — Firewall** is in progress on the development branch.
 
-Phases 0–2 are merged on `main`. Phase 3 adds the `ssh` role with a project-owned sshd drop-in, effective-config validation, reconnect verification, and rollback on activation failure.
+Phases 0–3 are merged on `main`. Phase 4 adds the `firewall` role with project-owned iptables-nft chains, foreign-policy classification, reconnect-safe activation, and persistence restore.
 
-Firewall, security, and Docker behavior begin in later phases.
+Security updates and Docker behavior begin in later phases.
 
 Start with:
 
