@@ -6,3 +6,6 @@ exclude_paths:
   - .git/
   - collections/
   - graphify-out/
+# Public product variables intentionally use the bootstrap_* namespace in role defaults.
+skip_list:
+  - var-naming[no-role-prefix]

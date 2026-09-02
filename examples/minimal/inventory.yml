@@ -1,0 +1,9 @@
+---
+# Example inventory for server-bootstrap.
+# Replace host details with your own target. Do not commit real customer data here.
+
+all:
+  hosts:
+    bootstrap-target:
+      ansible_host: 203.0.113.10
+      ansible_user: root

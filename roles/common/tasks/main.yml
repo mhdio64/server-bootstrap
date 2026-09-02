@@ -1,0 +1,121 @@
+---
+- name: Common | build effective package list
+  ansible.builtin.set_fact:
+    common_packages_effective: >-
+      {{ bootstrap_common_packages | union(bootstrap_common_packages_extra) | unique | sort }}
+
+- name: Common | wait for APT/dpkg lock release
+  ansible.builtin.command: >
+    bash -c 'end=$((SECONDS+{{ common_apt_lock_timeout_seconds }}));
+    while (( SECONDS < end )); do
+      fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || exit 0;
+      sleep {{ common_apt_lock_poll_seconds }};
+    done;
+    exit 1'
+  changed_when: false
+  register: common_apt_lock_wait
+  failed_when: common_apt_lock_wait.rc != 0
+  when: not ansible_check_mode
+
+- name: Common | refresh APT package cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Common | install baseline packages
+  ansible.builtin.apt:
+    name: "{{ common_packages_effective }}"
+    state: present
+
+- name: Common | upgrade all packages when explicitly enabled
+  ansible.builtin.apt:
+    upgrade: dist
+  when: bootstrap_upgrade_packages | bool
+
+- name: Common | read current timezone
+  ansible.builtin.command: timedatectl show -p Timezone --value
+  changed_when: false
+  register: common_current_timezone
+
+- name: Common | configure timezone
+  ansible.builtin.command: timedatectl set-timezone {{ bootstrap_timezone }}
+  register: common_timezone_set
+  changed_when: common_current_timezone.stdout | trim != bootstrap_timezone
+  failed_when: common_timezone_set.rc != 0
+
+- name: Common | read current locale settings
+  ansible.builtin.command: localectl status
+  changed_when: false
+  register: common_localectl_status
+  failed_when: common_localectl_status.rc != 0
+
+- name: Common | configure locale when explicitly requested
+  when: bootstrap_locale is defined
+  block:
+    - name: Common | ensure requested locale exists
+      ansible.builtin.command: "locale-gen {{ bootstrap_locale }}"
+      register: common_locale_gen
+      changed_when: >-
+        common_locale_gen.rc == 0 and
+        ('already exists' not in (common_locale_gen.stdout | default('') | lower))
+      failed_when: common_locale_gen.rc != 0
+
+    - name: Common | set system locale
+      ansible.builtin.command: "localectl set-locale LANG={{ bootstrap_locale }}"
+      register: common_localectl_set_locale
+      changed_when: common_localectl_set_locale.rc == 0
+      failed_when: common_localectl_set_locale.rc != 0
+
+- name: Common | apply conservative locale fallback when locale state is invalid
+  when:
+    - bootstrap_locale is not defined
+    - common_localectl_status.stdout is not search('System Locale:.*UTF-8')
+  block:
+    - name: Common | ensure fallback locale exists
+      ansible.builtin.command: "locale-gen {{ common_locale_fallback }}"
+      register: common_locale_fallback_gen
+      changed_when: >-
+        common_locale_fallback_gen.rc == 0 and
+        ('already exists' not in (common_locale_fallback_gen.stdout | default('') | lower))
+      failed_when: common_locale_fallback_gen.rc != 0
+
+    - name: Common | set conservative fallback locale
+      ansible.builtin.command: "localectl set-locale LANG={{ common_locale_fallback }}"
+      register: common_locale_fallback_set
+      changed_when: common_locale_fallback_set.rc == 0
+      failed_when: common_locale_fallback_set.rc != 0
+
+- name: Common | configure hostname when explicitly requested
+  ansible.builtin.hostname:
+    name: "{{ bootstrap_hostname }}"
+  when: bootstrap_hostname is defined
+
+- name: Common | ensure systemd-timesyncd package is present
+  ansible.builtin.apt:
+    name: systemd-timesyncd
+    state: present
+
+- name: Common | enable and start systemd-timesyncd
+  ansible.builtin.systemd:
+    name: systemd-timesyncd.service
+    enabled: true
+    state: started
+
+- name: Common | detect reboot-required flag
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: common_reboot_required_stat
+
+- name: Common | record reboot-required state
+  ansible.builtin.set_fact:
+    bootstrap_reboot_required: "{{ common_reboot_required_stat.stat.exists }}"
+    cacheable: true
+
+- name: Common | reboot when explicitly enabled and required
+  ansible.builtin.reboot:
+    msg: server-bootstrap reboot after package changes
+    reboot_timeout: 900
+  when:
+    - bootstrap_reboot_if_required | bool
+    - bootstrap_reboot_required | default(false) | bool
+    - not ansible_check_mode

@@ -1,0 +1,15 @@
+---
+- name: Synthetic | unsupported platform must fail platform preflight
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_distribution: Debian
+    ansible_distribution_version: "12"
+    ansible_architecture: x86_64
+    common_supported_distribution: Ubuntu
+    common_supported_distribution_version: "24.04"
+    common_supported_architectures:
+      - x86_64
+  tasks:
+    - name: Synthetic | import platform assertions
+      ansible.builtin.import_tasks: ../../../roles/common/tasks/assert_platform.yml

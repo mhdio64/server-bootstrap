@@ -1,0 +1,36 @@
+---
+# Public API defaults for the common role.
+bootstrap_common_enabled: true
+
+bootstrap_timezone: UTC
+bootstrap_upgrade_packages: false
+bootstrap_reboot_if_required: false
+
+bootstrap_common_packages:
+  - ca-certificates
+  - curl
+  - git
+  - gnupg
+  - htop
+  - jq
+  - nano
+  - unzip
+  - vim
+  - wget
+
+bootstrap_common_packages_extra: []
+
+# Optional. When unset, preserve the current hostname.
+# bootstrap_hostname: app-01.example.com
+
+# Optional. When unset, preserve a valid existing locale.
+# bootstrap_locale: en_US.UTF-8
+
+# Role-internal defaults (not public API).
+common_supported_distribution: Ubuntu
+common_supported_distribution_version: "24.04"
+common_supported_architectures:
+  - x86_64
+common_apt_lock_timeout_seconds: 60
+common_apt_lock_poll_seconds: 2
+common_locale_fallback: C.UTF-8

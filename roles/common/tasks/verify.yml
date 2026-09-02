@@ -1,0 +1,26 @@
+---
+- name: Common | build effective package list for verification
+  ansible.builtin.set_fact:
+    common_packages_effective: >-
+      {{ bootstrap_common_packages | union(bootstrap_common_packages_extra) | unique | sort }}
+
+- name: Common | verify timezone is effective
+  ansible.builtin.command: timedatectl show -p Timezone --value
+  changed_when: false
+  register: common_verify_timezone
+  failed_when: common_verify_timezone.stdout | trim != bootstrap_timezone
+
+- name: Common | verify baseline packages are installed
+  ansible.builtin.command: "dpkg-query -W -f='${Status}' {{ item }}"
+  changed_when: false
+  register: common_verify_package
+  failed_when: "'install ok installed' not in common_verify_package.stdout"
+  loop: "{{ common_packages_effective | default(bootstrap_common_packages) }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Common | verify systemd-timesyncd is active
+  ansible.builtin.systemd:
+    name: systemd-timesyncd.service
+  register: common_verify_timesyncd
+  failed_when: common_verify_timesyncd.status.ActiveState != 'active'

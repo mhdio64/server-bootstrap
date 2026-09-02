@@ -1,10 +1,22 @@
 ---
-# Placeholder playbook for repository syntax validation (Phase 0).
-# Full bootstrap orchestration is implemented in Phase 1+.
-- name: Bootstrap server
+- name: Bootstrap | preflight
   hosts: all
-  gather_facts: false
+  gather_facts: true
+  any_errors_fatal: true
   tasks:
-    - name: Placeholder | bootstrap apply not yet implemented
-      ansible.builtin.debug:
-        msg: Bootstrap apply playbook is not yet implemented.
+    - name: Preflight | global checks
+      ansible.builtin.import_tasks: tasks/preflight/global.yml
+
+    - name: Preflight | common role checks
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: preflight
+      when: bootstrap_common_enabled | default(true) | bool
+
+- name: Bootstrap | apply
+  hosts: all
+  gather_facts: true
+  any_errors_fatal: true
+  roles:
+    - role: common
+      when: bootstrap_common_enabled | default(true) | bool
