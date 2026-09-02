@@ -1,0 +1,84 @@
+---
+- name: Docker | query installed docker-ce version when present
+  ansible.builtin.command:
+    cmd: dpkg-query -W -f='${Version}' docker-ce
+  register: docker_installed_ce_version
+  changed_when: false
+  failed_when: false
+  when:
+    - bootstrap_docker_version != 'latest'
+    - "'docker-ce' in (docker_installed_official_packages | default([]))"
+
+- name: Docker | fail when requested Docker version is a downgrade
+  ansible.builtin.fail:
+    msg: >-
+      Requested docker-ce version {{ bootstrap_docker_version }} is older than the
+      installed version {{ docker_installed_ce_version.stdout | trim }}.
+      server-bootstrap v0.1.0 does not perform automatic Docker downgrades.
+  when:
+    - bootstrap_docker_version != 'latest'
+    - docker_installed_ce_version.stdout is defined
+    - docker_installed_ce_version.stdout | trim | length > 0
+    - docker_installed_ce_version.stdout is version(bootstrap_docker_version, '>')
+
+- name: Docker | build Docker package install list for latest on fresh hosts
+  ansible.builtin.set_fact:
+    docker_package_install_list: "{{ docker_official_packages }}"
+    docker_package_install_state: latest
+  when:
+    - bootstrap_docker_version == 'latest'
+    - docker_state == 'absent'
+
+- name: Docker | build Docker package install list for latest on compatible hosts
+  ansible.builtin.set_fact:
+    docker_package_install_list: "{{ docker_missing_official_packages | default([]) }}"
+    docker_package_install_state: present
+  when:
+    - bootstrap_docker_version == 'latest'
+    - docker_state == 'official_compatible'
+
+- name: Docker | build Docker package install list for pinned versions
+  ansible.builtin.set_fact:
+    docker_package_install_list: >-
+      {{
+        (
+          docker_versioned_packages
+          | map('regex_replace', '^(.*)$', '\1=' ~ bootstrap_docker_version)
+          | list
+        )
+        + (
+          docker_official_packages
+          | difference(docker_versioned_packages)
+          | list
+        )
+      }}
+    docker_package_install_state: present
+  when: bootstrap_docker_version != 'latest'
+
+- name: Docker | install official Docker packages on fresh hosts
+  ansible.builtin.apt:
+    name: "{{ docker_package_install_list }}"
+    state: "{{ docker_package_install_state }}"
+    allow_downgrade: false
+  when:
+    - docker_state == 'absent'
+    - docker_package_install_list | length > 0
+
+- name: Docker | reconcile missing official Docker packages on compatible hosts
+  ansible.builtin.apt:
+    name: "{{ docker_package_install_list }}"
+    state: present
+    allow_downgrade: false
+  when:
+    - docker_state == 'official_compatible'
+    - docker_package_install_list | default([]) | length > 0
+
+- name: Docker | ensure official Docker packages remain present without implicit upgrade
+  ansible.builtin.apt:
+    name: "{{ docker_official_packages }}"
+    state: present
+    allow_downgrade: false
+  when:
+    - bootstrap_docker_version == 'latest'
+    - docker_state == 'official_compatible'
+    - (docker_missing_official_packages | default([]) | length == 0)

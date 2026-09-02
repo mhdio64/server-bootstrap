@@ -1,0 +1,19 @@
+---
+- name: Synthetic | Docker downgrade request must fail package install guard
+  hosts: localhost
+  gather_facts: false
+  vars:
+    bootstrap_docker_version: 5:20.10.0-1
+    docker_installed_ce_version:
+      stdout: 5:29.7.2-1~ubuntu.24.04~noble
+  tasks:
+    - name: Synthetic | fail when requested Docker version is a downgrade
+      ansible.builtin.fail:
+        msg: >-
+          Requested docker-ce version {{ bootstrap_docker_version }} is older than the
+          installed version {{ docker_installed_ce_version.stdout | trim }}.
+          server-bootstrap v0.1.0 does not perform automatic Docker downgrades.
+      when:
+        - bootstrap_docker_version != 'latest'
+        - docker_installed_ce_version.stdout | trim | length > 0
+        - docker_installed_ce_version.stdout is version(bootstrap_docker_version, '>')

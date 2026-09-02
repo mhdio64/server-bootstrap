@@ -49,3 +49,11 @@
       when:
         - not ansible_check_mode
         - bootstrap_security_enabled | default(true) | bool
+
+    - name: Verify | docker role checks
+      ansible.builtin.import_role:
+        name: docker
+        tasks_from: verify
+      when:
+        - not ansible_check_mode
+        - bootstrap_docker_enabled | default(true) | bool

@@ -54,7 +54,7 @@
   ansible.builtin.find:
     paths:
       - /etc/apt/sources.list.d
-    patterns: "*.list"
+    patterns: "*.list,*.sources"
     file_type: file
   register: docker_apt_source_files
 

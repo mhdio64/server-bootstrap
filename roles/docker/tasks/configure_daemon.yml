@@ -1,0 +1,21 @@
+---
+- name: Docker | inspect existing daemon.json
+  ansible.builtin.stat:
+    path: "{{ docker_daemon_json_path }}"
+  register: docker_daemon_json_stat
+
+- name: Docker | validate existing daemon.json syntax when present
+  ansible.builtin.command:
+    cmd: /usr/bin/python3 -m json.tool {{ docker_daemon_json_path }}
+  changed_when: false
+  when: docker_daemon_json_stat.stat.exists
+
+- name: Docker | install fresh-host daemon.json when absent
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: "{{ docker_daemon_json_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: not docker_daemon_json_stat.stat.exists
+  notify: Docker | restart docker daemon

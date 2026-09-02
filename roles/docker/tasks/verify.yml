@@ -1,0 +1,36 @@
+---
+- name: Docker | verify containerd service is active
+  ansible.builtin.systemd:
+    name: "{{ docker_containerd_service_name }}"
+  register: docker_verify_containerd
+  failed_when: docker_verify_containerd.status.ActiveState != 'active'
+
+- name: Docker | verify Docker service is active
+  ansible.builtin.systemd:
+    name: "{{ docker_service_name }}"
+  register: docker_verify_service
+  failed_when: docker_verify_service.status.ActiveState != 'active'
+
+- name: Docker | verify docker CLI responds
+  ansible.builtin.command: docker version
+  changed_when: false
+
+- name: Docker | verify docker compose plugin responds
+  ansible.builtin.command: docker compose version
+  changed_when: false
+
+- name: Docker | verify docker info responds
+  ansible.builtin.command: docker info
+  changed_when: false
+
+- name: Docker | verify daemon.json is valid when present
+  ansible.builtin.command:
+    cmd: /usr/bin/python3 -m json.tool {{ docker_daemon_json_path }}
+  changed_when: false
+  when: docker_daemon_json_path is defined
+
+- name: Docker | verify project-owned Docker APT source exists after installation
+  ansible.builtin.stat:
+    path: "{{ docker_apt_sources_path }}"
+  register: docker_verify_apt_sources
+  failed_when: not docker_verify_apt_sources.stat.exists
