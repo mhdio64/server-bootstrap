@@ -34,7 +34,7 @@
 - name: Users | install project-owned sudoers drop-in
   ansible.builtin.copy:
     dest: "/etc/sudoers.d/{{ users_sudoers_dropin_prefix }}-{{ bootstrap_admin_user }}"
-    content: "{{ bootstrap_admin_user }} ALL=(ALL) NOPASSWD:ALL\n"
+    content: "{{ bootstrap_admin_user }} ALL=(ALL) NOPASSWD:ALL\n"  # pragma: allowlist secret
     owner: root
     group: root
     mode: "0440"
