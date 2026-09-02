@@ -1,0 +1,7 @@
+---
+# Local inventory for static validation only (Phase 0).
+# Real target inventories live outside this repository.
+all:
+  hosts:
+    localhost:
+      ansible_connection: local

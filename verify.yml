@@ -1,0 +1,10 @@
+---
+# Placeholder playbook for repository syntax validation (Phase 0).
+# Critical verification is implemented in Phase 7+.
+- name: Verify bootstrap state
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Placeholder | bootstrap verification not yet implemented
+      ansible.builtin.debug:
+        msg: Bootstrap verification playbook is not yet implemented.
