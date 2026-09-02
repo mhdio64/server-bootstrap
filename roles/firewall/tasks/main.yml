@@ -1,9 +1,12 @@
 ---
-- name: Firewall | discover current firewall state
-  ansible.builtin.import_tasks: discover_state.yml
+- name: Firewall | read-only state discovery and classification
+  check_mode: false
+  block:
+    - name: Firewall | discover current firewall state
+      ansible.builtin.import_tasks: discover_state.yml
 
-- name: Firewall | classify current firewall state
-  ansible.builtin.import_tasks: classify_state.yml
+    - name: Firewall | classify current firewall state
+      ansible.builtin.import_tasks: classify_state.yml
 
 - name: Firewall | ensure firewall packages are installed
   ansible.builtin.apt:
@@ -14,6 +17,7 @@
 
 - name: Firewall | refresh discovered firewall state after package install
   ansible.builtin.import_tasks: discover_state.yml
+  check_mode: false
 
 - name: Firewall | build project-owned firewall rules
   ansible.builtin.import_tasks: build_rules.yml

@@ -1,0 +1,16 @@
+---
+- name: Scenario 1 | Docker smoke test
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Scenario 1 | run official hello-world container
+      ansible.builtin.command: docker run --rm hello-world
+      changed_when: false
+      register: scenario1_docker_smoke
+
+    - name: Scenario 1 | assert hello-world output mentions Hello from Docker
+      ansible.builtin.assert:
+        that:
+          - scenario1_docker_smoke.stdout is search('Hello from Docker')
+        fail_msg: Docker smoke test did not produce the expected hello-world output.

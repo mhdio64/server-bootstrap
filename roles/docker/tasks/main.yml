@@ -1,9 +1,12 @@
 ---
-- name: Docker | discover existing Docker installation state
-  ansible.builtin.import_tasks: discover_state.yml
+- name: Docker | read-only discovery and classification
+  check_mode: false
+  block:
+    - name: Docker | discover existing Docker installation state
+      ansible.builtin.import_tasks: discover_state.yml
 
-- name: Docker | classify existing Docker installation state
-  ansible.builtin.import_tasks: classify_state.yml
+    - name: Docker | classify existing Docker installation state
+      ansible.builtin.import_tasks: classify_state.yml
 
 - name: Docker | confirm Docker state is safe to proceed
   ansible.builtin.assert:
