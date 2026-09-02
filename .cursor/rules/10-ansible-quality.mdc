@@ -1,0 +1,25 @@
+---
+description: Ansible implementation and idempotency rules for playbooks, roles, variables, and handlers.
+globs:
+  - "**/*.yml"
+  - "**/*.yaml"
+  - "roles/**"
+alwaysApply: false
+---
+
+# Ansible Quality Rules
+
+- Prefer fully qualified `ansible.builtin.*` modules.
+- Avoid `shell`/`command` when an appropriate module exists.
+- When `command`/`shell` is genuinely necessary, make changed-state and failure-state explicit and testable.
+- User-facing variables use `bootstrap_*`.
+- Keep role-internal variables private to the role.
+- Second identical apply must result in `changed=0`.
+- Do not rewrite equivalent files merely to update timestamps.
+- Support useful non-mutating check mode where technically honest.
+- Validate inputs before mutation.
+- Use handlers only when a real state change requires them.
+- Avoid unconditional service restarts.
+- Critical configuration should follow candidate -> validate -> activate -> reload/verify patterns where practical.
+- Prefer small responsibility-oriented roles over one giant role or excessive micro-roles.
+- Do not add support for non-MVP distributions.

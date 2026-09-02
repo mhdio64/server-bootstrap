@@ -1,0 +1,30 @@
+---
+description: Project governance, scope control, source-of-truth, and human approval gates.
+alwaysApply: true
+---
+
+# Project Governance
+
+Read `AGENTS.md` and `docs/00-CONTEXT-INDEX.md` before substantial work.
+
+The accepted architecture and product decisions in `docs/` are authoritative.
+
+For the current approved phase, read:
+- `docs/04-IMPLEMENTATION-PLAN.md`
+- `docs/10-PHASE-STATUS.md`
+- only the additional context documents relevant to that phase.
+
+Do not silently:
+- expand scope,
+- change supported platforms,
+- change `bootstrap_*` public behavior,
+- change security policy,
+- change architecture boundaries,
+- add a significant dependency,
+- weaken a gate to make CI pass.
+
+Cursor may automate branch/implementation/tests/commit/push/PR/CI fixes for an approved phase.
+
+Cursor must stop before merge, tag, or release.
+
+If GitHub or another required external capability is unavailable, report that exact limitation. Do not pretend a remote action happened.
