@@ -19,9 +19,9 @@ The MVP is intentionally narrow. It must be real and safe enough for actual DevO
 
 ## Current status
 
-**Phase 8 — Thin wrapper** is in progress on the development branch.
+**Phase 9 — Scenario 1 real-VM validation** is in progress on the development branch.
 
-Phases 0–7 are merged on `main`. Phase 8 adds the `./bootstrap` CLI wrapper around the Ansible playbooks.
+Phases 0–8 are merged on `main`. Phase 9 adds the repeatable Scenario 1 harness and sanitized release-gate evidence from a real Ubuntu Server 24.04 amd64 VM.
 
 Start with:
 
@@ -85,6 +85,16 @@ First-time SSH host trust requires interactive approval or `--expected-host-fing
 Interactive `apply` requires explicit confirmation; use `--yes` for automation.
 
 Logs are written under `${XDG_STATE_HOME:-~/.local/state}/server-bootstrap/logs`.
+
+## Scenario 1 validation
+
+Real-VM release validation is run locally with:
+
+```bash
+./tests/scenario1/run-scenario1.sh
+```
+
+See `tests/scenario1/README.md` for required environment variables. Sanitized evidence is recorded under `tests/scenario1/evidence/`.
 
 ## Repository layout
 

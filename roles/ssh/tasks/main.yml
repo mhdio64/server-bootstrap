@@ -1,6 +1,9 @@
 ---
-- name: SSH | discover effective sshd state
-  ansible.builtin.import_tasks: discover_effective_state.yml
+- name: SSH | read-only effective sshd discovery
+  check_mode: false
+  block:
+    - name: SSH | discover effective sshd state
+      ansible.builtin.import_tasks: discover_effective_state.yml
 
 - name: SSH | render candidate sshd drop-in content
   ansible.builtin.import_tasks: build_dropin_content.yml

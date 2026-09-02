@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 6B Docker official repository setup, package installation, fresh-host `daemon.json` default, and functional verification.
 - Phase 7 verification summary, component opt-out warnings, reboot-required warnings, platform verification, and idempotent target metadata at `/var/lib/server-bootstrap/metadata.json`.
 - Phase 8 Python stdlib `./bootstrap` wrapper with `check`, `apply`, and `verify`, explicit SSH host-key trust, apply confirmation, and XDG state log paths.
+- Phase 9 Scenario 1 real-VM validation harness, sanitized evidence report, check-mode preflight/read-only discovery fixes, and successful Ubuntu 24.04 amd64 end-to-end validation.
 
 ## [0.0.1] - 2026-09-01
 

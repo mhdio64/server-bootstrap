@@ -9,23 +9,27 @@
   tasks:
     - name: Preflight | global checks
       ansible.builtin.import_tasks: tasks/preflight/global.yml
+      check_mode: false
 
     - name: Preflight | common role checks
       ansible.builtin.import_role:
         name: common
         tasks_from: preflight
+      check_mode: false
       when: bootstrap_common_enabled | default(true) | bool
 
     - name: Preflight | users role checks
       ansible.builtin.import_role:
         name: users
         tasks_from: preflight
+      check_mode: false
       when: bootstrap_users_enabled | default(true) | bool
 
     - name: Preflight | ssh role checks
       ansible.builtin.import_role:
         name: ssh
         tasks_from: preflight
+      check_mode: false
       when: bootstrap_ssh_enabled | default(true) | bool
 
     - name: Preflight | firewall role checks
@@ -33,17 +37,20 @@
         name: firewall
         tasks_from: preflight
       when: bootstrap_firewall_enabled | default(true) | bool
+      check_mode: false
 
     - name: Preflight | security role checks
       ansible.builtin.import_role:
         name: security
         tasks_from: preflight
+      check_mode: false
       when: bootstrap_security_enabled | default(true) | bool
 
     - name: Preflight | docker role checks
       ansible.builtin.import_role:
         name: docker
         tasks_from: preflight
+      check_mode: false
       when: bootstrap_docker_enabled | default(true) | bool
 
     - name: Preflight | component opt-out warnings
