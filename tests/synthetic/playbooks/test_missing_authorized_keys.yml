@@ -1,0 +1,13 @@
+---
+- name: Synthetic | missing authorized keys must fail users preflight
+  hosts: localhost
+  gather_facts: false
+  vars:
+    bootstrap_admin_user: deploy
+    bootstrap_admin_authorized_keys: []
+    bootstrap_admin_authorized_key_files: []
+  tasks:
+    - name: Synthetic | import users preflight checks
+      ansible.builtin.import_role:
+        name: users
+        tasks_from: preflight
