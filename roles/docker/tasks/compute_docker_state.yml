@@ -1,0 +1,42 @@
+---
+- name: Docker | compute Docker installation state
+  ansible.builtin.set_fact:
+    docker_state: >-
+      {{
+        'conflicting'
+        if (
+          (docker_snap_installed | default(false) | bool)
+          or ((docker_installed_conflicting_packages | default([])) | length > 0)
+        )
+        else (
+          'ambiguous'
+          if (
+            (docker_has_unofficial_docker_apt_source | default(false) | bool)
+            or (
+              (docker_cli_present | default(false) | bool)
+              and ((docker_installed_official_packages | default([])) | length == 0)
+              and not (docker_ce_from_official_origin | default(false) | bool)
+            )
+          )
+          else (
+            'official_compatible'
+            if (
+              ((docker_missing_official_packages | default([])) | length == 0)
+              and (
+                (docker_has_official_apt_source | default(false) | bool)
+                or (docker_ce_from_official_origin | default(false) | bool)
+              )
+            )
+            else (
+              'absent'
+              if (
+                ((docker_installed_official_packages | default([])) | length == 0)
+                and not (docker_has_official_apt_source | default(false) | bool)
+                and not (docker_cli_present | default(false) | bool)
+                and not (docker_snap_installed | default(false) | bool)
+              )
+              else 'partial'
+            )
+          )
+        )
+      }}

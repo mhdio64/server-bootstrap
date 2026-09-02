@@ -1,0 +1,31 @@
+---
+- name: Docker | compute Docker installation state
+  ansible.builtin.import_tasks: compute_docker_state.yml
+
+- name: Docker | fail on conflicting Docker installation state
+  ansible.builtin.fail:
+    msg: >-
+      Conflicting Docker installation state detected
+      ({{ docker_installed_conflicting_packages | default([]) | join(', ') }}
+      {% if docker_snap_installed | default(false) %} snap docker{% endif %}).
+      server-bootstrap does not automatically remove or replace foreign Docker
+      installations. Resolve the conflict manually before continuing.
+  when: docker_state == 'conflicting'
+
+- name: Docker | fail on partial Docker installation state
+  ansible.builtin.fail:
+    msg: >-
+      Partial Docker installation state detected. Installed official packages:
+      {{ docker_installed_official_packages | default([]) | join(', ') | default('none') }}.
+      Missing official packages:
+      {{ docker_missing_official_packages | default([]) | join(', ') | default('none') }}.
+      Complete or remove the partial Docker installation before continuing.
+  when: docker_state == 'partial'
+
+- name: Docker | fail on ambiguous Docker installation state
+  ansible.builtin.fail:
+    msg: >-
+      Ambiguous Docker installation state detected. server-bootstrap could not
+      classify the existing Docker packages, CLI, or APT sources safely. Resolve
+      the Docker installation state manually before continuing.
+  when: docker_state == 'ambiguous'

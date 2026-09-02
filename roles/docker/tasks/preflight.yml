@@ -1,0 +1,15 @@
+---
+- name: Docker | discover existing Docker installation state
+  ansible.builtin.import_tasks: discover_state.yml
+
+- name: Docker | classify existing Docker installation state
+  ansible.builtin.import_tasks: classify_state.yml
+
+- name: Docker | confirm Docker state is safe to proceed
+  ansible.builtin.assert:
+    that:
+      - docker_state in docker_allowed_preflight_states
+    fail_msg: >-
+      Docker preflight state {{ docker_state | default('unknown') }} is not
+      allowed to proceed. Only {{ docker_allowed_preflight_states | join(' and ') }}
+      states may continue.

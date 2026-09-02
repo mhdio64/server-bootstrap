@@ -1,0 +1,141 @@
+---
+- name: Docker | build tracked package list
+  ansible.builtin.set_fact:
+    docker_tracked_packages: >-
+      {{
+        docker_official_packages
+        | union(docker_conflicting_packages)
+        | unique
+        | sort
+      }}
+
+- name: Docker | query tracked package installation state
+  ansible.builtin.command:
+    cmd: dpkg-query -W -f='${Status} ${Package}\n' {{ item }}
+  register: docker_package_queries
+  loop: "{{ docker_tracked_packages }}"
+  changed_when: false
+  failed_when: false
+  loop_control:
+    label: "{{ item }}"
+
+- name: Docker | collect installed tracked packages
+  ansible.builtin.set_fact:
+    docker_installed_packages: >-
+      {{
+        docker_package_queries.results
+        | selectattr('stdout', 'defined')
+        | selectattr('stdout', 'search', '^install ok installed')
+        | map(attribute='item')
+        | list
+      }}
+
+- name: Docker | detect docker CLI presence
+  ansible.builtin.command: command -v docker
+  register: docker_cli_probe
+  changed_when: false
+  failed_when: false
+
+- name: Docker | record docker CLI presence
+  ansible.builtin.set_fact:
+    docker_cli_present: "{{ docker_cli_probe.rc == 0 }}"
+
+- name: Docker | inspect snap docker package
+  ansible.builtin.command: snap list docker
+  register: docker_snap_query
+  changed_when: false
+  failed_when: false
+
+- name: Docker | record snap docker installation
+  ansible.builtin.set_fact:
+    docker_snap_installed: "{{ docker_snap_query.rc == 0 }}"
+
+- name: Docker | list apt source list files
+  ansible.builtin.find:
+    paths:
+      - /etc/apt/sources.list.d
+    patterns: "*.list"
+    file_type: file
+  register: docker_apt_source_files
+
+- name: Docker | read apt source list files
+  ansible.builtin.slurp:
+    path: "{{ item.path }}"
+  register: docker_apt_source_contents
+  loop: "{{ docker_apt_source_files.files | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Docker | read main apt sources file
+  ansible.builtin.slurp:
+    path: /etc/apt/sources.list
+  register: docker_main_apt_sources
+  failed_when: false
+
+- name: Docker | initialize apt source classification facts
+  ansible.builtin.set_fact:
+    docker_has_official_apt_source: false
+    docker_has_unofficial_docker_apt_source: false
+
+- name: Docker | classify apt source list file contents
+  ansible.builtin.set_fact:
+    docker_has_official_apt_source: >-
+      {{
+        docker_has_official_apt_source | bool
+        or (item.content | b64decode is search(docker_official_apt_marker))
+      }}
+    docker_has_unofficial_docker_apt_source: >-
+      {{
+        docker_has_unofficial_docker_apt_source | bool
+        or (
+          (item.content | b64decode is search('(?i)docker'))
+          and not (item.content | b64decode is search(docker_official_apt_marker))
+        )
+      }}
+  loop: "{{ docker_apt_source_contents.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.path | default('unknown') }}"
+
+- name: Docker | classify main apt sources file content
+  ansible.builtin.set_fact:
+    docker_has_official_apt_source: >-
+      {{
+        docker_has_official_apt_source | bool
+        or (
+          not docker_main_apt_sources.failed | default(true)
+          and (docker_main_apt_sources.content | b64decode is search(docker_official_apt_marker))
+        )
+      }}
+    docker_has_unofficial_docker_apt_source: >-
+      {{
+        docker_has_unofficial_docker_apt_source | bool
+        or (
+          not docker_main_apt_sources.failed | default(true)
+          and (docker_main_apt_sources.content | b64decode is search('(?i)docker'))
+          and not (docker_main_apt_sources.content | b64decode is search(docker_official_apt_marker))
+        )
+      }}
+  when: not docker_main_apt_sources.failed | default(true)
+
+- name: Docker | query docker-ce package origin policy
+  ansible.builtin.command: apt-cache policy docker-ce
+  register: docker_ce_policy
+  changed_when: false
+  failed_when: false
+
+- name: Docker | record official docker-ce package origin
+  ansible.builtin.set_fact:
+    docker_ce_from_official_origin: >-
+      {{
+        docker_ce_policy.stdout is defined
+        and (docker_ce_policy.stdout is search('download\\.docker\\.com'))
+      }}
+
+- name: Docker | derive installed official and conflicting packages
+  ansible.builtin.set_fact:
+    docker_installed_official_packages: >-
+      {{ docker_official_packages | intersect(docker_installed_packages | default([])) }}
+    docker_missing_official_packages: >-
+      {{ docker_official_packages | difference(docker_installed_packages | default([])) }}
+    docker_installed_conflicting_packages: >-
+      {{ docker_conflicting_packages | intersect(docker_installed_packages | default([])) }}
