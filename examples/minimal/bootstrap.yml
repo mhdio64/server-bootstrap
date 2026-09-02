@@ -18,3 +18,4 @@ bootstrap_admin_authorized_keys:
 # bootstrap_upgrade_packages: false
 # bootstrap_reboot_if_required: false
 # bootstrap_common_packages_extra: []
+# bootstrap_ssh_port: 22

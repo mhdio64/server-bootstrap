@@ -1,0 +1,28 @@
+---
+- name: SSH | query effective sshd configuration
+  ansible.builtin.command: /usr/sbin/sshd -T
+  changed_when: false
+  register: ssh_effective_raw
+
+- name: SSH | build effective configuration map
+  ansible.builtin.set_fact:
+    ssh_effective_config: >-
+      {{
+        dict(
+          ssh_effective_raw.stdout_lines
+          | map('regex_replace', '^(\S+)\s+(.*)$', '\1||\2')
+          | map('split', '||')
+          | list
+        )
+      }}
+
+- name: SSH | derive effective SSH port
+  ansible.builtin.set_fact:
+    ssh_effective_port: "{{ ssh_effective_config.port | default('22') | int }}"
+
+- name: SSH | derive target SSH port for reconnect checks
+  ansible.builtin.set_fact:
+    ssh_target_port: >-
+      {{
+        bootstrap_ssh_port | default(ssh_effective_port) | int
+      }}

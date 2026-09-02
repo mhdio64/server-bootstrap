@@ -1,0 +1,21 @@
+---
+- name: SSH | validate configured SSH port when explicitly set
+  ansible.builtin.assert:
+    that:
+      - bootstrap_ssh_port | int >= 1
+      - bootstrap_ssh_port | int <= 65535
+    fail_msg: >-
+      bootstrap_ssh_port must be an integer between 1 and 65535 when set.
+  when: bootstrap_ssh_port is defined
+
+- name: SSH | discover effective sshd state
+  ansible.builtin.import_tasks: discover_effective_state.yml
+
+- name: SSH | verify control node identity matches configured admin keys
+  ansible.builtin.import_tasks: validate_control_node_identity.yml
+
+- name: SSH | inspect consequential sshd configuration conflicts
+  ansible.builtin.import_tasks: inspect_conflicts.yml
+
+- name: SSH | render candidate sshd drop-in content
+  ansible.builtin.import_tasks: build_dropin_content.yml

@@ -1,0 +1,66 @@
+---
+- name: SSH | discover effective sshd state
+  ansible.builtin.import_tasks: discover_effective_state.yml
+
+- name: SSH | render candidate sshd drop-in content
+  ansible.builtin.import_tasks: build_dropin_content.yml
+
+- name: SSH | activate project-owned sshd drop-in safely
+  block:
+    - name: SSH | install project-owned sshd drop-in
+      ansible.builtin.copy:
+        dest: "{{ ssh_dropin_path }}"
+        content: "{{ ssh_dropin_content }}"
+        owner: root
+        group: root
+        mode: "0644"
+      register: ssh_dropin_result
+
+    - name: SSH | validate sshd syntax after drop-in installation
+      ansible.builtin.command: /usr/sbin/sshd -t
+      changed_when: false
+      when: not ansible_check_mode
+
+    - name: SSH | validate effective sshd configuration after drop-in installation
+      ansible.builtin.import_tasks: validate_effective_config.yml
+      when: not ansible_check_mode
+
+    - name: SSH | reload SSH service after drop-in installation
+      ansible.builtin.systemd:
+        name: "{{ ssh_service_name }}"
+        state: reloaded
+      when:
+        - not ansible_check_mode
+        - ssh_dropin_result.changed
+
+    - name: SSH | verify admin SSH login after hardening changes
+      ansible.builtin.command:
+        cmd: >-
+          ssh
+          {% if ansible_ssh_private_key_file is defined %}-i {{ ansible_ssh_private_key_file | quote }}{% endif %}
+          -o BatchMode=yes
+          -o ConnectTimeout={{ ssh_reconnect_timeout }}
+          -o StrictHostKeyChecking=yes
+          -p {{ ssh_target_port }}
+          {{ bootstrap_admin_user }}@{{ ansible_host }}
+          /bin/true
+      delegate_to: localhost
+      become: false
+      changed_when: false
+      register: ssh_reconnect_probe
+      failed_when: ssh_reconnect_probe.rc != 0
+      when:
+        - not ansible_check_mode
+        - ssh_dropin_result.changed
+
+  rescue:
+    - name: SSH | rollback project-owned sshd drop-in after activation failure
+      ansible.builtin.import_tasks: rollback.yml
+      when: not ansible_check_mode
+
+    - name: SSH | fail after SSH activation rollback
+      ansible.builtin.fail:
+        msg: >-
+          SSH hardening activation failed and the project-owned drop-in was rolled
+          back. Verify admin key access, sshd configuration precedence, and SSH
+          service health before retrying.

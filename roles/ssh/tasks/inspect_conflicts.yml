@@ -1,0 +1,79 @@
+---
+- name: SSH | list sshd drop-in files
+  ansible.builtin.find:
+    paths: /etc/ssh/sshd_config.d
+    patterns: "*.conf"
+    file_type: file
+  register: ssh_dropin_files
+
+- name: SSH | identify earlier drop-ins that can preempt managed directives
+  ansible.builtin.set_fact:
+    ssh_preempting_dropins: >-
+      {{
+        ssh_dropin_files.files
+        | map(attribute='path')
+        | reject('equalto', ssh_dropin_path)
+        | select('lt', ssh_dropin_path)
+        | list
+      }}
+
+- name: SSH | read earlier sshd drop-ins
+  ansible.builtin.slurp:
+    path: "{{ item }}"
+  register: ssh_preempting_dropin_contents
+  loop: "{{ ssh_preempting_dropins | default([]) }}"
+  loop_control:
+    label: "{{ item }}"
+  when: ssh_preempting_dropins | default([]) | length > 0
+
+- name: SSH | fail when earlier drop-ins define managed sshd directives
+  ansible.builtin.fail:
+    msg: >-
+      sshd drop-in {{ item.item }} defines managed SSH directives that take
+      precedence over the server-bootstrap drop-in because OpenSSH uses the
+      first obtained value for each parameter. Remove or relocate the conflicting
+      directives before bootstrap can manage SSH safely.
+  when:
+    - ssh_preempting_dropins | default([]) | length > 0
+    - dropin_content is search('(?im)^\\s*Port\\s+')
+      or dropin_content is search('(?im)^\\s*PubkeyAuthentication\\s+')
+      or dropin_content is search('(?im)^\\s*PermitEmptyPasswords\\s+')
+      or dropin_content is search('(?im)^\\s*PasswordAuthentication\\s+')
+      or dropin_content is search('(?im)^\\s*KbdInteractiveAuthentication\\s+')
+      or dropin_content is search('(?im)^\\s*PermitRootLogin\\s+')
+  vars:
+    dropin_content: "{{ item.content | b64decode }}"
+  loop: "{{ ssh_preempting_dropin_contents.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: SSH | read main sshd configuration
+  ansible.builtin.slurp:
+    path: /etc/ssh/sshd_config
+  register: ssh_main_config
+
+- name: SSH | fail when main sshd configuration defines managed directives
+  ansible.builtin.fail:
+    msg: >-
+      /etc/ssh/sshd_config defines managed SSH directives before the
+      sshd_config.d include, which takes precedence over the server-bootstrap
+      drop-in. Reconcile the main sshd configuration before bootstrap can manage
+      SSH safely.
+  vars:
+    active_content: >-
+      {{
+        ssh_main_config.content
+        | b64decode
+        | split('\n')
+        | map('trim')
+        | reject('equalto', '')
+        | reject('match', '^#')
+        | join('\n')
+      }}
+  when:
+    - active_content is search('(?im)^Port\\s+')
+      or active_content is search('(?im)^PubkeyAuthentication\\s+')
+      or active_content is search('(?im)^PermitEmptyPasswords\\s+')
+      or active_content is search('(?im)^PasswordAuthentication\\s+')
+      or active_content is search('(?im)^KbdInteractiveAuthentication\\s+')
+      or active_content is search('(?im)^PermitRootLogin\\s+')
