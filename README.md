@@ -19,11 +19,11 @@ The MVP is intentionally narrow. It must be real and safe enough for actual DevO
 
 ## Current status
 
-**Phase 1 — Orchestration, global preflight, and common role** is in progress on the development branch.
+**Phase 2 — Admin user** is in progress on the development branch.
 
-Phase 0 foundation is merged on `main`. Phase 1 adds the three-play orchestration entrypoint (`preflight` → `apply` → `verify`), global preflight checks, and the `common` role for Ubuntu 24.04 baseline configuration.
+Phases 0–1 are merged on `main`. Phase 2 adds the `users` role for bootstrap admin account management, sudoers drop-in, and project-managed authorized_keys blocks.
 
-Target-host admin user, SSH, firewall, security, and Docker behavior begin in later phases.
+SSH, firewall, security, and Docker behavior begin in later phases.
 
 Start with:
 
@@ -77,7 +77,8 @@ server-bootstrap/
 ├── site.yml              # preflight + apply orchestration
 ├── verify.yml            # post-apply verification (common only for now)
 ├── roles/
-│   └── common/
+│   ├── common/
+│   └── users/
 ├── tasks/preflight/
 ├── examples/minimal/
 ├── tests/synthetic/
