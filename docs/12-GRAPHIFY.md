@@ -44,7 +44,11 @@ Ignore local-only artifacts:
 
 ```text
 graphify-out/cost.json
+graphify-out/cache/
+graphify-out/.graphify_*
 ```
+
+`graphify-out/` is excluded from `scripts/secret-scan.sh` because generated AST/content hashes trigger false positives in detect-secrets.
 
 ## Review before commit
 
