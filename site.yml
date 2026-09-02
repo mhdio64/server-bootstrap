@@ -13,6 +13,12 @@
         tasks_from: preflight
       when: bootstrap_common_enabled | default(true) | bool
 
+    - name: Preflight | users role checks
+      ansible.builtin.import_role:
+        name: users
+        tasks_from: preflight
+      when: bootstrap_users_enabled | default(true) | bool
+
 - name: Bootstrap | apply
   hosts: all
   gather_facts: true
@@ -20,3 +26,5 @@
   roles:
     - role: common
       when: bootstrap_common_enabled | default(true) | bool
+    - role: users
+      when: bootstrap_users_enabled | default(true) | bool

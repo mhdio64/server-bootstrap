@@ -19,6 +19,13 @@ run_expect_failure() {
   echo "PASS: $label failed as expected (exit ${rc})"
 }
 
+run_expect_success() {
+  local playbook="$1"
+  local label="$2"
+  ansible-playbook "$playbook"
+  echo "PASS: $label succeeded"
+}
+
 run_expect_failure \
   tests/synthetic/playbooks/test_missing_admin_user.yml \
   "missing bootstrap_admin_user preflight"
@@ -27,4 +34,16 @@ run_expect_failure \
   tests/synthetic/playbooks/test_unsupported_platform.yml \
   "unsupported platform preflight"
 
-echo "All Phase 1 synthetic preflight tests passed."
+run_expect_failure \
+  tests/synthetic/playbooks/test_root_admin_user.yml \
+  "root bootstrap_admin_user rejection"
+
+run_expect_failure \
+  tests/synthetic/playbooks/test_missing_authorized_keys.yml \
+  "missing authorized keys users preflight"
+
+run_expect_success \
+  tests/synthetic/playbooks/test_system_uid_classification.yml \
+  "system UID classification"
+
+echo "All synthetic preflight tests passed."

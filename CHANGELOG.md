@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 1 orchestration with global preflight and the `common` role for Ubuntu 24.04 baseline configuration.
 - Synthetic preflight tests for missing required variables and unsupported platform detection.
 - Minimal example `inventory.yml` and `bootstrap.yml` layout under `examples/minimal/`.
+- Phase 2 `users` role for bootstrap admin account, sudoers drop-in, and project-managed authorized_keys block.
+- Synthetic tests for root admin rejection, missing authorized keys, and system UID classification.
 
 ## [0.0.1] - 2026-09-01
 

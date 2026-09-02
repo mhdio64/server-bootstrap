@@ -1,0 +1,38 @@
+---
+- name: Users | build effective authorized key list for verification
+  ansible.builtin.import_tasks: build_authorized_keys.yml
+
+- name: Users | verify admin account exists
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ bootstrap_admin_user }}"
+
+- name: Users | read admin authorized_keys file
+  ansible.builtin.slurp:
+    path: "/home/{{ bootstrap_admin_user }}/.ssh/authorized_keys"
+  register: users_verify_authorized_keys
+
+- name: Users | verify managed authorized keys are present
+  ansible.builtin.assert:
+    that:
+      - item in (users_verify_authorized_keys.content | b64decode)
+    fail_msg: >-
+      Expected authorized key for {{ bootstrap_admin_user }} is missing from the
+      project-managed authorized_keys block.
+  loop: "{{ users_authorized_keys_effective }}"
+  loop_control:
+    label: "authorized key {{ ansible_loop.index }}"
+
+- name: Users | verify passwordless sudo for admin account
+  ansible.builtin.command: sudo -n id -u
+  become: true
+  become_user: "{{ bootstrap_admin_user }}"
+  changed_when: false
+  register: users_verify_sudo
+  failed_when: users_verify_sudo.stdout | int != 0
+
+- name: Users | verify project-owned sudoers drop-in exists
+  ansible.builtin.stat:
+    path: "/etc/sudoers.d/{{ users_sudoers_dropin_prefix }}-{{ bootstrap_admin_user }}"
+  register: users_verify_sudoers_dropin
+  failed_when: not users_verify_sudoers_dropin.stat.exists

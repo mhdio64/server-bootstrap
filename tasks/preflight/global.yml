@@ -7,24 +7,25 @@
     fail_msg: >-
       bootstrap_admin_user must be set to the primary admin account name.
 
-- name: Preflight | require bootstrap_admin_authorized_keys
+- name: Preflight | require at least one authorized key source
   ansible.builtin.assert:
     that:
-      - bootstrap_admin_authorized_keys is defined
-      - bootstrap_admin_authorized_keys is sequence
-      - bootstrap_admin_authorized_keys | length > 0
+      - (bootstrap_admin_authorized_keys | default([]) | length > 0) or
+        (bootstrap_admin_authorized_key_files | default([]) | length > 0)
     fail_msg: >-
-      bootstrap_admin_authorized_keys must contain at least one SSH public key.
+      Configure bootstrap_admin_authorized_keys and/or
+      bootstrap_admin_authorized_key_files with at least one SSH public key source.
 
-- name: Preflight | validate authorized key entries are non-empty strings
+- name: Preflight | validate inline authorized key entries are non-empty strings
   ansible.builtin.assert:
     that:
       - item | string | length > 0
     fail_msg: >-
       bootstrap_admin_authorized_keys contains an empty entry.
-  loop: "{{ bootstrap_admin_authorized_keys }}"
+  loop: "{{ bootstrap_admin_authorized_keys | default([]) }}"
   loop_control:
     label: "authorized key {{ ansible_loop.index }}"
+  when: bootstrap_admin_authorized_keys | default([]) | length > 0
 
 - name: Preflight | verify administrative privileges
   ansible.builtin.command: id -u

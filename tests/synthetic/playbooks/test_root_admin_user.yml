@@ -1,0 +1,11 @@
+---
+- name: Synthetic | root admin account name must fail users preflight
+  hosts: localhost
+  gather_facts: false
+  vars:
+    bootstrap_admin_user: root
+    bootstrap_admin_authorized_keys:
+      - "ssh-ed25519 AAAA synthetic-test-only@bootstrap"
+  tasks:
+    - name: Synthetic | import root account rejection check
+      ansible.builtin.import_tasks: ../../../roles/users/tasks/preflight.yml

@@ -1,0 +1,24 @@
+---
+- name: Synthetic | system UID must classify as system_reserved
+  hosts: localhost
+  gather_facts: false
+  vars:
+    users_admin_exists: true
+    users_admin_uid: 42
+    users_min_normal_uid: 1000
+  tasks:
+    - name: Synthetic | classify admin account state
+      ansible.builtin.set_fact:
+        users_admin_state: >-
+          {{
+            'absent' if not (users_admin_exists | bool)
+            else (
+              'system_reserved' if (users_admin_uid | int) < (users_min_normal_uid | int)
+              else 'compatible_existing'
+            )
+          }}
+
+    - name: Synthetic | expect system_reserved classification
+      ansible.builtin.assert:
+        that:
+          - users_admin_state == 'system_reserved'
