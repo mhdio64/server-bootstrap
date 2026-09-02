@@ -1,0 +1,90 @@
+# Troubleshooting — v0.1.0
+
+## Quick checks
+
+1. Confirm platform support: Ubuntu Server 24.04 LTS, amd64 only.
+2. Confirm control node Python 3.12–3.14 and Ansible from `requirements-dev.txt`.
+3. Run `./bootstrap check -i inventory.yml` before apply when practical.
+4. Run `./bootstrap verify -i inventory.yml` after apply.
+5. Inspect wrapper logs under `${XDG_STATE_HOME:-~/.local/state}/server-bootstrap/logs`.
+
+## SSH and access
+
+### Host key trust rejected or blocked
+
+The wrapper never silently trusts a new host.
+
+- Compare the presented fingerprint out-of-band.
+- Re-run with `--expected-host-fingerprint SHA256:...`, or approve interactively when prompted.
+
+### No control-node identity matches admin keys
+
+Preflight stops before SSH hardening if no loaded control-node key matches `bootstrap_admin_authorized_keys`.
+
+- Set `ansible_ssh_private_key_file` in `inventory.yml`, or load the matching key into `ssh-agent`.
+- Ensure the public key in `bootstrap.yml` matches the private key you use to connect.
+
+### Locked out after SSH changes
+
+The SSH role rolls back the project-owned drop-in if reconnect verification fails. If you are locked out:
+
+- Use provider console or out-of-band access.
+- Remove or fix `/etc/ssh/sshd_config.d/00-server-bootstrap.conf`.
+- Reload SSH and restore key-based access before retrying.
+
+## Firewall
+
+### Preflight stops on foreign firewall policy
+
+Unknown consequential firewall state stops before mutation. Common causes:
+
+- active UFW enforcement,
+- unexpected `iptables` policy outside project-owned chains,
+- non-`iptables-nft` backend.
+
+Disable conflicting managers only after understanding the impact. This project does not globally flush rules.
+
+### SSH works but other ports do not
+
+Only ports listed in `bootstrap_firewall_allowed_tcp_ports` / `bootstrap_firewall_allowed_udp_ports` are opened, plus SSH. Published Docker container ports are not managed by this MVP.
+
+## Docker
+
+### Conflicting or partial Docker installation
+
+Preflight classifies existing Docker state. Only `absent` and `official_compatible` may proceed automatically.
+
+- Remove conflicting packages such as `docker.io` manually, or
+- reconcile to an official compatible install before retrying.
+
+### Downgrade requested
+
+`bootstrap_docker_version` cannot request a version older than the installed `docker-ce` package. Upgrade intentionally with a higher pin instead.
+
+### `docker` group membership
+
+Users are not added to the `docker` group unless listed in `bootstrap_docker_users`.
+
+## Idempotency and check mode
+
+### Second apply reports changes
+
+Inspect the PLAY RECAP and task names. Common causes:
+
+- metadata or file content drift outside project ownership,
+- upstream package updates when not pinned,
+- timestamp-only rewrites (report as a defect).
+
+### Check mode appears to fail on discovery tasks
+
+v0.1.0 runs read-only preflight and discovery outside Ansible check mode so validation remains honest. Check mode should still not mutate the host.
+
+## Reboot required
+
+If `/var/run/reboot-required` exists, bootstrap completes successfully with a warning. Reboot manually or set `bootstrap_reboot_if_required: true` on a later run.
+
+## Getting more help
+
+- Configuration: `docs/13-CONFIGURATION-REFERENCE.md`
+- Safety model: `docs/03-SECURITY-SAFETY.md`
+- Security reports: `SECURITY.md`
