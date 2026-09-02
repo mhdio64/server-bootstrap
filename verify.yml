@@ -2,6 +2,7 @@
 - name: Bootstrap | verify
   hosts: all
   gather_facts: true
+  become: true
   any_errors_fatal: true
   tasks:
     - name: Verify | post-apply checks are not run in check mode
@@ -32,3 +33,11 @@
       when:
         - not ansible_check_mode
         - bootstrap_ssh_enabled | default(true) | bool
+
+    - name: Verify | firewall role checks
+      ansible.builtin.import_role:
+        name: firewall
+        tasks_from: verify
+      when:
+        - not ansible_check_mode
+        - bootstrap_firewall_enabled | default(true) | bool

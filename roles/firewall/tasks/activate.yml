@@ -1,0 +1,107 @@
+---
+- name: Firewall | ensure state directory exists
+  ansible.builtin.file:
+    path: "{{ firewall_state_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Firewall | save pre-activation IPv4 rules for rollback
+  ansible.builtin.copy:
+    dest: "{{ firewall_state_dir }}/pre-activation.v4.rules"
+    content: "{{ firewall_iptables_save_v4.stdout }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when: not ansible_check_mode
+
+- name: Firewall | save pre-activation IPv6 rules for rollback
+  ansible.builtin.copy:
+    dest: "{{ firewall_state_dir }}/pre-activation.v6.rules"
+    content: "{{ firewall_iptables_save_v6.stdout }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - not ansible_check_mode
+    - firewall_ipv6_required | bool
+
+- name: Firewall | validate IPv4 rules fragment syntax
+  ansible.builtin.command:
+    cmd: /usr/sbin/iptables-restore --test {{ firewall_rules_fragment_v4 }}
+  changed_when: false
+  when: not ansible_check_mode
+
+- name: Firewall | validate IPv6 rules fragment syntax when required
+  ansible.builtin.command:
+    cmd: /usr/sbin/ip6tables-restore --test {{ firewall_rules_fragment_v6 }}
+  changed_when: false
+  when:
+    - not ansible_check_mode
+    - firewall_ipv6_required | bool
+
+- name: Firewall | apply project-owned IPv4 firewall rules
+  ansible.builtin.command:
+    cmd: /usr/local/sbin/server-bootstrap-restore-firewall-v4.sh
+  register: firewall_apply_v4
+  changed_when: >-
+    firewall_restore_script_v4.changed | default(false)
+    or firewall_fragment_v4_result.changed | default(false)
+  when: not ansible_check_mode
+
+- name: Firewall | apply project-owned IPv6 firewall rules when required
+  ansible.builtin.command:
+    cmd: /usr/local/sbin/server-bootstrap-restore-firewall-v6.sh
+  register: firewall_apply_v6
+  changed_when: >-
+    firewall_restore_script_v6.changed | default(false)
+    or firewall_fragment_v6_result.changed | default(false)
+  when:
+    - not ansible_check_mode
+    - firewall_ipv6_required | bool
+
+- name: Firewall | schedule rollback window after activation
+  ansible.builtin.command:
+    cmd: >-
+      systemd-run --on-active={{ firewall_rollback_window_seconds }}
+      --unit=server-bootstrap-firewall-rollback
+      /bin/sh -c
+      '/usr/sbin/iptables-restore {{ firewall_state_dir }}/pre-activation.v4.rules;
+      if [ -f {{ firewall_state_dir }}/pre-activation.v6.rules ]; then
+      /usr/sbin/ip6tables-restore {{ firewall_state_dir }}/pre-activation.v6.rules;
+      fi'
+  changed_when: false
+  when: not ansible_check_mode
+
+- name: Firewall | verify SSH connectivity after firewall activation
+  ansible.builtin.command:
+    cmd: >-
+      ssh
+      {% if ansible_ssh_private_key_file is defined %}-i {{ ansible_ssh_private_key_file | quote }}{% endif %}
+      -o BatchMode=yes
+      -o ConnectTimeout={{ firewall_reconnect_timeout }}
+      -o StrictHostKeyChecking=yes
+      -p {{ firewall_target_ssh_port }}
+      {{ bootstrap_admin_user }}@{{ ansible_host }}
+      /bin/true
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  register: firewall_reconnect_probe
+  failed_when: firewall_reconnect_probe.rc != 0
+  when: not ansible_check_mode
+
+- name: Firewall | cancel timed rollback after successful connectivity check
+  ansible.builtin.systemd:
+    name: server-bootstrap-firewall-rollback.timer
+    state: stopped
+  failed_when: false
+  when: not ansible_check_mode
+
+- name: Firewall | cancel timed rollback service if already triggered
+  ansible.builtin.systemd:
+    name: server-bootstrap-firewall-rollback.service
+    state: stopped
+  failed_when: false
+  when: not ansible_check_mode

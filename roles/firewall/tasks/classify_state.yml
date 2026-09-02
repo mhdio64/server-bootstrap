@@ -1,0 +1,115 @@
+---
+- name: Firewall | verify iptables uses the nft backend
+  ansible.builtin.command: /usr/sbin/iptables --version
+  changed_when: false
+  register: firewall_iptables_version
+
+- name: Firewall | fail when iptables backend is not nftables-based
+  ansible.builtin.fail:
+    msg: >-
+      server-bootstrap v0.1.0 requires the iptables-nft backend. Detected:
+      {{ firewall_iptables_version.stdout | default('unknown') }}.
+  when: "'nf_tables' not in firewall_iptables_version.stdout"
+
+- name: Firewall | inspect UFW service state
+  ansible.builtin.systemd:
+    name: ufw
+  register: firewall_ufw_state
+
+- name: Firewall | fail when UFW is active
+  ansible.builtin.fail:
+    msg: >-
+      UFW is active on this host. server-bootstrap manages host firewall policy
+      through project-owned iptables-nft chains and stops on active foreign backends.
+  when: firewall_ufw_state.status.ActiveState == 'active'
+
+- name: Firewall | parse IPv4 chain policies from iptables-save
+  ansible.builtin.set_fact:
+    firewall_input_policy_v4: >-
+      {{
+        (
+          firewall_iptables_save_v4.stdout_lines
+          | select('match', '^:INPUT ')
+          | first
+          | default(':INPUT ACCEPT [0:0]')
+          | regex_replace('^:INPUT ', '')
+          | regex_replace(' \\[.*$', '')
+        )
+      }}
+    firewall_forward_policy_v4: >-
+      {{
+        (
+          firewall_iptables_save_v4.stdout_lines
+          | select('match', '^:FORWARD ')
+          | first
+          | default(':FORWARD ACCEPT [0:0]')
+          | regex_replace('^:FORWARD ', '')
+          | regex_replace(' \\[.*$', '')
+        )
+      }}
+
+- name: Firewall | detect project-owned firewall chains
+  ansible.builtin.set_fact:
+    firewall_has_project_chain_v4: >-
+      {{ firewall_iptables_save_v4.stdout is search(':' ~ firewall_chain_name ~ ' ') }}
+
+- name: Firewall | detect Docker-owned firewall chains
+  ansible.builtin.set_fact:
+    firewall_has_docker_chains_v4: >-
+      {{ firewall_iptables_save_v4.stdout is search(':DOCKER ') }}
+
+- name: Firewall | collect non-comment INPUT rules
+  ansible.builtin.set_fact:
+    firewall_input_rules_v4: >-
+      {{
+        firewall_iptables_save_v4.stdout_lines
+        | select('match', '^-A INPUT ')
+        | list
+      }}
+
+- name: Firewall | identify foreign INPUT rules
+  ansible.builtin.set_fact:
+    firewall_foreign_input_rules_v4: >-
+      {{
+        firewall_input_rules_v4
+        | reject('search', '\\s-i lo\\s')
+        | reject('search', 'ctstate RELATED,ESTABLISHED')
+        | reject('search', 'ctstate ESTABLISHED,RELATED')
+        | reject('search', '\\s-j ' ~ firewall_chain_name ~ '$')
+        | reject('search', '\\s-j DOCKER')
+        | reject('search', '\\s-j ufw-')
+        | reject('search', '\\s-j f2b-')
+        | reject('search', '\\s-p icmp ')
+        | reject('search', '\\s-p ipv6-icmp ')
+        | list
+      }}
+
+- name: Firewall | classify IPv4 firewall state
+  ansible.builtin.set_fact:
+    firewall_state_v4: >-
+      {{
+        'project_owned' if (firewall_has_project_chain_v4 | bool)
+        else (
+          'foreign'
+          if (
+            firewall_foreign_input_rules_v4 | length > 0
+            or (
+              firewall_input_policy_v4 not in ['ACCEPT', 'DROP']
+            )
+            or (
+              firewall_input_policy_v4 == 'DROP'
+              and not (firewall_has_project_chain_v4 | bool)
+            )
+          )
+          else 'fresh_default'
+        )
+      }}
+
+- name: Firewall | fail on consequential foreign IPv4 firewall policy
+  ansible.builtin.fail:
+    msg: >-
+      Unknown consequential IPv4 firewall policy was detected. server-bootstrap
+      only reconciles fresh/default, project-owned, or Docker-compatible host
+      states. Foreign INPUT policy/rules must be resolved before bootstrap can
+      continue.
+  when: firewall_state_v4 == 'foreign'

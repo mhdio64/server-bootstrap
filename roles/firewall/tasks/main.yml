@@ -1,0 +1,37 @@
+---
+- name: Firewall | discover current firewall state
+  ansible.builtin.import_tasks: discover_state.yml
+
+- name: Firewall | classify current firewall state
+  ansible.builtin.import_tasks: classify_state.yml
+
+- name: Firewall | ensure firewall packages are installed
+  ansible.builtin.apt:
+    name: "{{ firewall_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Firewall | refresh discovered firewall state after package install
+  ansible.builtin.import_tasks: discover_state.yml
+
+- name: Firewall | build project-owned firewall rules
+  ansible.builtin.import_tasks: build_rules.yml
+
+- name: Firewall | persist firewall restore artifacts
+  ansible.builtin.import_tasks: persist.yml
+
+- name: Firewall | activate project-owned firewall policy safely
+  block:
+    - name: Firewall | apply firewall activation workflow
+      ansible.builtin.import_tasks: activate.yml
+  rescue:
+    - name: Firewall | rollback firewall activation after failure
+      ansible.builtin.import_tasks: rollback.yml
+      when: not ansible_check_mode
+
+    - name: Firewall | fail after firewall activation rollback
+      ansible.builtin.fail:
+        msg: >-
+          Firewall activation failed and the pre-activation ruleset was restored.
+          Verify SSH connectivity and foreign firewall policy before retrying.

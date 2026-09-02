@@ -1,0 +1,30 @@
+---
+- name: Firewall | validate configured TCP port entries
+  ansible.builtin.assert:
+    that:
+      - item | int >= firewall_min_port
+      - item | int <= firewall_max_port
+    fail_msg: >-
+      bootstrap_firewall_allowed_tcp_ports must contain integers between
+      {{ firewall_min_port }} and {{ firewall_max_port }}.
+  loop: "{{ bootstrap_firewall_allowed_tcp_ports | default([]) }}"
+  loop_control:
+    label: "tcp/{{ item }}"
+
+- name: Firewall | validate configured UDP port entries
+  ansible.builtin.assert:
+    that:
+      - item | int >= firewall_min_port
+      - item | int <= firewall_max_port
+    fail_msg: >-
+      bootstrap_firewall_allowed_udp_ports must contain integers between
+      {{ firewall_min_port }} and {{ firewall_max_port }}.
+  loop: "{{ bootstrap_firewall_allowed_udp_ports | default([]) }}"
+  loop_control:
+    label: "udp/{{ item }}"
+
+- name: Firewall | discover current firewall state
+  ansible.builtin.import_tasks: discover_state.yml
+
+- name: Firewall | classify current firewall state
+  ansible.builtin.import_tasks: classify_state.yml

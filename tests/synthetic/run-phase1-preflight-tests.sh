@@ -54,6 +54,18 @@ run_expect_success \
   tests/synthetic/playbooks/test_ssh_dropin_content.yml \
   "ssh drop-in content rendering"
 
+run_expect_failure \
+  tests/synthetic/playbooks/test_invalid_firewall_port.yml \
+  "invalid bootstrap_firewall_allowed_tcp_ports rejection"
+
+run_expect_success \
+  tests/synthetic/playbooks/test_firewall_classify_fresh.yml \
+  "fresh firewall classification"
+
+run_expect_success \
+  tests/synthetic/playbooks/test_firewall_classify_project_owned.yml \
+  "project-owned firewall classification"
+
 run_expect_success \
   tests/synthetic/playbooks/test_system_uid_classification.yml \
   "system UID classification"

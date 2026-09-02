@@ -1,0 +1,30 @@
+---
+- name: Firewall | restore pre-activation IPv4 rules during rollback
+  ansible.builtin.command:
+    cmd: /usr/sbin/iptables-restore {{ firewall_state_dir }}/pre-activation.v4.rules
+  changed_when: false
+  when:
+    - not ansible_check_mode
+    - firewall_state_dir is defined
+
+- name: Firewall | restore pre-activation IPv6 rules during rollback
+  ansible.builtin.command:
+    cmd: /usr/sbin/ip6tables-restore {{ firewall_state_dir }}/pre-activation.v6.rules
+  changed_when: false
+  when:
+    - not ansible_check_mode
+    - firewall_ipv6_required | default(false) | bool
+
+- name: Firewall | remove IPv4 persistence fragment during rollback
+  ansible.builtin.file:
+    path: "{{ firewall_rules_fragment_v4 }}"
+    state: absent
+  when: not ansible_check_mode
+
+- name: Firewall | remove IPv6 persistence fragment during rollback
+  ansible.builtin.file:
+    path: "{{ firewall_rules_fragment_v6 }}"
+    state: absent
+  when:
+    - not ansible_check_mode
+    - firewall_ipv6_required | default(false) | bool

@@ -1,0 +1,35 @@
+---
+- name: Firewall | install firewall restore systemd unit
+  ansible.builtin.template:
+    src: server-bootstrap-firewall-restore.service.j2
+    dest: "/etc/systemd/system/{{ firewall_restore_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: firewall_restore_unit_result
+
+- name: Firewall | install idempotent IPv4 restore script
+  ansible.builtin.template:
+    src: restore-firewall-v4.sh.j2
+    dest: /usr/local/sbin/server-bootstrap-restore-firewall-v4.sh
+    owner: root
+    group: root
+    mode: "0755"
+  register: firewall_restore_script_v4
+
+- name: Firewall | install idempotent IPv6 restore script when required
+  ansible.builtin.template:
+    src: restore-firewall-v6.sh.j2
+    dest: /usr/local/sbin/server-bootstrap-restore-firewall-v6.sh
+    owner: root
+    group: root
+    mode: "0755"
+  register: firewall_restore_script_v6
+  when: firewall_ipv6_required | bool
+
+- name: Firewall | enable firewall restore service
+  ansible.builtin.systemd:
+    name: "{{ firewall_restore_unit }}"
+    enabled: true
+    daemon_reload: true
+  when: not ansible_check_mode

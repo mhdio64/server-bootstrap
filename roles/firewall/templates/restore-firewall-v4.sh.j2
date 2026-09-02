@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+IPT="{{ firewall_iptables_binary | default('/usr/sbin/iptables') }}"
+CHAIN="{{ firewall_chain_name }}"
+COMMENT="{{ firewall_jump_comment }}"
+FRAGMENT="{{ firewall_rules_fragment_v4 }}"
+
+"$IPT" -N "$CHAIN" 2>/dev/null || true
+while "$IPT" -D INPUT -m comment --comment "$COMMENT" -j "$CHAIN" 2>/dev/null; do :; done
+"$IPT" -F "$CHAIN"
+
+"$IPT" -C INPUT -i lo -j ACCEPT 2>/dev/null || "$IPT" -A INPUT -i lo -j ACCEPT
+"$IPT" -C INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT 2>/dev/null \
+  || "$IPT" -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+"$IPT" -C INPUT -p icmp --icmp-type echo-request -j ACCEPT 2>/dev/null \
+  || "$IPT" -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+"$IPT" -C INPUT -p icmp --icmp-type destination-unreachable -j ACCEPT 2>/dev/null \
+  || "$IPT" -A INPUT -p icmp --icmp-type destination-unreachable -j ACCEPT
+"$IPT" -C INPUT -p icmp --icmp-type time-exceeded -j ACCEPT 2>/dev/null \
+  || "$IPT" -A INPUT -p icmp --icmp-type time-exceeded -j ACCEPT
+
+/usr/sbin/iptables-restore -n "$FRAGMENT"
+"$IPT" -C INPUT -m comment --comment "$COMMENT" -j "$CHAIN" 2>/dev/null \
+  || "$IPT" -A INPUT -m comment --comment "$COMMENT" -j "$CHAIN"
+
+"$IPT" -P INPUT DROP
+"$IPT" -P FORWARD DROP
+"$IPT" -P OUTPUT ACCEPT

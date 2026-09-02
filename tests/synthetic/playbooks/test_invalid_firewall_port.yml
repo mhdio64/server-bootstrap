@@ -1,0 +1,21 @@
+---
+- name: Synthetic | invalid firewall TCP port must fail preflight
+  hosts: localhost
+  gather_facts: false
+  vars:
+    bootstrap_firewall_allowed_tcp_ports:
+      - 70000
+    firewall_min_port: 1
+    firewall_max_port: 65535
+  tasks:
+    - name: Synthetic | validate configured TCP port entries
+      ansible.builtin.assert:
+        that:
+          - item | int >= firewall_min_port
+          - item | int <= firewall_max_port
+        fail_msg: >-
+          bootstrap_firewall_allowed_tcp_ports must contain integers between
+          {{ firewall_min_port }} and {{ firewall_max_port }}.
+      loop: "{{ bootstrap_firewall_allowed_tcp_ports | default([]) }}"
+      loop_control:
+        label: "tcp/{{ item }}"

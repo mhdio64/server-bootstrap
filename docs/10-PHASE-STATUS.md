@@ -2,7 +2,7 @@
 
 Target release: `v0.1.0`
 
-Current state: **Phase 3 implemented on feature branch; awaiting review and merge**
+Current state: **Phase 4 implemented on feature branch; awaiting review and merge**
 
 ## Status table
 
@@ -11,8 +11,8 @@ Current state: **Phase 3 implemented on feature branch; awaiting review and merg
 | 0 | Repository foundation | MERGED |
 | 1 | Orchestration + global preflight + common | MERGED |
 | 2 | Admin user | MERGED |
-| 3 | SSH hardening | IMPLEMENTED (PR pending review) |
-| 4 | Firewall (`iptables-nft`) | PENDING |
+| 3 | SSH hardening | MERGED |
+| 4 | Firewall (`iptables-nft`) | IMPLEMENTED (PR pending review) |
 | 5 | Security baseline | PENDING |
 | 6A | Docker discovery/preflight | PENDING |
 | 6B | Docker repository + installation | PENDING |
@@ -23,10 +23,10 @@ Current state: **Phase 3 implemented on feature branch; awaiting review and merg
 
 ## Current approval boundary
 
-Phase 3 implementation is complete on branch `feat/phase-3-ssh-hardening`.
+Phase 4 implementation is complete on branch `feat/phase-4-firewall`.
 
-Phase 3 delivers the `ssh` role only. Firewall, security, and Docker remain out of scope.
+Phase 4 delivers the `firewall` role only. Security updates and Docker remain out of scope.
 
-After Phase 3 PR review and merge, **Phase 4 requires separate human approval** before implementation begins.
+After Phase 4 PR review and merge, **Phase 5 requires separate human approval** before implementation begins.
 
 The next phase is not automatically authorized by completion of the current phase.

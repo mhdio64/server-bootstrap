@@ -2,6 +2,7 @@
 - name: Bootstrap | preflight
   hosts: all
   gather_facts: true
+  become: true
   any_errors_fatal: true
   tasks:
     - name: Preflight | global checks
@@ -25,9 +26,16 @@
         tasks_from: preflight
       when: bootstrap_ssh_enabled | default(true) | bool
 
+    - name: Preflight | firewall role checks
+      ansible.builtin.import_role:
+        name: firewall
+        tasks_from: preflight
+      when: bootstrap_firewall_enabled | default(true) | bool
+
 - name: Bootstrap | apply
   hosts: all
   gather_facts: true
+  become: true
   any_errors_fatal: true
   roles:
     - role: common
@@ -36,3 +44,5 @@
       when: bootstrap_users_enabled | default(true) | bool
     - role: ssh
       when: bootstrap_ssh_enabled | default(true) | bool
+    - role: firewall
+      when: bootstrap_firewall_enabled | default(true) | bool
