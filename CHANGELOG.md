@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Synthetic tests for invalid SSH port, drop-in content rendering, and missing control-node identity rejection.
 - Phase 4 `firewall` role with project-owned iptables-nft chains, foreign-policy classifier, timed rollback, and persistence restore service.
 - Synthetic tests for invalid firewall ports and firewall state classification.
+- Phase 5 `security` role for unattended security upgrades with automatic reboot disabled.
+- VM validation fixes for UFW detection, SSH PermitRootLogin semantics, firewall idempotency, and users sudo verification.
 
 ## [0.0.1] - 2026-09-01
 
