@@ -2,6 +2,7 @@
 - name: Bootstrap | verify
   hosts: all
   gather_facts: true
+  become: true
   any_errors_fatal: true
   tasks:
     - name: Verify | post-apply checks are not run in check mode

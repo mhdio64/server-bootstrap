@@ -2,6 +2,7 @@
 - name: Bootstrap | preflight
   hosts: all
   gather_facts: true
+  become: true
   any_errors_fatal: true
   tasks:
     - name: Preflight | global checks
@@ -34,6 +35,7 @@
 - name: Bootstrap | apply
   hosts: all
   gather_facts: true
+  become: true
   any_errors_fatal: true
   roles:
     - role: common
