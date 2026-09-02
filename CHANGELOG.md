@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Minimal example `inventory.yml` and `bootstrap.yml` layout under `examples/minimal/`.
 - Phase 2 `users` role for bootstrap admin account, sudoers drop-in, and project-managed authorized_keys block.
 - Synthetic tests for root admin rejection, missing authorized keys, and system UID classification.
+- Phase 3 `ssh` role with project-owned sshd drop-in, effective-config validation, reconnect verification, and rollback on failure.
+- Synthetic tests for invalid SSH port, drop-in content rendering, and missing control-node identity rejection.
 
 ## [0.0.1] - 2026-09-01
 

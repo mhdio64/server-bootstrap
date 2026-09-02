@@ -19,11 +19,11 @@ The MVP is intentionally narrow. It must be real and safe enough for actual DevO
 
 ## Current status
 
-**Phase 2 — Admin user** is in progress on the development branch.
+**Phase 3 — SSH hardening** is in progress on the development branch.
 
-Phases 0–1 are merged on `main`. Phase 2 adds the `users` role for bootstrap admin account management, sudoers drop-in, and project-managed authorized_keys blocks.
+Phases 0–2 are merged on `main`. Phase 3 adds the `ssh` role with a project-owned sshd drop-in, effective-config validation, reconnect verification, and rollback on activation failure.
 
-SSH, firewall, security, and Docker behavior begin in later phases.
+Firewall, security, and Docker behavior begin in later phases.
 
 Start with:
 
