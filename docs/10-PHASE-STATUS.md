@@ -2,7 +2,7 @@
 
 Target release: `v0.1.0`
 
-Current state: **Phase 9 implemented on feature branch; awaiting review and merge**
+Current state: **Phase 10 implemented on feature branch; release prepared, not tagged**
 
 ## Status table
 
@@ -18,15 +18,13 @@ Current state: **Phase 9 implemented on feature branch; awaiting review and merg
 | 6B | Docker repository + installation | MERGED |
 | 7 | Verification + summary + metadata | MERGED |
 | 8 | Thin wrapper | MERGED |
-| 9 | Scenario 1 real-VM validation | IMPLEMENTED (PR pending review) |
-| 10 | Documentation + v0.1.0 release preparation | PENDING |
+| 9 | Scenario 1 real-VM validation | MERGED |
+| 10 | Documentation + v0.1.0 release preparation | IMPLEMENTED (PR pending review) |
 
 ## Current approval boundary
 
-Phase 9 implementation is complete on branch `feat/phase-9-scenario1-vm-validation`.
+Phase 10 implementation is complete on branch `feat/phase-10-docs-v0.1.0-release-prep`.
 
-Phase 9 delivers the repeatable Scenario 1 harness, sanitized evidence report, check-mode preflight fixes, and successful real-VM validation on Ubuntu Server 24.04 amd64.
+Phase 10 delivers user-facing documentation, release evidence, `VERSION` set to `0.1.0`, and a proposed release checklist.
 
-After Phase 9 PR review and merge, **Phase 10 requires separate human approval** before implementation begins.
-
-The next phase is not automatically authorized by completion of the current phase.
+**Git tag and GitHub Release for `v0.1.0` require explicit human approval** and are intentionally not created by this phase.

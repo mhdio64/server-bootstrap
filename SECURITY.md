@@ -4,8 +4,9 @@
 
 | Version | Supported |
 |---|---|
-| 0.0.x (development) | Best effort |
-| 0.1.x | Planned after first MVP release |
+| 0.1.0 | Yes |
+| 0.0.x | Development only; no routine security support |
+| < 0.1.0 tags | Unsupported |
 
 Only the latest patch release of a supported minor line receives routine security attention.
 
@@ -32,14 +33,22 @@ Include:
 
 This project configures real servers (SSH, firewall, packages, Docker). Treat misconfiguration or unsafe defaults as security-relevant even when they are not traditional software vulnerabilities.
 
+In scope for v0.1.0:
+
+- Ubuntu Server 24.04 LTS amd64 targets,
+- documented `bootstrap_*` configuration,
+- wrapper host-key trust behavior,
+- SSH, firewall, Docker, and admin-user safety properties in `docs/03-SECURITY-SAFETY.md`.
+
 Out of scope for routine security response:
 
-- unsupported operating systems or architectures documented in `docs/01-PROJECT-SPEC.md`,
+- unsupported operating systems or architectures,
 - operator misconfiguration outside documented variables,
-- third-party upstream defects outside this repository's control.
+- third-party upstream defects outside this repository's control,
+- workload container images and application security beyond the Docker engine baseline.
 
 ## Secure development practices
 
-The repository uses static validation, secret scanning, and phased safety gates documented in `docs/03-SECURITY-SAFETY.md` and `docs/05-TESTING-RELEASE.md`.
+The repository uses static validation, secret scanning, phased safety gates, and Scenario 1 VM validation documented in `docs/03-SECURITY-SAFETY.md`, `docs/05-TESTING-RELEASE.md`, and `docs/15-RELEASE-EVIDENCE.md`.
 
 Private keys, credentials, and customer inventories must never be committed to this repository.

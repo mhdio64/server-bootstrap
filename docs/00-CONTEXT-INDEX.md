@@ -30,6 +30,9 @@ Do not load every document into context unless necessary.
 | `10-PHASE-STATUS.md` | Current implementation phase and approval state |
 | `11-INTERVIEW-DECISIONS.md` | Interview-confirmed product/architecture decisions |
 | `12-GRAPHIFY.md` | Optional Graphify developer tooling policy |
+| `13-CONFIGURATION-REFERENCE.md` | Public `bootstrap_*` configuration API |
+| `14-TROUBLESHOOTING.md` | Operator troubleshooting guide |
+| `15-RELEASE-EVIDENCE.md` | v0.1.0 release gate evidence and checklist |
 
 ## Conflict policy
 
