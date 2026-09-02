@@ -1,0 +1,19 @@
+---
+- name: Synthetic | missing control node identity must fail ssh preflight
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ssh_control_node_pubkeys: []
+    ssh_admin_fingerprint_tokens:
+      - "SHA256:synthetic-admin-token"
+    ssh_control_node_fingerprint_tokens: []
+  tasks:
+    - name: Synthetic | expect missing control node identity rejection
+      ansible.builtin.assert:
+        that:
+          - ssh_control_node_pubkeys | length > 0
+          - (ssh_admin_fingerprint_tokens | intersect(ssh_control_node_fingerprint_tokens | default([]))) | length > 0
+        fail_msg: >-
+          No control-node SSH identity matches the configured admin public keys.
+          Load a matching private key into ssh-agent or set ansible_ssh_private_key_file
+          before SSH hardening disables password authentication.

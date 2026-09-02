@@ -1,0 +1,12 @@
+---
+- name: Synthetic | invalid SSH port must fail ssh preflight
+  hosts: localhost
+  gather_facts: false
+  vars:
+    bootstrap_ssh_port: 0
+    bootstrap_admin_user: deploy
+    bootstrap_admin_authorized_keys:
+      - "ssh-ed25519 AAAA synthetic-test-only@bootstrap"
+  tasks:
+    - name: Synthetic | import invalid SSH port check
+      ansible.builtin.import_tasks: ../../../roles/ssh/tasks/preflight.yml

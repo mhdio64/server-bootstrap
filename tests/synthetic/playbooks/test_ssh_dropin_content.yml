@@ -1,0 +1,28 @@
+---
+- name: Synthetic | ssh drop-in preserves effective port when unset
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Synthetic | render drop-in without explicit port
+      ansible.builtin.import_tasks: ../../../roles/ssh/tasks/build_dropin_content.yml
+
+    - name: Synthetic | expect Port directive to be omitted
+      ansible.builtin.assert:
+        that:
+          - ssh_dropin_content is not search('(?m)^Port\\s+')
+          - ssh_dropin_content is search('(?m)^PasswordAuthentication no$')
+          - ssh_dropin_content is search('(?m)^PermitRootLogin prohibit-password$')
+
+- name: Synthetic | ssh drop-in includes explicit port when configured
+  hosts: localhost
+  gather_facts: false
+  vars:
+    bootstrap_ssh_port: 2222
+  tasks:
+    - name: Synthetic | render drop-in with explicit port
+      ansible.builtin.import_tasks: ../../../roles/ssh/tasks/build_dropin_content.yml
+
+    - name: Synthetic | expect Port directive to be present
+      ansible.builtin.assert:
+        that:
+          - ssh_dropin_content is search('(?m)^Port 2222$')
