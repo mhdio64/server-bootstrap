@@ -1,0 +1,26 @@
+---
+- name: Synthetic | official-compatible Docker state must classify correctly
+  hosts: localhost
+  gather_facts: false
+  vars:
+    docker_snap_installed: false
+    docker_installed_conflicting_packages: []
+    docker_has_unofficial_docker_apt_source: false
+    docker_cli_present: true
+    docker_missing_official_packages: []
+    docker_installed_official_packages:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    docker_has_official_apt_source: true
+    docker_ce_from_official_origin: true
+  tasks:
+    - name: Synthetic | compute Docker state
+      ansible.builtin.import_tasks: ../../../roles/docker/tasks/compute_docker_state.yml
+
+    - name: Synthetic | expect official_compatible classification
+      ansible.builtin.assert:
+        that:
+          - docker_state == 'official_compatible'

@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Synthetic tests for invalid firewall ports and firewall state classification.
 - Phase 5 `security` role for unattended security upgrades with automatic reboot disabled.
 - VM validation fixes for UFW detection, SSH PermitRootLogin semantics, firewall idempotency, and users sudo verification.
+- Phase 6A `docker` role read-only discovery/classifier for absent, official-compatible, partial, conflicting, and ambiguous states.
+- Synthetic tests for all Docker classifier states and conflicting preflight rejection.
 
 ## [0.0.1] - 2026-09-01
 

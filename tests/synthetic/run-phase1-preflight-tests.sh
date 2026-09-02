@@ -67,6 +67,30 @@ run_expect_success \
   "project-owned firewall classification"
 
 run_expect_success \
+  tests/synthetic/playbooks/test_docker_classify_absent.yml \
+  "absent Docker classification"
+
+run_expect_success \
+  tests/synthetic/playbooks/test_docker_classify_official_compatible.yml \
+  "official-compatible Docker classification"
+
+run_expect_success \
+  tests/synthetic/playbooks/test_docker_classify_partial.yml \
+  "partial Docker classification"
+
+run_expect_success \
+  tests/synthetic/playbooks/test_docker_classify_conflicting.yml \
+  "conflicting Docker classification"
+
+run_expect_success \
+  tests/synthetic/playbooks/test_docker_classify_ambiguous.yml \
+  "ambiguous Docker classification"
+
+run_expect_failure \
+  tests/synthetic/playbooks/test_docker_preflight_conflicting.yml \
+  "conflicting Docker preflight rejection"
+
+run_expect_success \
   tests/synthetic/playbooks/test_system_uid_classification.yml \
   "system UID classification"
 

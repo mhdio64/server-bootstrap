@@ -22,3 +22,6 @@ bootstrap_admin_authorized_keys:
 # bootstrap_firewall_allowed_tcp_ports:
 #   - 443
 # bootstrap_firewall_allowed_udp_ports: []
+# bootstrap_docker_enabled: true
+# bootstrap_docker_version: latest
+# bootstrap_docker_users: []

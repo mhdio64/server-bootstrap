@@ -38,6 +38,12 @@
         tasks_from: preflight
       when: bootstrap_security_enabled | default(true) | bool
 
+    - name: Preflight | docker role checks
+      ansible.builtin.import_role:
+        name: docker
+        tasks_from: preflight
+      when: bootstrap_docker_enabled | default(true) | bool
+
 - name: Bootstrap | apply
   hosts: all
   gather_facts: true
