@@ -1,0 +1,93 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "scripts_secret_scan",
+      "label": "secret-scan.sh",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "secret-scan.sh",
+      "file_type": "code",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "norm_label": "secret-scan.sh",
+      "source_file": "scripts/secret-scan.sh",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_secret_scan_sh__entry",
+      "label": "secret-scan.sh script",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "secret-scan.sh",
+      "file_type": "code",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "norm_label": "secret-scan.sh script",
+      "source_file": "scripts/secret-scan.sh",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_test_secret_gate_negative",
+      "label": "test-secret-gate-negative.sh",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "test-secret-gate-negative.sh",
+      "file_type": "code",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "norm_label": "test-secret-gate-negative.sh",
+      "source_file": "scripts/test-secret-gate-negative.sh",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_test_secret_gate_negative_sh__entry",
+      "label": "test-secret-gate-negative.sh script",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "test-secret-gate-negative.sh",
+      "file_type": "code",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "norm_label": "test-secret-gate-negative.sh script",
+      "source_file": "scripts/test-secret-gate-negative.sh",
+      "source_location": "L1"
+    }
+  ],
+  "links": [
+    {
+      "source": "scripts_secret_scan",
+      "target": "scripts_secret_scan_sh__entry",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/secret-scan.sh",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_test_secret_gate_negative",
+      "target": "scripts_test_secret_gate_negative_sh__entry",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/test-secret-gate-negative.sh",
+      "source_location": "L1",
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "d7c9662cadfe159daacb1cbc052671a7478b2f1e"
+}
