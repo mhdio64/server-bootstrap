@@ -1,0 +1,4 @@
+---
+# Project-internal constants (not public API).
+bootstrap_metadata_state_dir: /var/lib/server-bootstrap
+bootstrap_metadata_path: /var/lib/server-bootstrap/metadata.json

@@ -1,0 +1,50 @@
+---
+- name: Post-apply | read toolkit version from control node
+  ansible.builtin.set_fact:
+    bootstrap_toolkit_version: "{{ lookup('ansible.builtin.file', playbook_dir + '/VERSION') | trim }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Post-apply | define desired target metadata
+  ansible.builtin.set_fact:
+    bootstrap_metadata_desired:
+      bootstrap_version: "{{ bootstrap_toolkit_version }}"
+
+- name: Post-apply | ensure metadata state directory exists
+  ansible.builtin.file:
+    path: "{{ bootstrap_metadata_state_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Post-apply | read existing target metadata when present
+  ansible.builtin.slurp:
+    path: "{{ bootstrap_metadata_path }}"
+  register: bootstrap_metadata_existing
+  failed_when: false
+
+- name: Post-apply | parse existing target metadata when readable
+  ansible.builtin.set_fact:
+    bootstrap_metadata_existing_content: >-
+      {{
+        (bootstrap_metadata_existing.content | b64decode | from_json)
+        if (
+          bootstrap_metadata_existing is defined
+          and not bootstrap_metadata_existing.failed | default(false)
+          and bootstrap_metadata_existing.content is defined
+          and (bootstrap_metadata_existing.content | length) > 0
+        )
+        else {}
+      }}
+
+- name: Post-apply | write target metadata when missing or version changed
+  ansible.builtin.copy:
+    content: "{{ bootstrap_metadata_desired | to_nice_json }}\n"
+    dest: "{{ bootstrap_metadata_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: >-
+    bootstrap_metadata_existing_content.get('bootstrap_version', '')
+    != bootstrap_metadata_desired.bootstrap_version

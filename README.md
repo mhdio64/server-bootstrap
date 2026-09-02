@@ -19,9 +19,9 @@ The MVP is intentionally narrow. It must be real and safe enough for actual DevO
 
 ## Current status
 
-**Phase 6B — Docker installation** is in progress on the development branch.
+**Phase 7 — Verification, summary, and metadata** is in progress on the development branch.
 
-Phases 0–6A are merged on `main`. Phase 6B adds official Docker CE installation, daemon policy, and verification.
+Phases 0–6B are merged on `main`. Phase 7 adds critical verification completion, Ansible-native summary reporting, and target metadata recording.
 
 Start with:
 
@@ -67,20 +67,27 @@ ansible-playbook verify.yml --syntax-check
 git diff --check
 ```
 
-## Repository layout (Phase 1)
+## Repository layout
 
 ```text
 server-bootstrap/
 ├── ansible.cfg
 ├── site.yml              # preflight + apply orchestration
-├── verify.yml            # post-apply verification (common only for now)
+├── verify.yml            # post-apply verification and summary
 ├── roles/
 │   ├── common/
-│   └── users/
-├── tasks/preflight/
+│   ├── users/
+│   ├── ssh/
+│   ├── firewall/
+│   ├── security/
+│   └── docker/
+├── tasks/
+│   ├── preflight/
+│   ├── post_apply/
+│   └── summary/
+├── vars/
 ├── examples/minimal/
 ├── tests/synthetic/
-├── inventory/
 ├── requirements-dev.txt
 ├── .ansible-lint
 ├── .yamllint
@@ -91,7 +98,9 @@ server-bootstrap/
 └── docs/
 ```
 
-Roles, wrapper scripts, and full verification are added in later approved phases.
+Target metadata is recorded at `/var/lib/server-bootstrap/metadata.json` (bootstrap version only; no per-run timestamps).
+
+The thin wrapper CLI is added in Phase 8.
 
 ## Optional developer tooling
 

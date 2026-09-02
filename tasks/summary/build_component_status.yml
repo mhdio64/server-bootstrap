@@ -1,0 +1,23 @@
+---
+- name: Summary | build component enablement status
+  ansible.builtin.set_fact:
+    bootstrap_summary_components:
+      common: "{{ bootstrap_common_enabled | default(true) | bool }}"
+      users: "{{ bootstrap_users_enabled | default(true) | bool }}"
+      ssh: "{{ bootstrap_ssh_enabled | default(true) | bool }}"
+      firewall: "{{ bootstrap_firewall_enabled | default(true) | bool }}"
+      security: "{{ bootstrap_security_enabled | default(true) | bool }}"
+      docker: "{{ bootstrap_docker_enabled | default(true) | bool }}"
+
+- name: Summary | build disabled-component warning list
+  ansible.builtin.set_fact:
+    bootstrap_summary_opt_out_warnings: >-
+      {{
+        []
+        + ([] if bootstrap_summary_components.common else ['common baseline is disabled'])
+        + ([] if bootstrap_summary_components.users else ['admin user management is disabled'])
+        + ([] if bootstrap_summary_components.ssh else ['SSH hardening is disabled'])
+        + ([] if bootstrap_summary_components.firewall else ['host firewall is disabled'])
+        + ([] if bootstrap_summary_components.security else ['unattended security updates are disabled'])
+        + ([] if bootstrap_summary_components.docker else ['Docker installation is disabled'])
+      }}

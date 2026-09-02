@@ -1,0 +1,28 @@
+---
+- name: Summary | build component enablement status
+  ansible.builtin.import_tasks: build_component_status.yml
+
+- name: Summary | detect reboot-required flag
+  ansible.builtin.import_tasks: reboot_required_warning.yml
+
+- name: Summary | read toolkit version from control node
+  ansible.builtin.set_fact:
+    bootstrap_toolkit_version: "{{ lookup('ansible.builtin.file', playbook_dir + '/VERSION') | trim }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Summary | emit bootstrap verification summary
+  ansible.builtin.debug:
+    msg:
+      - "server-bootstrap verification summary"
+      - "host: {{ inventory_hostname }}"
+      - "toolkit version: {{ bootstrap_toolkit_version }}"
+      - "components: {{ bootstrap_summary_components }}"
+      - "reboot required: {{ bootstrap_reboot_required | default(false) | bool }}"
+      - >-
+        {{
+          'WARNING: one or more components are explicitly disabled'
+          if bootstrap_summary_opt_out_warnings | length > 0
+          else 'all default components enabled'
+        }}
+      - "critical verification: PASS"

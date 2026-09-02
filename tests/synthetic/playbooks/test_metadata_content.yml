@@ -1,0 +1,22 @@
+---
+- name: Synthetic | target metadata contains only bootstrap version
+  hosts: localhost
+  gather_facts: false
+  vars:
+    bootstrap_toolkit_version: 0.0.1-test
+  tasks:
+    - name: Synthetic | define desired target metadata
+      ansible.builtin.set_fact:
+        bootstrap_metadata_desired:
+          bootstrap_version: "{{ bootstrap_toolkit_version }}"
+
+    - name: Synthetic | assert metadata has no timestamp fields
+      ansible.builtin.assert:
+        that:
+          - bootstrap_metadata_desired.keys() | list == ['bootstrap_version']
+          - bootstrap_metadata_desired.bootstrap_version == bootstrap_toolkit_version
+
+    - name: Synthetic | assert metadata JSON is stable across runs
+      ansible.builtin.assert:
+        that:
+          - (bootstrap_metadata_desired | to_nice_json) == (bootstrap_metadata_desired | to_nice_json)

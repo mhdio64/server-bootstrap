@@ -4,6 +4,8 @@
   gather_facts: true
   become: true
   any_errors_fatal: true
+  vars_files:
+    - vars/bootstrap_internal.yml
   tasks:
     - name: Verify | post-apply checks are not run in check mode
       ansible.builtin.debug:
@@ -57,3 +59,15 @@
       when:
         - not ansible_check_mode
         - bootstrap_docker_enabled | default(true) | bool
+
+    - name: Verify | component opt-out warnings
+      ansible.builtin.import_tasks: tasks/summary/component_opt_out_warnings.yml
+      when: not ansible_check_mode
+
+    - name: Verify | reboot-required warning
+      ansible.builtin.import_tasks: tasks/summary/reboot_required_warning.yml
+      when: not ansible_check_mode
+
+    - name: Verify | bootstrap summary
+      ansible.builtin.import_tasks: tasks/summary/report.yml
+      when: not ansible_check_mode

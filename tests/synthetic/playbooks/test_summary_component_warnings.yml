@@ -1,0 +1,39 @@
+---
+- name: Synthetic | build disabled-component warnings when security roles are off
+  hosts: localhost
+  gather_facts: false
+  vars:
+    bootstrap_ssh_enabled: false
+    bootstrap_firewall_enabled: false
+    bootstrap_security_enabled: false
+    bootstrap_docker_enabled: false
+  tasks:
+    - name: Synthetic | build component status
+      ansible.builtin.import_tasks: ../../../tasks/summary/build_component_status.yml
+
+    - name: Synthetic | assert expected opt-out warnings
+      ansible.builtin.assert:
+        that:
+          - bootstrap_summary_opt_out_warnings | length == 4
+          - "'SSH hardening is disabled' in bootstrap_summary_opt_out_warnings"
+          - "'host firewall is disabled' in bootstrap_summary_opt_out_warnings"
+          - "'unattended security updates are disabled' in bootstrap_summary_opt_out_warnings"
+          - "'Docker installation is disabled' in bootstrap_summary_opt_out_warnings"
+
+- name: Synthetic | build no warnings when all components are enabled
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Synthetic | build component status with defaults
+      ansible.builtin.import_tasks: ../../../tasks/summary/build_component_status.yml
+
+    - name: Synthetic | assert no opt-out warnings
+      ansible.builtin.assert:
+        that:
+          - bootstrap_summary_components.common
+          - bootstrap_summary_components.users
+          - bootstrap_summary_components.ssh
+          - bootstrap_summary_components.firewall
+          - bootstrap_summary_components.security
+          - bootstrap_summary_components.docker
+          - bootstrap_summary_opt_out_warnings | length == 0
