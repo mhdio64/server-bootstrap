@@ -1,0 +1,14 @@
+# Managed by server-bootstrap. Do not edit manually.
+*filter
+:{{ firewall_chain_name }} - [0:0]
+-A {{ firewall_chain_name }} -p icmp --icmp-type echo-request -j ACCEPT
+-A {{ firewall_chain_name }} -p icmp --icmp-type destination-unreachable -j ACCEPT
+-A {{ firewall_chain_name }} -p icmp --icmp-type time-exceeded -j ACCEPT
+{% for port in firewall_allowed_tcp_ports_effective %}
+-A {{ firewall_chain_name }} -p tcp -m tcp --dport {{ port }} -j ACCEPT
+{% endfor %}
+{% for port in firewall_allowed_udp_ports_effective %}
+-A {{ firewall_chain_name }} -p udp -m udp --dport {{ port }} -j ACCEPT
+{% endfor %}
+-A {{ firewall_chain_name }} -j RETURN
+COMMIT

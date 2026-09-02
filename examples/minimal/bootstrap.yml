@@ -19,3 +19,6 @@ bootstrap_admin_authorized_keys:
 # bootstrap_reboot_if_required: false
 # bootstrap_common_packages_extra: []
 # bootstrap_ssh_port: 22
+# bootstrap_firewall_allowed_tcp_ports:
+#   - 443
+# bootstrap_firewall_allowed_udp_ports: []

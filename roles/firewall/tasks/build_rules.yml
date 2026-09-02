@@ -1,0 +1,52 @@
+---
+- name: Firewall | build effective allowed TCP port list
+  ansible.builtin.set_fact:
+    firewall_allowed_tcp_ports_effective: >-
+      {{
+        (
+          bootstrap_firewall_allowed_tcp_ports | default([])
+          | map('int')
+          | reject('equalto', firewall_target_ssh_port | int)
+          | list
+          | union([firewall_target_ssh_port | int])
+          | unique
+          | sort
+        )
+      }}
+
+- name: Firewall | build effective allowed UDP port list
+  ansible.builtin.set_fact:
+    firewall_allowed_udp_ports_effective: >-
+      {{
+        bootstrap_firewall_allowed_udp_ports | default([])
+        | map('int')
+        | unique
+        | sort
+      }}
+
+- name: Firewall | ensure rules directory exists
+  ansible.builtin.file:
+    path: "{{ firewall_rules_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Firewall | render IPv4 persistence fragment
+  ansible.builtin.template:
+    src: rules.v4.j2
+    dest: "{{ firewall_rules_fragment_v4 }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: firewall_fragment_v4_result
+
+- name: Firewall | render IPv6 persistence fragment when required
+  ansible.builtin.template:
+    src: rules.v6.j2
+    dest: "{{ firewall_rules_fragment_v6 }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: firewall_fragment_v6_result
+  when: firewall_ipv6_required | bool

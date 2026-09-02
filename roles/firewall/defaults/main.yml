@@ -1,0 +1,20 @@
+---
+# Public API defaults for the firewall role.
+bootstrap_firewall_enabled: true
+bootstrap_firewall_allowed_tcp_ports: []
+bootstrap_firewall_allowed_udp_ports: []
+
+# Role-internal defaults (not public API).
+firewall_chain_name: SERVER_BOOTSTRAP_INPUT
+firewall_jump_comment: server-bootstrap-input-jump
+firewall_packages:
+  - iptables
+firewall_rules_dir: /etc/iptables/rules.d
+firewall_rules_fragment_v4: /etc/iptables/rules.d/50-server-bootstrap.v4
+firewall_rules_fragment_v6: /etc/iptables/rules.d/50-server-bootstrap.v6
+firewall_state_dir: /var/lib/server-bootstrap/firewall
+firewall_restore_unit: server-bootstrap-firewall-restore.service
+firewall_rollback_window_seconds: 90
+firewall_reconnect_timeout: 15
+firewall_min_port: 1
+firewall_max_port: 65535

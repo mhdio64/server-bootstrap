@@ -32,3 +32,11 @@
       when:
         - not ansible_check_mode
         - bootstrap_ssh_enabled | default(true) | bool
+
+    - name: Verify | firewall role checks
+      ansible.builtin.import_role:
+        name: firewall
+        tasks_from: verify
+      when:
+        - not ansible_check_mode
+        - bootstrap_firewall_enabled | default(true) | bool

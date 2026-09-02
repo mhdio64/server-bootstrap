@@ -1,0 +1,14 @@
+[Unit]
+Description=Restore server-bootstrap firewall rules
+DefaultDependencies=no
+Before=network-pre.target
+After=systemd-modules-load.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/server-bootstrap-restore-firewall-v4.sh
+ExecStart=/usr/local/sbin/server-bootstrap-restore-firewall-v6.sh
+
+[Install]
+WantedBy=multi-user.target
