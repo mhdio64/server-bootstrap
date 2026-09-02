@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+.env.*
+
+# Ansible
+*.retry
+.ansible/
+ansible_facts/
+collections/
+
+# Editor and OS
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+
+# Logs and local artifacts
+*.log
+.cache/
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Secrets and local overrides (never commit)
+*.pem
+*.key
+id_rsa*
+secrets/
+local/
+
+# Graphify local-only artifacts
+graphify-out/cost.json
+graphify-out/cache/
+graphify-out/.graphify_*

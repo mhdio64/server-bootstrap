@@ -1,0 +1,38 @@
+---
+description: Mandatory safety constraints for SSH, firewall, users, security, Docker, repository, and privileged changes.
+globs:
+  - "roles/users/**"
+  - "roles/ssh/**"
+  - "roles/firewall/**"
+  - "roles/security/**"
+  - "roles/docker/**"
+  - "site.yml"
+  - "verify.yml"
+alwaysApply: false
+---
+
+# Security-Critical Rules
+
+Read `docs/03-SECURITY-SAFETY.md` before editing security-critical areas.
+
+Mandatory invariants:
+
+```text
+Known + owned -> reconcile
+Unknown + harmless -> preserve
+Unknown + consequential -> stop
+```
+
+- Never destroy unknown configuration silently.
+- Never disable SSH host-key checking globally.
+- Never manage user private SSH keys.
+- Never disable password SSH access unless key-based admin access is safely established.
+- Validate SSH configuration before reload and verify effective configuration.
+- Do not globally flush iptables rules.
+- Do not take ownership of Docker-generated firewall chains.
+- Protect IPv6 when it is enabled.
+- Do not silently uninstall/migrate conflicting Docker installations.
+- Do not use convenience installers such as `curl | sh`.
+- Do not delete APT/dpkg lock files or kill package-manager processes to force progress.
+- Do not leak secrets into output, logs, CI artifacts, or command lines.
+- A critical verification failure is a real failure, not a warning.

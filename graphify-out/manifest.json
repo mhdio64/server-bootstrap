@@ -1,0 +1,14 @@
+{
+  "scripts/secret-scan.sh": {
+    "mtime": 1788366071.2937136,
+    "seen": 1788366198.506704,
+    "ast_hash": "e31798c3e5f64d501409be09c2f5135c",
+    "semantic_hash": "e31798c3e5f64d501409be09c2f5135c"
+  },
+  "scripts/test-secret-gate-negative.sh": {
+    "mtime": 1788366072.3864303,
+    "seen": 1788366198.506708,
+    "ast_hash": "39d0c814cc0185be82cc29908795eccd",
+    "semantic_hash": "39d0c814cc0185be82cc29908795eccd"
+  }
+}

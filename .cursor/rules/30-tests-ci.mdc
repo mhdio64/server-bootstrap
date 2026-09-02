@@ -1,0 +1,26 @@
+---
+description: Testing, CI, dependency, GitHub Actions, and release-gate rules.
+globs:
+  - "tests/**"
+  - ".github/**"
+  - "requirements*.txt"
+  - ".ansible-lint"
+  - ".yamllint"
+alwaysApply: false
+---
+
+# Tests and CI Rules
+
+Read `docs/05-TESTING-RELEASE.md` and `docs/06-CURSOR-WORKFLOW.md`.
+
+- Add tests with the implementation, not as an afterthought.
+- Run focused tests first, then full applicable validation.
+- Idempotency is a hard gate.
+- Detect check-mode mutation where practical.
+- Prefer synthetic fixtures for state classifiers.
+- Do not fake system integration by over-mutating a GitHub-hosted runner.
+- Real SSH/firewall/systemd/Docker integration belongs on the Ubuntu 24.04 VM release path.
+- Pin third-party GitHub Actions to full commit SHAs.
+- Dependency bots may open PRs; do not configure dependency auto-merge.
+- Never weaken or skip a security test merely to make CI green.
+- Stop before merge/tag/release unless explicitly authorized.

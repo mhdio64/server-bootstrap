@@ -1,0 +1,8 @@
+---
+# Phase 0 baseline. Expand as roles and playbooks are added in later phases.
+profile: production
+exclude_paths:
+  - .venv/
+  - .git/
+  - collections/
+  - graphify-out/
