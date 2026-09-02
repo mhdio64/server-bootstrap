@@ -11,17 +11,18 @@
       {{ firewall_iptables_version.stdout | default('unknown') }}.
   when: "'nf_tables' not in firewall_iptables_version.stdout"
 
-- name: Firewall | inspect UFW service state
-  ansible.builtin.systemd:
-    name: ufw
-  register: firewall_ufw_state
+- name: Firewall | inspect UFW enforcement state
+  ansible.builtin.command: ufw status
+  changed_when: false
+  register: firewall_ufw_status
 
-- name: Firewall | fail when UFW is active
+- name: Firewall | fail when UFW is enforcing firewall policy
   ansible.builtin.fail:
     msg: >-
-      UFW is active on this host. server-bootstrap manages host firewall policy
-      through project-owned iptables-nft chains and stops on active foreign backends.
-  when: firewall_ufw_state.status.ActiveState == 'active'
+      UFW is enforcing firewall policy on this host. server-bootstrap manages
+      host firewall policy through project-owned iptables-nft chains and stops
+      on active foreign backends. Disable UFW before continuing.
+  when: firewall_ufw_status.stdout is search('(?m)^Status:\\s+active\\s*$')
 
 - name: Firewall | parse IPv4 chain policies from iptables-save
   ansible.builtin.set_fact:
@@ -33,7 +34,8 @@
           | first
           | default(':INPUT ACCEPT [0:0]')
           | regex_replace('^:INPUT ', '')
-          | regex_replace(' \\[.*$', '')
+          | split(' ')
+          | first
         )
       }}
     firewall_forward_policy_v4: >-
@@ -44,7 +46,8 @@
           | first
           | default(':FORWARD ACCEPT [0:0]')
           | regex_replace('^:FORWARD ', '')
-          | regex_replace(' \\[.*$', '')
+          | split(' ')
+          | first
         )
       }}
 

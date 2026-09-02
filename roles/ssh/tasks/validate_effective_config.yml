@@ -28,6 +28,16 @@
   loop_control:
     label: "{{ item.key }}"
 
+- name: SSH | verify effective PermitRootLogin hardening value
+  ansible.builtin.assert:
+    that:
+      - ssh_effective_after_config.permitrootlogin in ssh_permitrootlogin_accepted_values
+    fail_msg: >-
+      Effective sshd configuration for permitrootlogin is
+      {{ ssh_effective_after_config.permitrootlogin | default('unset') }}, expected one of
+      {{ ssh_permitrootlogin_accepted_values | join(', ') }} after activating the
+      server-bootstrap drop-in.
+
 - name: SSH | verify effective SSH port when explicitly configured
   ansible.builtin.assert:
     that:

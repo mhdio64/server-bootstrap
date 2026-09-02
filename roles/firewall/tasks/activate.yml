@@ -96,6 +96,7 @@
   ansible.builtin.systemd:
     name: server-bootstrap-firewall-rollback.timer
     state: stopped
+  changed_when: false
   failed_when: false
   when: not ansible_check_mode
 
@@ -103,5 +104,6 @@
   ansible.builtin.systemd:
     name: server-bootstrap-firewall-rollback.service
     state: stopped
+  changed_when: false
   failed_when: false
   when: not ansible_check_mode

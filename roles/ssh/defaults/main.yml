@@ -19,4 +19,6 @@ ssh_expected_effective:
   permitemptypasswords: "no"
   passwordauthentication: "no"
   kbdinteractiveauthentication: "no"
-  permitrootlogin: "prohibit-password"
+ssh_permitrootlogin_accepted_values:
+  - prohibit-password
+  - without-password

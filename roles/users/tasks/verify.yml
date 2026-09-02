@@ -24,9 +24,8 @@
     label: "authorized key {{ ansible_loop.index }}"
 
 - name: Users | verify passwordless sudo for admin account
-  ansible.builtin.command: sudo -n id -u
-  become: true
-  become_user: "{{ bootstrap_admin_user }}"
+  ansible.builtin.command:
+    cmd: sudo -u {{ bootstrap_admin_user | quote }} sudo -n id -u
   changed_when: false
   register: users_verify_sudo
   failed_when: users_verify_sudo.stdout | int != 0
