@@ -1,0 +1,48 @@
+---
+- name: Preflight | require bootstrap_admin_user
+  ansible.builtin.assert:
+    that:
+      - bootstrap_admin_user is defined
+      - bootstrap_admin_user | string | length > 0
+    fail_msg: >-
+      bootstrap_admin_user must be set to the primary admin account name.
+
+- name: Preflight | require bootstrap_admin_authorized_keys
+  ansible.builtin.assert:
+    that:
+      - bootstrap_admin_authorized_keys is defined
+      - bootstrap_admin_authorized_keys is sequence
+      - bootstrap_admin_authorized_keys | length > 0
+    fail_msg: >-
+      bootstrap_admin_authorized_keys must contain at least one SSH public key.
+
+- name: Preflight | validate authorized key entries are non-empty strings
+  ansible.builtin.assert:
+    that:
+      - item | string | length > 0
+    fail_msg: >-
+      bootstrap_admin_authorized_keys contains an empty entry.
+  loop: "{{ bootstrap_admin_authorized_keys }}"
+  loop_control:
+    label: "authorized key {{ ansible_loop.index }}"
+
+- name: Preflight | verify administrative privileges
+  ansible.builtin.command: id -u
+  become: "{{ ansible_user != 'root' }}"
+  changed_when: false
+  register: preflight_effective_uid
+  failed_when: preflight_effective_uid.stdout | int != 0
+
+- name: Preflight | verify remote Python is available
+  ansible.builtin.command: /usr/bin/python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'
+  changed_when: false
+  register: preflight_python_version
+  failed_when: preflight_python_version.rc != 0
+
+- name: Preflight | require supported remote Python version
+  ansible.builtin.assert:
+    that:
+      - preflight_python_version.stdout is version('3.9', '>=')
+    fail_msg: >-
+      Remote Python {{ preflight_python_version.stdout | default('unknown') }} is not supported.
+      Ansible requires Python 3.9 or newer on the target host.

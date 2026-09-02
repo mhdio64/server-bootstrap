@@ -1,10 +1,18 @@
 ---
-# Placeholder playbook for repository syntax validation (Phase 0).
-# Critical verification is implemented in Phase 7+.
-- name: Verify bootstrap state
+- name: Bootstrap | verify
   hosts: all
-  gather_facts: false
+  gather_facts: true
+  any_errors_fatal: true
   tasks:
-    - name: Placeholder | bootstrap verification not yet implemented
+    - name: Verify | post-apply checks are not run in check mode
       ansible.builtin.debug:
-        msg: Bootstrap verification playbook is not yet implemented.
+        msg: NOT RUN (check mode)
+      when: ansible_check_mode
+
+    - name: Verify | common role checks
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: verify
+      when:
+        - not ansible_check_mode
+        - bootstrap_common_enabled | default(true) | bool

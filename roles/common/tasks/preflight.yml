@@ -1,0 +1,19 @@
+---
+- name: Common | preflight platform checks
+  ansible.builtin.import_tasks: assert_platform.yml
+
+- name: Common | inspect APT/dpkg lock state
+  ansible.builtin.command: >
+    bash -c 'fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; echo $?'
+  changed_when: false
+  register: common_dpkg_lock_state
+  failed_when: false
+
+- name: Common | fail when package manager lock is held
+  ansible.builtin.fail:
+    msg: >-
+      APT/dpkg lock is held by another process. Wait for the other package manager
+      operation to finish, then rerun bootstrap. server-bootstrap never kills apt,
+      dpkg, or deletes lock files.
+  when:
+    - common_dpkg_lock_state.stdout | trim == '0'
