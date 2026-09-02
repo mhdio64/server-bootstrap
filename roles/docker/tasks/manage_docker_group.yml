@@ -1,0 +1,10 @@
+---
+- name: Docker | add explicit users to docker group
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
+  loop: "{{ bootstrap_docker_users | default([]) }}"
+  loop_control:
+    label: "{{ item }}"
+  when: bootstrap_docker_users | default([]) | length > 0

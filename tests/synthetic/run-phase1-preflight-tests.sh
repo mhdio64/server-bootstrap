@@ -90,6 +90,10 @@ run_expect_failure \
   tests/synthetic/playbooks/test_docker_preflight_conflicting.yml \
   "conflicting Docker preflight rejection"
 
+run_expect_failure \
+  tests/synthetic/playbooks/test_docker_downgrade_rejection.yml \
+  "Docker downgrade rejection"
+
 run_expect_success \
   tests/synthetic/playbooks/test_system_uid_classification.yml \
   "system UID classification"

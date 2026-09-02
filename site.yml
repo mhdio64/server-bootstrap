@@ -60,3 +60,5 @@
       when: bootstrap_firewall_enabled | default(true) | bool
     - role: security
       when: bootstrap_security_enabled | default(true) | bool
+    - role: docker
+      when: bootstrap_docker_enabled | default(true) | bool

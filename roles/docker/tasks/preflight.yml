@@ -1,4 +1,23 @@
 ---
+- name: Docker | validate docker group users exist when configured
+  ansible.builtin.assert:
+    that:
+      - item | length > 0
+    fail_msg: bootstrap_docker_users must not contain empty usernames.
+  loop: "{{ bootstrap_docker_users | default([]) }}"
+  loop_control:
+    label: "{{ item }}"
+  when: bootstrap_docker_users | default([]) | length > 0
+
+- name: Docker | verify configured docker group users exist
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ item }}"
+  loop: "{{ bootstrap_docker_users | default([]) }}"
+  loop_control:
+    label: "{{ item }}"
+  when: bootstrap_docker_users | default([]) | length > 0
+
 - name: Docker | discover existing Docker installation state
   ansible.builtin.import_tasks: discover_state.yml
 

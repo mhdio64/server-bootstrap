@@ -19,9 +19,9 @@ The MVP is intentionally narrow. It must be real and safe enough for actual DevO
 
 ## Current status
 
-**Phase 6A — Docker discovery/preflight** is in progress on the development branch.
+**Phase 6B — Docker installation** is in progress on the development branch.
 
-Phases 0–5 are merged on `main`. Phase 6A adds read-only Docker state discovery and preflight classification. Docker installation begins in Phase 6B.
+Phases 0–6A are merged on `main`. Phase 6B adds official Docker CE installation, daemon policy, and verification.
 
 Start with:
 

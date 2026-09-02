@@ -1,0 +1,48 @@
+---
+- name: Docker | discover existing Docker installation state
+  ansible.builtin.import_tasks: discover_state.yml
+
+- name: Docker | classify existing Docker installation state
+  ansible.builtin.import_tasks: classify_state.yml
+
+- name: Docker | confirm Docker state is safe to proceed
+  ansible.builtin.assert:
+    that:
+      - docker_state in docker_allowed_preflight_states
+    fail_msg: >-
+      Docker apply state {{ docker_state | default('unknown') }} is not allowed
+      to proceed. Only {{ docker_allowed_preflight_states | join(' and ') }}
+      states may continue.
+
+- name: Docker | install official Docker APT repository when required
+  ansible.builtin.import_tasks: install_repository.yml
+  when: docker_state == 'absent'
+
+- name: Docker | install official Docker APT repository for compatible hosts missing project source
+  ansible.builtin.import_tasks: install_repository.yml
+  when:
+    - docker_state == 'official_compatible'
+    - not (docker_has_official_apt_source | default(false) | bool)
+
+- name: Docker | install or reconcile official Docker packages
+  ansible.builtin.import_tasks: install_packages.yml
+
+- name: Docker | configure Docker daemon settings
+  ansible.builtin.import_tasks: configure_daemon.yml
+
+- name: Docker | enable and start containerd service
+  ansible.builtin.systemd:
+    name: "{{ docker_containerd_service_name }}"
+    enabled: true
+    state: started
+  when: not ansible_check_mode
+
+- name: Docker | enable and start Docker service
+  ansible.builtin.systemd:
+    name: "{{ docker_service_name }}"
+    enabled: true
+    state: started
+  when: not ansible_check_mode
+
+- name: Docker | add explicit users to docker group
+  ansible.builtin.import_tasks: manage_docker_group.yml

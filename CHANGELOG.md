@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - VM validation fixes for UFW detection, SSH PermitRootLogin semantics, firewall idempotency, and users sudo verification.
 - Phase 6A `docker` role read-only discovery/classifier for absent, official-compatible, partial, conflicting, and ambiguous states.
 - Synthetic tests for all Docker classifier states and conflicting preflight rejection.
+- Phase 6B Docker official repository setup, package installation, fresh-host `daemon.json` default, and functional verification.
 
 ## [0.0.1] - 2026-09-01
 
