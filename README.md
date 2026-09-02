@@ -19,9 +19,9 @@ The MVP is intentionally narrow. It must be real and safe enough for actual DevO
 
 ## Current status
 
-**Phase 7 — Verification, summary, and metadata** is in progress on the development branch.
+**Phase 8 — Thin wrapper** is in progress on the development branch.
 
-Phases 0–6B are merged on `main`. Phase 7 adds critical verification completion, Ansible-native summary reporting, and target metadata recording.
+Phases 0–7 are merged on `main`. Phase 8 adds the `./bootstrap` CLI wrapper around the Ansible playbooks.
 
 Start with:
 
@@ -62,15 +62,36 @@ yamllint .
 ansible-lint
 ansible-playbook site.yml --syntax-check
 ansible-playbook verify.yml --syntax-check
+python -m unittest discover -s tests/unit -p 'test_*.py'
 ./scripts/secret-scan.sh
 ./scripts/test-secret-gate-negative.sh
 git diff --check
 ```
 
+## Bootstrap wrapper
+
+From a checkout of this repository, run the thin Python stdlib wrapper against your own project configuration:
+
+```bash
+./bootstrap check -i /path/to/inventory.yml
+./bootstrap apply -i /path/to/inventory.yml
+./bootstrap verify -i /path/to/inventory.yml
+```
+
+`bootstrap.yml` is expected beside `inventory.yml` unless you pass `--extra-vars`.
+
+First-time SSH host trust requires interactive approval or `--expected-host-fingerprint` after out-of-band verification. Silent trust-on-first-use is forbidden.
+
+Interactive `apply` requires explicit confirmation; use `--yes` for automation.
+
+Logs are written under `${XDG_STATE_HOME:-~/.local/state}/server-bootstrap/logs`.
+
 ## Repository layout
 
 ```text
 server-bootstrap/
+├── bootstrap             # thin Python stdlib CLI wrapper
+├── bootstrap_wrapper/
 ├── ansible.cfg
 ├── site.yml              # preflight + apply orchestration
 ├── verify.yml            # post-apply verification and summary
@@ -99,8 +120,6 @@ server-bootstrap/
 ```
 
 Target metadata is recorded at `/var/lib/server-bootstrap/metadata.json` (bootstrap version only; no per-run timestamps).
-
-The thin wrapper CLI is added in Phase 8.
 
 ## Optional developer tooling
 

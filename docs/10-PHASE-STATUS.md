@@ -2,7 +2,7 @@
 
 Target release: `v0.1.0`
 
-Current state: **Phase 7 implemented on feature branch; awaiting review and merge**
+Current state: **Phase 8 implemented on feature branch; awaiting review and merge**
 
 ## Status table
 
@@ -16,17 +16,17 @@ Current state: **Phase 7 implemented on feature branch; awaiting review and merg
 | 5 | Security baseline | MERGED |
 | 6A | Docker discovery/preflight | MERGED |
 | 6B | Docker repository + installation | MERGED |
-| 7 | Verification + summary + metadata | IMPLEMENTED (PR pending review) |
-| 8 | Thin wrapper | PENDING |
+| 7 | Verification + summary + metadata | MERGED |
+| 8 | Thin wrapper | IMPLEMENTED (PR pending review) |
 | 9 | Scenario 1 real-VM validation | PENDING |
 | 10 | Documentation + v0.1.0 release preparation | PENDING |
 
 ## Current approval boundary
 
-Phase 7 implementation is complete on branch `feat/phase-7-verify-summary-metadata`.
+Phase 8 implementation is complete on branch `feat/phase-8-thin-wrapper`.
 
-Phase 7 delivers independent critical verification completion, Ansible-native summary reporting, component opt-out warnings, reboot-required warnings, and idempotent target metadata recording.
+Phase 8 delivers the Python stdlib `./bootstrap` wrapper with `check`, `apply`, and `verify`, explicit host-key trust, apply confirmation, and XDG log paths.
 
-After Phase 7 PR review and merge, **Phase 8 requires separate human approval** before implementation begins.
+After Phase 8 PR review and merge, **Phase 9 requires separate human approval** before implementation begins.
 
 The next phase is not automatically authorized by completion of the current phase.
