@@ -98,4 +98,12 @@ run_expect_success \
   tests/synthetic/playbooks/test_system_uid_classification.yml \
   "system UID classification"
 
+run_expect_success \
+  tests/synthetic/playbooks/test_summary_component_warnings.yml \
+  "summary component opt-out warnings"
+
+run_expect_success \
+  tests/synthetic/playbooks/test_metadata_content.yml \
+  "target metadata content"
+
 echo "All synthetic preflight tests passed."

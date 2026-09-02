@@ -1,0 +1,11 @@
+---
+- name: Summary | build component enablement status
+  ansible.builtin.import_tasks: build_component_status.yml
+
+- name: Summary | warn about disabled components
+  ansible.builtin.debug:
+    msg: "WARNING: server-bootstrap component opt-out: {{ item }}"
+  loop: "{{ bootstrap_summary_opt_out_warnings }}"
+  loop_control:
+    label: "{{ item }}"
+  when: bootstrap_summary_opt_out_warnings | length > 0

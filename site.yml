@@ -4,6 +4,8 @@
   gather_facts: true
   become: true
   any_errors_fatal: true
+  vars_files:
+    - vars/bootstrap_internal.yml
   tasks:
     - name: Preflight | global checks
       ansible.builtin.import_tasks: tasks/preflight/global.yml
@@ -44,11 +46,16 @@
         tasks_from: preflight
       when: bootstrap_docker_enabled | default(true) | bool
 
+    - name: Preflight | component opt-out warnings
+      ansible.builtin.import_tasks: tasks/summary/component_opt_out_warnings.yml
+
 - name: Bootstrap | apply
   hosts: all
   gather_facts: true
   become: true
   any_errors_fatal: true
+  vars_files:
+    - vars/bootstrap_internal.yml
   roles:
     - role: common
       when: bootstrap_common_enabled | default(true) | bool
@@ -62,3 +69,14 @@
       when: bootstrap_security_enabled | default(true) | bool
     - role: docker
       when: bootstrap_docker_enabled | default(true) | bool
+  tasks:
+    - name: Apply | record target metadata
+      ansible.builtin.import_tasks: tasks/post_apply/metadata.yml
+      when: not ansible_check_mode
+
+    - name: Apply | component opt-out warnings
+      ansible.builtin.import_tasks: tasks/summary/component_opt_out_warnings.yml
+
+    - name: Apply | reboot-required warning
+      ansible.builtin.import_tasks: tasks/summary/reboot_required_warning.yml
+      when: not ansible_check_mode

@@ -1,0 +1,19 @@
+---
+- name: Summary | detect reboot-required flag
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: summary_reboot_required_stat
+  changed_when: false
+
+- name: Summary | record reboot-required state
+  ansible.builtin.set_fact:
+    bootstrap_reboot_required: "{{ summary_reboot_required_stat.stat.exists }}"
+    cacheable: true
+
+- name: Summary | warn when host reboot is required
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: A host reboot is required (/var/run/reboot-required is present).
+      Automatic reboot is disabled by default (bootstrap_reboot_if_required: false).
+      Reboot the host when convenient, then rerun bootstrap verify.
+  when: summary_reboot_required_stat.stat.exists

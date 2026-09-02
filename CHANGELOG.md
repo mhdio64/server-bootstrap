@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 6A `docker` role read-only discovery/classifier for absent, official-compatible, partial, conflicting, and ambiguous states.
 - Synthetic tests for all Docker classifier states and conflicting preflight rejection.
 - Phase 6B Docker official repository setup, package installation, fresh-host `daemon.json` default, and functional verification.
+- Phase 7 verification summary, component opt-out warnings, reboot-required warnings, platform verification, and idempotent target metadata at `/var/lib/server-bootstrap/metadata.json`.
 
 ## [0.0.1] - 2026-09-01
 
