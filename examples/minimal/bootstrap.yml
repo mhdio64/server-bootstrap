@@ -1,0 +1,16 @@
+---
+# Example desired-state configuration for server-bootstrap.
+# Copy this layout into your own project directory outside this repository.
+
+bootstrap_admin_user: deploy
+
+bootstrap_admin_authorized_keys:
+  - "ssh-ed25519 AAAA... example-only@bootstrap"
+
+# Optional overrides
+# bootstrap_timezone: UTC
+# bootstrap_hostname: app-01.example.com
+# bootstrap_locale: en_US.UTF-8
+# bootstrap_upgrade_packages: false
+# bootstrap_reboot_if_required: false
+# bootstrap_common_packages_extra: []

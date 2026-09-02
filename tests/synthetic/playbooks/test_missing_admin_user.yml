@@ -1,0 +1,7 @@
+---
+- name: Synthetic | missing admin user must fail global preflight
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Synthetic | import global preflight checks
+      ansible.builtin.import_tasks: ../../../tasks/preflight/global.yml

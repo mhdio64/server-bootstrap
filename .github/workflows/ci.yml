@@ -56,5 +56,8 @@ jobs:
       - name: Secret scan negative gate test
         run: ./scripts/test-secret-gate-negative.sh
 
+      - name: Phase 1 synthetic preflight tests
+        run: ./tests/synthetic/run-phase1-preflight-tests.sh
+
       - name: Repository whitespace check
         run: git diff --check

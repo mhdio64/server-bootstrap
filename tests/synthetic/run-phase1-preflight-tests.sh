@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
+
+run_expect_failure() {
+  local playbook="$1"
+  local label="$2"
+  set +e
+  ansible-playbook "$playbook" >/tmp/server-bootstrap-synthetic.out 2>&1
+  local rc=$?
+  set -e
+  if [[ "$rc" -eq 0 ]]; then
+    echo "FAIL: expected $label to fail, but playbook succeeded" >&2
+    cat /tmp/server-bootstrap-synthetic.out >&2
+    exit 1
+  fi
+  echo "PASS: $label failed as expected (exit ${rc})"
+}
+
+run_expect_failure \
+  tests/synthetic/playbooks/test_missing_admin_user.yml \
+  "missing bootstrap_admin_user preflight"
+
+run_expect_failure \
+  tests/synthetic/playbooks/test_unsupported_platform.yml \
+  "unsupported platform preflight"
+
+echo "All Phase 1 synthetic preflight tests passed."
