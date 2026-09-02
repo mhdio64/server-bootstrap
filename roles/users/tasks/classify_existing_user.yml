@@ -1,0 +1,32 @@
+---
+- name: Users | inspect existing admin account
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ bootstrap_admin_user }}"
+  register: users_admin_getent
+  failed_when: false
+
+- name: Users | record whether admin account exists
+  ansible.builtin.set_fact:
+    users_admin_exists: >-
+      {{
+        users_admin_getent.ansible_facts.getent_passwd is defined
+        and bootstrap_admin_user in users_admin_getent.ansible_facts.getent_passwd
+      }}
+
+- name: Users | record existing admin account UID when present
+  ansible.builtin.set_fact:
+    users_admin_uid: >-
+      {{ users_admin_getent.ansible_facts.getent_passwd[bootstrap_admin_user][1] | int }}
+  when: users_admin_exists | bool
+
+- name: Users | classify existing admin account state
+  ansible.builtin.set_fact:
+    users_admin_state: >-
+      {{
+        'absent' if not (users_admin_exists | bool)
+        else (
+          'system_reserved' if (users_admin_uid | int) < (users_min_normal_uid | int)
+          else 'compatible_existing'
+        )
+      }}

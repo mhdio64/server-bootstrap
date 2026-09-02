@@ -1,0 +1,76 @@
+---
+- name: Users | initialize inline authorized key list
+  ansible.builtin.set_fact:
+    users_keys_from_inline: >-
+      {{ bootstrap_admin_authorized_keys | default([]) | map('trim') | reject('equalto', '') | list }}
+
+- name: Users | resolve authorized key file paths relative to inventory directory
+  ansible.builtin.set_fact:
+    users_resolved_key_files: >-
+      {{
+        bootstrap_admin_authorized_key_files | default([])
+        | map('regex_replace', '^(?!/)', (inventory_dir | default(playbook_dir)) ~ '/')
+        | list
+      }}
+
+- name: Users | verify configured authorized key files exist on control node
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  delegate_to: localhost
+  become: false
+  register: users_key_file_stats
+  loop: "{{ users_resolved_key_files | default([]) }}"
+  loop_control:
+    label: "{{ item }}"
+  when: users_resolved_key_files | default([]) | length > 0
+
+- name: Users | fail when authorized key file is missing
+  ansible.builtin.fail:
+    msg: >-
+      Authorized key file {{ item.item }} was not found on the control node.
+      Paths in bootstrap_admin_authorized_key_files resolve relative to the
+      inventory directory unless absolute.
+  loop: "{{ users_key_file_stats.results | default([]) }}"
+  when:
+    - users_resolved_key_files | default([]) | length > 0
+    - not item.stat.exists
+
+- name: Users | load public keys from local files
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  delegate_to: localhost
+  become: false
+  register: users_key_file_slurps
+  loop: "{{ users_resolved_key_files | default([]) }}"
+  loop_control:
+    label: "{{ item }}"
+  when: users_resolved_key_files | default([]) | length > 0
+
+- name: Users | initialize keys loaded from files
+  ansible.builtin.set_fact:
+    users_keys_from_files: []
+
+- name: Users | parse public keys from local files
+  ansible.builtin.set_fact:
+    users_keys_from_files: >-
+      {{
+        users_keys_from_files
+        + (
+          item.content
+          | b64decode
+          | split('\n')
+          | map('trim')
+          | reject('equalto', '')
+          | reject('match', '^#')
+          | list
+        )
+      }}
+  loop: "{{ users_key_file_slurps.results | default([]) }}"
+  when:
+    - users_resolved_key_files | default([]) | length > 0
+    - not item.skipped | default(false)
+
+- name: Users | build effective authorized key list
+  ansible.builtin.set_fact:
+    users_authorized_keys_effective: >-
+      {{ users_keys_from_inline | union(users_keys_from_files | default([])) | unique }}

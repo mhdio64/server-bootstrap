@@ -16,3 +16,11 @@
       when:
         - not ansible_check_mode
         - bootstrap_common_enabled | default(true) | bool
+
+    - name: Verify | users role checks
+      ansible.builtin.import_role:
+        name: users
+        tasks_from: verify
+      when:
+        - not ansible_check_mode
+        - bootstrap_users_enabled | default(true) | bool

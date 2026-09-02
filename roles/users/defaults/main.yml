@@ -1,0 +1,13 @@
+---
+# Public API defaults for the users role.
+bootstrap_users_enabled: true
+bootstrap_admin_authorized_key_files: []
+
+# Used only when creating a new admin account.
+bootstrap_admin_shell: /bin/bash
+
+# Role-internal defaults (not public API).
+users_min_normal_uid: 1000
+users_sudo_group: sudo
+users_sudoers_dropin_prefix: 10-server-bootstrap
+users_authorized_keys_block_marker: server-bootstrap managed keys

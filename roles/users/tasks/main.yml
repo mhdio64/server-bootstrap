@@ -1,0 +1,62 @@
+---
+- name: Users | build effective authorized key list
+  ansible.builtin.import_tasks: build_authorized_keys.yml
+
+- name: Users | classify existing admin account state
+  ansible.builtin.import_tasks: classify_existing_user.yml
+
+- name: Users | fail when admin account name is reserved for a system user
+  ansible.builtin.fail:
+    msg: >-
+      Account {{ bootstrap_admin_user }} already exists as a system account (UID
+      {{ users_admin_uid }}). Choose a different bootstrap_admin_user.
+  when: users_admin_state == 'system_reserved'
+
+- name: Users | create new admin account
+  ansible.builtin.user:
+    name: "{{ bootstrap_admin_user }}"
+    shell: "{{ bootstrap_admin_shell }}"
+    create_home: true
+    password_lock: true
+    groups: "{{ users_sudo_group }}"
+    append: true
+    state: present
+  when: users_admin_state == 'absent'
+
+- name: Users | ensure sudo membership for existing admin account
+  ansible.builtin.user:
+    name: "{{ bootstrap_admin_user }}"
+    groups: "{{ users_sudo_group }}"
+    append: true
+    state: present
+  when: users_admin_state == 'compatible_existing'
+
+- name: Users | install project-owned sudoers drop-in
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ users_sudoers_dropin_prefix }}-{{ bootstrap_admin_user }}"
+    content: "{{ bootstrap_admin_user }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Users | ensure admin SSH directory exists
+  ansible.builtin.file:
+    path: "/home/{{ bootstrap_admin_user }}/.ssh"
+    state: directory
+    owner: "{{ bootstrap_admin_user }}"
+    group: "{{ bootstrap_admin_user }}"
+    mode: "0700"
+
+- name: Users | manage project-owned authorized_keys block
+  ansible.builtin.blockinfile:
+    path: "/home/{{ bootstrap_admin_user }}/.ssh/authorized_keys"
+    marker: "# {mark} {{ users_authorized_keys_block_marker }}"
+    block: |
+      {% for key in users_authorized_keys_effective %}
+      {{ key }}
+      {% endfor %}
+    owner: "{{ bootstrap_admin_user }}"
+    group: "{{ bootstrap_admin_user }}"
+    mode: "0600"
+    create: true
