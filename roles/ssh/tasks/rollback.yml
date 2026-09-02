@@ -1,0 +1,11 @@
+---
+- name: SSH | remove project-owned sshd drop-in during rollback
+  ansible.builtin.file:
+    path: "{{ ssh_dropin_path }}"
+    state: absent
+
+- name: SSH | reload SSH service after rollback
+  ansible.builtin.systemd:
+    name: "{{ ssh_service_name }}"
+    state: reloaded
+  when: not ansible_check_mode

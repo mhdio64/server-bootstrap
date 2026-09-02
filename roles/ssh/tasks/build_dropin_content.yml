@@ -1,0 +1,13 @@
+---
+- name: SSH | render project-owned sshd drop-in content
+  ansible.builtin.set_fact:
+    ssh_dropin_content: |
+      # Managed by server-bootstrap. Do not edit manually.
+      {% if bootstrap_ssh_port is defined %}
+      Port {{ bootstrap_ssh_port }}
+      {% endif %}
+      PubkeyAuthentication yes
+      PermitEmptyPasswords no
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      PermitRootLogin prohibit-password

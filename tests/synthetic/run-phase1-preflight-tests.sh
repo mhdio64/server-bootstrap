@@ -42,6 +42,18 @@ run_expect_failure \
   tests/synthetic/playbooks/test_missing_authorized_keys.yml \
   "missing authorized keys users preflight"
 
+run_expect_failure \
+  tests/synthetic/playbooks/test_invalid_ssh_port.yml \
+  "invalid bootstrap_ssh_port rejection"
+
+run_expect_failure \
+  tests/synthetic/playbooks/test_missing_control_node_identity.yml \
+  "missing control node SSH identity rejection"
+
+run_expect_success \
+  tests/synthetic/playbooks/test_ssh_dropin_content.yml \
+  "ssh drop-in content rendering"
+
 run_expect_success \
   tests/synthetic/playbooks/test_system_uid_classification.yml \
   "system UID classification"

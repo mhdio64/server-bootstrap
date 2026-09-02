@@ -19,6 +19,12 @@
         tasks_from: preflight
       when: bootstrap_users_enabled | default(true) | bool
 
+    - name: Preflight | ssh role checks
+      ansible.builtin.import_role:
+        name: ssh
+        tasks_from: preflight
+      when: bootstrap_ssh_enabled | default(true) | bool
+
 - name: Bootstrap | apply
   hosts: all
   gather_facts: true
@@ -28,3 +34,5 @@
       when: bootstrap_common_enabled | default(true) | bool
     - role: users
       when: bootstrap_users_enabled | default(true) | bool
+    - role: ssh
+      when: bootstrap_ssh_enabled | default(true) | bool

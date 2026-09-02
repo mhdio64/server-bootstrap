@@ -1,0 +1,22 @@
+---
+# Public API defaults for the ssh role.
+bootstrap_ssh_enabled: true
+
+# Role-internal defaults (not public API).
+ssh_dropin_filename: 00-server-bootstrap.conf
+ssh_dropin_path: "/etc/ssh/sshd_config.d/{{ ssh_dropin_filename }}"
+ssh_service_name: ssh
+ssh_reconnect_timeout: 15
+ssh_managed_directives:
+  - port
+  - pubkeyauthentication
+  - permitemptypasswords
+  - passwordauthentication
+  - kbdinteractiveauthentication
+  - permitrootlogin
+ssh_expected_effective:
+  pubkeyauthentication: "yes"
+  permitemptypasswords: "no"
+  passwordauthentication: "no"
+  kbdinteractiveauthentication: "no"
+  permitrootlogin: "prohibit-password"

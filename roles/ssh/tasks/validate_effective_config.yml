@@ -1,0 +1,47 @@
+---
+- name: SSH | query effective sshd configuration after candidate activation
+  ansible.builtin.command: /usr/sbin/sshd -T
+  changed_when: false
+  register: ssh_effective_after_raw
+
+- name: SSH | build post-activation effective configuration map
+  ansible.builtin.set_fact:
+    ssh_effective_after_config: >-
+      {{
+        dict(
+          ssh_effective_after_raw.stdout_lines
+          | map('regex_replace', '^(\S+)\s+(.*)$', '\1||\2')
+          | map('split', '||')
+          | list
+        )
+      }}
+
+- name: SSH | verify effective SSH hardening directives
+  ansible.builtin.assert:
+    that:
+      - ssh_effective_after_config[item.key] == item.value
+    fail_msg: >-
+      Effective sshd configuration for {{ item.key }} is
+      {{ ssh_effective_after_config[item.key] | default('unset') }}, expected
+      {{ item.value }} after activating the server-bootstrap drop-in.
+  loop: "{{ ssh_expected_effective | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: SSH | verify effective SSH port when explicitly configured
+  ansible.builtin.assert:
+    that:
+      - ssh_effective_after_config.port | int == bootstrap_ssh_port | int
+    fail_msg: >-
+      Effective sshd port is {{ ssh_effective_after_config.port | default('unset') }},
+      expected {{ bootstrap_ssh_port }} after activating the server-bootstrap drop-in.
+  when: bootstrap_ssh_port is defined
+
+- name: SSH | verify effective SSH port is preserved when not explicitly configured
+  ansible.builtin.assert:
+    that:
+      - ssh_effective_after_config.port | int == ssh_effective_port | int
+    fail_msg: >-
+      Effective sshd port changed to {{ ssh_effective_after_config.port | default('unset') }}
+      even though bootstrap_ssh_port was not configured.
+  when: bootstrap_ssh_port is not defined

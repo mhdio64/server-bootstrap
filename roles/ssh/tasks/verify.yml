@@ -1,0 +1,35 @@
+---
+- name: SSH | discover effective sshd state
+  ansible.builtin.import_tasks: discover_effective_state.yml
+
+- name: SSH | verify project-owned sshd drop-in exists
+  ansible.builtin.stat:
+    path: "{{ ssh_dropin_path }}"
+  register: ssh_verify_dropin
+  failed_when: not ssh_verify_dropin.stat.exists
+
+- name: SSH | verify effective SSH hardening directives
+  ansible.builtin.assert:
+    that:
+      - ssh_effective_config[item.key] == item.value
+    fail_msg: >-
+      Effective sshd configuration for {{ item.key }} is
+      {{ ssh_effective_config[item.key] | default('unset') }}, expected {{ item.value }}.
+  loop: "{{ ssh_expected_effective | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: SSH | verify effective SSH port when explicitly configured
+  ansible.builtin.assert:
+    that:
+      - ssh_effective_config.port | int == bootstrap_ssh_port | int
+    fail_msg: >-
+      Effective sshd port is {{ ssh_effective_config.port | default('unset') }},
+      expected {{ bootstrap_ssh_port }}.
+  when: bootstrap_ssh_port is defined
+
+- name: SSH | verify SSH service is active
+  ansible.builtin.systemd:
+    name: "{{ ssh_service_name }}"
+  register: ssh_verify_service
+  failed_when: ssh_verify_service.status.ActiveState != 'active'
