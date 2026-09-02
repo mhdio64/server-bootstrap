@@ -2,7 +2,7 @@
 
 Target release: `v0.1.0`
 
-Current state: **Phase 5 implemented on feature branch; VM validation in progress**
+Current state: **Phase 6A implemented on feature branch; awaiting review and merge**
 
 ## Status table
 
@@ -13,8 +13,8 @@ Current state: **Phase 5 implemented on feature branch; VM validation in progres
 | 2 | Admin user | MERGED |
 | 3 | SSH hardening | MERGED |
 | 4 | Firewall (`iptables-nft`) | MERGED |
-| 5 | Security baseline | IMPLEMENTED (PR pending review) |
-| 6A | Docker discovery/preflight | PENDING |
+| 5 | Security baseline | MERGED |
+| 6A | Docker discovery/preflight | IMPLEMENTED (PR pending review) |
 | 6B | Docker repository + installation | PENDING |
 | 7 | Verification + summary + metadata | PENDING |
 | 8 | Thin wrapper | PENDING |
@@ -23,10 +23,10 @@ Current state: **Phase 5 implemented on feature branch; VM validation in progres
 
 ## Current approval boundary
 
-Phase 5 implementation is complete on branch `feat/phase-5-security-baseline`.
+Phase 6A implementation is complete on branch `feat/phase-6a-docker-preflight`.
 
-Phase 5 delivers the `security` role only. Docker remains out of scope.
+Phase 6A delivers read-only Docker discovery and preflight classification only. No Docker installation or daemon mutation yet.
 
-After Phase 5 PR review and merge, **Phase 6A requires separate human approval** before implementation begins.
+After Phase 6A PR review and merge, **Phase 6B requires separate human approval** before implementation begins.
 
 The next phase is not automatically authorized by completion of the current phase.
