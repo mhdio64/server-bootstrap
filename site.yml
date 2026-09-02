@@ -32,6 +32,12 @@
         tasks_from: preflight
       when: bootstrap_firewall_enabled | default(true) | bool
 
+    - name: Preflight | security role checks
+      ansible.builtin.import_role:
+        name: security
+        tasks_from: preflight
+      when: bootstrap_security_enabled | default(true) | bool
+
 - name: Bootstrap | apply
   hosts: all
   gather_facts: true
@@ -46,3 +52,5 @@
       when: bootstrap_ssh_enabled | default(true) | bool
     - role: firewall
       when: bootstrap_firewall_enabled | default(true) | bool
+    - role: security
+      when: bootstrap_security_enabled | default(true) | bool

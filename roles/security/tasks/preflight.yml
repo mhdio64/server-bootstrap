@@ -1,0 +1,4 @@
+---
+- name: Security | preflight checks complete
+  ansible.builtin.debug:
+    msg: Security role preflight has no additional host mutation checks in v0.1.0.

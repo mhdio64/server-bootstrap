@@ -19,11 +19,11 @@ The MVP is intentionally narrow. It must be real and safe enough for actual DevO
 
 ## Current status
 
-**Phase 4 — Firewall** is in progress on the development branch.
+**Phase 5 — Security baseline** is in progress on the development branch.
 
-Phases 0–3 are merged on `main`. Phase 4 adds the `firewall` role with project-owned iptables-nft chains, foreign-policy classification, reconnect-safe activation, and persistence restore.
+Phases 0–4 are merged on `main`. Phase 5 adds the `security` role for unattended security upgrades with automatic reboot disabled.
 
-Security updates and Docker behavior begin in later phases.
+Docker behavior begins in later phases.
 
 Start with:
 

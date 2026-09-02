@@ -1,0 +1,6 @@
+# Managed by server-bootstrap. Do not edit manually.
+Unattended-Upgrade::Allowed-Origins {
+    "{{ ansible_facts['distribution'] | lower }}:{{ ansible_facts['distribution_release'] }}-security";
+};
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot "false";
