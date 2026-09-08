@@ -1,3 +1,5 @@
+[English](README.md) | [فارسی](README.fa.md)
+
 # server-bootstrap
 
 > Safely bootstrap Ubuntu Server 24.04 LTS (amd64) hosts into a secure, manageable, Docker-ready baseline with Ansible.
