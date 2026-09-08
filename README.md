@@ -90,12 +90,12 @@ Full reference: `docs/13-CONFIGURATION-REFERENCE.md`.
 - `bootstrap_docker_version: latest` preserves compatible existing official installs without implicit upgrade.
 - `docker` group membership is opt-in via `bootstrap_docker_users`.
 
-### Limitations
+### Scope & focus
 
-- one target host per invocation
-- no generic full rollback system
-- no Kubernetes, monitoring agents, reverse proxy, TLS, or application deployment
-- Scenario 2 existing-server validation is post-MVP
+- single target host per invocation for explicit operator oversight
+- automatic rollback guards for critical access points (SSH and firewall), relying on idempotent rerun for general convergence
+- focuses on baseline provisioning: reverse proxies, TLS certificates, monitoring agents, and application workloads are deployed after this stage
+- Scenario 2 existing-server validation on pre-configured hosts is post-MVP
 
 ## Documentation
 
@@ -141,9 +141,11 @@ server-bootstrap/
 
 Target metadata: `/var/lib/server-bootstrap/metadata.json` (bootstrap version only).
 
-## License
+## License & Disclaimer
 
-MIT — see [LICENSE](LICENSE).
+Distributed under the [MIT License](LICENSE). This project is provided "as is", without warranty of any kind.
+
+As with any infrastructure automation tool modifying system-level settings (SSH, firewall, package managers), operators are encouraged to preview changes using `./bootstrap check` and validate behavior on staging environments before applying to critical production hosts.
 
 ## Security
 
