@@ -51,11 +51,15 @@ pip install -r requirements-dev.txt
 
 ```text
 my-server/
-├── inventory.yml    # مشخصات اتصال SSH به سرور
-└── bootstrap.yml    # متغیرهای تنظیمی دلخواه (bootstrap_*)
+├── inventory.yml
+└── bootstrap.yml
 ```
 
 </div>
+
+توضیحات فایل‌ها:
+- `inventory.yml`: مشخصات اتصال SSH به سرور هدف.
+- `bootstrap.yml`: مقادیر تنظیمی و متغیرهای دلخواه پروژه (`bootstrap_*`).
 
 می‌توانید از نمونه‌های آماده در [examples/minimal/](examples/minimal/) الگوبرداری کنید:
 
@@ -80,24 +84,30 @@ all:
 
 ```yaml
 ---
-# کاربر ادمین جدید
+# New admin user (cannot be root)
 bootstrap_admin_user: deploy
 
-# کلیدهای عمومی معتبر برای ورود ادمین (حداقل یک کلید الزامی است)
+# Public SSH keys for admin user (at least one key is required)
 bootstrap_admin_authorized_keys:
   - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... user@example.com"
 
-# پورت‌های اضافی فایروال (پورت SSH به طور خودکار باز است)
+# Optional: extra inbound firewall TCP ports (SSH is always allowed)
 # bootstrap_firewall_allowed_tcp_ports:
 #   - 80
 #   - 443
 
-# کاربرانی که باید به گروه docker اضافه شوند (اختیاری)
+# Optional: users to add to docker group
 # bootstrap_docker_users:
 #   - deploy
 ```
 
 </div>
+
+توضیحات متغیرهای کلیدی:
+- `bootstrap_admin_user`: نام کاربری ادمین جدید (نباید `root` باشد).
+- `bootstrap_admin_authorized_keys`: فهرست کلیدهای عمومی معتبر برای ورود SSH ادمین.
+- `bootstrap_firewall_allowed_tcp_ports`: پورت‌های باز TCP اضافی در فایروال (پورت SSH به صورت پیش‌فرض و خودکار باز است).
+- `bootstrap_docker_users`: کاربرانی که اجازه دارند دستورات داکر را بدون نیاز به `sudo` اجرا کنند.
 
 ### ۳. چرخه ۳ مرحله‌ای اجرا (Check ➜ Apply ➜ Verify)
 
@@ -106,17 +116,17 @@ bootstrap_admin_authorized_keys:
 <div dir="ltr">
 
 ```bash
-# ۱. شبیه‌سازی و بررسی بدون تغییر روی سرور (Dry Run)
 ./bootstrap check -i /path/to/my-server/inventory.yml
-
-# ۲. اعمال واقعی تنظیمات
 ./bootstrap apply -i /path/to/my-server/inventory.yml
-
-# ۳. راستی‌آزمایی صحت کارکرد سرویس‌ها و فایروال و تست داکر
 ./bootstrap verify -i /path/to/my-server/inventory.yml
 ```
 
 </div>
+
+شرح مراحل:
+1. **دستور `check`:** شبیه‌سازی و بررسی اولیه بدون ایجاد هیچ‌گونه تغییر روی سرور (Dry Run).
+2. **دستور `apply`:** اعمال واقعی تنظیمات و پیکربندی کامل سرور.
+3. **دستور `verify`:** راستی‌آزمایی صحت کارکرد سرویس‌ها، فایروال و اجرای تستی داکر (`hello-world`).
 
 > **نکته ایمنی Wrapper:**
 > - در اولین اتصال، اثرانگشت SSH سرور (Host Fingerprint) به صورت تعاملی از شما تأیید می‌گیرد (یا می‌توانید با فلگ `--expected-host-fingerprint` آن را در محیط‌های اتوماسیون پاس دهید).
@@ -142,15 +152,15 @@ ssh -i ~/.ssh/id_ed25519 deploy@203.0.113.10
 <div dir="ltr">
 
 ```bash
-# تست دسترسی ادمین (sudo بدون رمز)
 sudo whoami
-
-# تست دسترسی داکر
 docker ps
 docker compose version
 ```
 
 </div>
+
+- دستور `sudo whoami`: بررسی دسترسی ادمین بدون رمز (خروجی باید `root` باشد).
+- دستورات `docker ps` و `docker compose version`: بررسی صحت اجرای سرویس داکر.
 
 ---
 
@@ -203,14 +213,14 @@ docker compose version
 
 ```text
 server-bootstrap/
-├── bootstrap                  # اسکریپت رابط کاربر (Python CLI wrapper)
-├── bootstrap_wrapper/         # کدهای پایتونی هندلرها و لاگین
-├── site.yml                   # پلی‌بوک اصلی برای اجرای Preflight و Apply
-├── verify.yml                 # پلی‌بوک تست سلامت و راستی‌آزمایی
-├── roles/                     # رول‌های ماژولار (common, users, ssh, firewall, security, docker)
-├── examples/minimal/          # نمونه حداقل کانفیگ‌های inventory و bootstrap
-├── tests/                     # تست‌های واحد، synthetic و تست ماشین مجازی سناریو ۱
-└── docs/                      # مستندات کامل معماری، ایمنی، تصمیمات و عیب‌یابی
+├── bootstrap
+├── bootstrap_wrapper/
+├── site.yml
+├── verify.yml
+├── roles/
+├── examples/minimal/
+├── tests/
+└── docs/
 ```
 
 </div>
