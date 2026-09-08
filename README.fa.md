@@ -30,6 +30,8 @@
 
 ابتدا مخزن را دریافت کرده و ابزارهای مورد نیاز را درون یک محیط مجازی پایتون نصب کنید:
 
+<div dir="ltr">
+
 ```bash
 git clone https://github.com/mhdio64/server-bootstrap.git
 cd server-bootstrap
@@ -39,9 +41,13 @@ source .venv/bin/activate
 pip install -r requirements-dev.txt
 ```
 
+</div>
+
 ### ۲. ساخت فایل‌های پیکربندی سرور
 
 پیکربندی سرور هدف را در یک مسیر خارج از پوشه اصلی سورس پروژه بسازید (مثلاً در یک پوشه جداگانه):
+
+<div dir="ltr">
 
 ```text
 my-server/
@@ -49,9 +55,14 @@ my-server/
 └── bootstrap.yml    # متغیرهای تنظیمی دلخواه (bootstrap_*)
 ```
 
+</div>
+
 می‌توانید از نمونه‌های آماده در [examples/minimal/](examples/minimal/) الگوبرداری کنید:
 
 **نمونه `inventory.yml`:**
+
+<div dir="ltr">
+
 ```yaml
 ---
 all:
@@ -61,7 +72,12 @@ all:
       ansible_user: root
 ```
 
+</div>
+
 **نمونه `bootstrap.yml`:**
+
+<div dir="ltr">
+
 ```yaml
 ---
 # کاربر ادمین جدید
@@ -81,9 +97,13 @@ bootstrap_admin_authorized_keys:
 #   - deploy
 ```
 
+</div>
+
 ### ۳. چرخه ۳ مرحله‌ای اجرا (Check ➜ Apply ➜ Verify)
 
 دستورات را از پوشه اصلی پروژه اجرا کنید:
+
+<div dir="ltr">
 
 ```bash
 # ۱. شبیه‌سازی و بررسی بدون تغییر روی سرور (Dry Run)
@@ -96,6 +116,8 @@ bootstrap_admin_authorized_keys:
 ./bootstrap verify -i /path/to/my-server/inventory.yml
 ```
 
+</div>
+
 > **نکته ایمنی Wrapper:**
 > - در اولین اتصال، اثرانگشت SSH سرور (Host Fingerprint) به صورت تعاملی از شما تأیید می‌گیرد (یا می‌توانید با فلگ `--expected-host-fingerprint` آن را در محیط‌های اتوماسیون پاس دهید).
 > - اجرای `apply` نیاز به تأییدیه کاربر دارد؛ برای اسکریپت‌ها یا CI می‌توانید از فلگ `--yes` استفاده کنید.
@@ -107,11 +129,18 @@ bootstrap_admin_authorized_keys:
 
 پس از اعمال موفقیت‌آمیز، احراز هویت با رمز عبور در SSH غیرفعال شده و باید با کاربر ادمین جدید و کلید خصوصی SSH وارد شوید:
 
+<div dir="ltr">
+
 ```bash
 ssh -i ~/.ssh/id_ed25519 deploy@203.0.113.10
 ```
 
+</div>
+
 تست دسترسی‌ها روی سرور:
+
+<div dir="ltr">
+
 ```bash
 # تست دسترسی ادمین (sudo بدون رمز)
 sudo whoami
@@ -120,6 +149,8 @@ sudo whoami
 docker ps
 docker compose version
 ```
+
+</div>
 
 ---
 
@@ -168,6 +199,8 @@ docker compose version
 
 ## ساختار دایرکتوری‌ها
 
+<div dir="ltr">
+
 ```text
 server-bootstrap/
 ├── bootstrap                  # اسکریپت رابط کاربر (Python CLI wrapper)
@@ -179,6 +212,8 @@ server-bootstrap/
 ├── tests/                     # تست‌های واحد، synthetic و تست ماشین مجازی سناریو ۱
 └── docs/                      # مستندات کامل معماری، ایمنی، تصمیمات و عیب‌یابی
 ```
+
+</div>
 
 ---
 
