@@ -36,8 +36,13 @@ htmlcov/
 *.pem
 *.key
 id_rsa*
+id_ed25519*
+id_test*
 secrets/
 local/
+.vagrant/
+tests/vagrant/.vagrant/
+tests/vagrant/tmp/
 
 # Graphify local-only artifacts
 graphify-out/cost.json
