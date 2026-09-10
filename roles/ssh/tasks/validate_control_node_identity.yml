@@ -113,7 +113,8 @@
   register: ssh_admin_key_fingerprints
   loop: "{{ users_authorized_keys_effective }}"
   loop_control:
-    label: "admin key {{ ansible_loop.index }}"
+    index_var: admin_key_index
+    label: "admin key {{ admin_key_index + 1 }}"
 
 - name: SSH | compute fingerprints for control node public keys
   ansible.builtin.command:
@@ -126,7 +127,8 @@
   register: ssh_control_node_key_fingerprints
   loop: "{{ ssh_control_node_pubkeys }}"
   loop_control:
-    label: "control node key {{ ansible_loop.index }}"
+    index_var: control_key_index
+    label: "control node key {{ control_key_index + 1 }}"
   when: ssh_control_node_pubkeys | length > 0
 
 - name: SSH | extract admin key fingerprint tokens

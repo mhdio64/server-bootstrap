@@ -61,6 +61,7 @@
     state: "{{ docker_package_install_state }}"
     allow_downgrade: false
   when:
+    - not ansible_check_mode
     - docker_state == 'absent'
     - docker_package_install_list | length > 0
 
