@@ -21,7 +21,8 @@ Do not invent future requirements.
 
 ## Non-negotiable MVP boundaries
 
-- Target: Ubuntu Server 24.04 LTS, amd64 only.
+- Target (Current Baseline): Ubuntu Server 24.04 LTS, amd64 only.
+- Target (Authorized Multi-Distro Expansion Roadmap): Ubuntu Server 22.04 LTS, Ubuntu Server 24.04 LTS, Debian 13.x Stable (Trixie), AlmaLinux 9.x, AlmaLinux 10.x (amd64/x86_64 only). See `docs/16-MULTI-DISTRO-ROADMAP.md`.
 - Control node: Linux only; Python 3.12–3.14.
 - Ansible project, not an Ansible Collection for v0.1.0.
 - Roles: `common`, `users`, `ssh`, `firewall`, `security`, `docker`.
