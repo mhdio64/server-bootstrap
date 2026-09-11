@@ -1,36 +1,15 @@
 ---
+- name: Common | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Common | build effective package list
   ansible.builtin.set_fact:
     common_packages_effective: >-
       {{ bootstrap_common_packages | union(bootstrap_common_packages_extra) | unique | sort }}
 
-- name: Common | wait for APT/dpkg lock release
-  ansible.builtin.command: >
-    bash -c 'end=$((SECONDS+{{ common_apt_lock_timeout_seconds }}));
-    while (( SECONDS < end )); do
-      fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || exit 0;
-      sleep {{ common_apt_lock_poll_seconds }};
-    done;
-    exit 1'
-  changed_when: false
-  register: common_apt_lock_wait
-  failed_when: common_apt_lock_wait.rc != 0
-  when: not ansible_check_mode
-
-- name: Common | refresh APT package cache
-  ansible.builtin.apt:
-    update_cache: true
-    cache_valid_time: 3600
-
-- name: Common | install baseline packages
-  ansible.builtin.apt:
-    name: "{{ common_packages_effective }}"
-    state: present
-
-- name: Common | upgrade all packages when explicitly enabled
-  ansible.builtin.apt:
-    upgrade: dist
-  when: bootstrap_upgrade_packages | bool
+- name: Common | manage packages via APT
+  ansible.builtin.include_tasks: package_manager/apt_install.yml
+  when: common_package_manager == 'apt'
 
 - name: Common | read current timezone
   ansible.builtin.command: timedatectl show -p Timezone --value
@@ -90,20 +69,20 @@
     name: "{{ bootstrap_hostname }}"
   when: bootstrap_hostname is defined
 
-- name: Common | ensure systemd-timesyncd package is present
-  ansible.builtin.apt:
-    name: systemd-timesyncd
+- name: Common | ensure time synchronization package is present
+  ansible.builtin.package:
+    name: "{{ common_timesync_package }}"
     state: present
 
-- name: Common | enable and start systemd-timesyncd
+- name: Common | enable and start time synchronization service
   ansible.builtin.systemd:
-    name: systemd-timesyncd.service
+    name: "{{ common_timesync_service }}"
     enabled: true
     state: started
 
 - name: Common | detect reboot-required flag
   ansible.builtin.stat:
-    path: /var/run/reboot-required
+    path: "{{ common_reboot_required_file }}"
   register: common_reboot_required_stat
 
 - name: Common | record reboot-required state

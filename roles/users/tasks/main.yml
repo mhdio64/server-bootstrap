@@ -1,4 +1,7 @@
 ---
+- name: Users | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Users | build effective authorized key list
   ansible.builtin.import_tasks: build_authorized_keys.yml
 

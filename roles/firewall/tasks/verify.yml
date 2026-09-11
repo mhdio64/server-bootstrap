@@ -1,4 +1,7 @@
 ---
+- name: Firewall | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Firewall | discover current firewall state
   ansible.builtin.import_tasks: discover_state.yml
 

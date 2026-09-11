@@ -1,0 +1,12 @@
+---
+# Platform variables for Ubuntu systems in the docker role.
+docker_package_manager: apt
+docker_apt_key_path: /etc/apt/keyrings/server-bootstrap-docker.asc
+docker_apt_sources_path: /etc/apt/sources.list.d/server-bootstrap-docker.sources
+docker_apt_repository_component: stable
+docker_project_apt_filename_prefix: server-bootstrap-docker
+docker_official_apt_marker: download.docker.com/linux/ubuntu
+docker_apt_key_url: https://download.docker.com/linux/ubuntu/gpg
+docker_apt_repository_uri: https://download.docker.com/linux/ubuntu
+docker_service_name: docker
+docker_containerd_service_name: containerd

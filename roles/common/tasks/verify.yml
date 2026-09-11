@@ -1,4 +1,7 @@
 ---
+- name: Common | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Common | verify supported platform
   ansible.builtin.import_tasks: assert_platform.yml
 
@@ -25,9 +28,9 @@
   loop_control:
     label: "{{ item }}"
 
-- name: Common | verify systemd-timesyncd is active
+- name: Common | verify time synchronization service is active
   ansible.builtin.systemd:
-    name: systemd-timesyncd.service
+    name: "{{ common_timesync_service }}"
   register: common_verify_timesyncd
   failed_when: common_verify_timesyncd.status.ActiveState != 'active'
   retries: 5
@@ -36,7 +39,7 @@
 
 - name: Common | verify reboot-required flag is detectable
   ansible.builtin.stat:
-    path: /var/run/reboot-required
+    path: "{{ common_reboot_required_file }}"
   register: common_verify_reboot_required
   changed_when: false
 

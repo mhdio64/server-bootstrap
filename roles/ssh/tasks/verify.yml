@@ -1,4 +1,7 @@
 ---
+- name: SSH | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: SSH | discover effective sshd state
   ansible.builtin.import_tasks: discover_effective_state.yml
 

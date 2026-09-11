@@ -1,4 +1,7 @@
 ---
+- name: Firewall | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Firewall | validate configured TCP port entries
   ansible.builtin.assert:
     that:

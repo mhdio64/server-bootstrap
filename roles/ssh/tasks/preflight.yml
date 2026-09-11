@@ -1,4 +1,7 @@
 ---
+- name: SSH | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: SSH | validate configured SSH port when explicitly set
   ansible.builtin.assert:
     that:

@@ -1,4 +1,7 @@
 ---
+- name: Firewall | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Firewall | read-only state discovery and classification
   check_mode: false
   block:
@@ -9,11 +12,9 @@
       ansible.builtin.import_tasks: classify_state.yml
 
 - name: Firewall | ensure firewall packages are installed
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: "{{ firewall_packages }}"
     state: present
-    update_cache: true
-    cache_valid_time: 3600
 
 - name: Firewall | refresh discovered firewall state after package install
   ansible.builtin.import_tasks: discover_state.yml

@@ -5,7 +5,7 @@
       - ansible_distribution == common_supported_distribution
     fail_msg: >-
       Unsupported distribution {{ ansible_distribution | default('unknown') }}.
-      server-bootstrap v0.1.0 officially supports Ubuntu Server 24.04 only.
+      server-bootstrap in Phase MD-1 officially validates Ubuntu Server 24.04 only.
 
 - name: Common | assert supported distribution version
   ansible.builtin.assert:
@@ -13,7 +13,7 @@
       - ansible_distribution_version is version(common_supported_distribution_version, '==')
     fail_msg: >-
       Unsupported Ubuntu version {{ ansible_distribution_version | default('unknown') }}.
-      server-bootstrap v0.1.0 officially supports Ubuntu Server 24.04 only.
+      server-bootstrap in Phase MD-1 officially validates Ubuntu Server 24.04 only.
 
 - name: Common | assert supported CPU architecture
   ansible.builtin.assert:

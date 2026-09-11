@@ -1,35 +1,7 @@
 ---
-- name: Security | install unattended security upgrade packages
-  ansible.builtin.apt:
-    name: "{{ security_packages }}"
-    state: present
-    update_cache: true
-    cache_valid_time: 3600
+- name: Security | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
 
-- name: Security | install project-owned APT periodic policy drop-in
-  ansible.builtin.template:
-    src: 20server-bootstrap-auto-upgrades.j2
-    dest: "{{ security_apt_periodic_dropin }}"
-    owner: root
-    group: root
-    mode: "0644"
-
-- name: Security | install project-owned unattended-upgrades policy drop-in
-  ansible.builtin.template:
-    src: 50server-bootstrap-unattended-upgrades.j2
-    dest: "{{ security_unattended_upgrades_dropin }}"
-    owner: root
-    group: root
-    mode: "0644"
-
-- name: Security | enable APT periodic update timer
-  ansible.builtin.systemd:
-    name: "{{ security_apt_daily_timer }}"
-    enabled: true
-  when: not ansible_check_mode
-
-- name: Security | enable unattended security upgrade timer
-  ansible.builtin.systemd:
-    name: "{{ security_unattended_upgrades_timer }}"
-    enabled: true
-  when: not ansible_check_mode
+- name: Security | configure unattended-upgrades backend
+  ansible.builtin.include_tasks: backends/unattended_upgrades.yml
+  when: security_backend == 'unattended_upgrades'

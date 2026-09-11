@@ -106,4 +106,8 @@ run_expect_success \
   tests/synthetic/playbooks/test_metadata_content.yml \
   "target metadata content"
 
+run_expect_success \
+  tests/synthetic/playbooks/test_platform_vars_resolution.yml \
+  "platform vars resolution"
+
 echo "All synthetic preflight tests passed."

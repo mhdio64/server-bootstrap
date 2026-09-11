@@ -1,0 +1,18 @@
+---
+- name: Users | load platform-specific variables
+  ansible.builtin.include_vars: "{{ lookup('ansible.builtin.first_found', params) }}"
+  vars:
+    platform_distro: "{{ ansible_facts['distribution'] | default(ansible_distribution | default('default')) }}"
+    platform_version: "{{ ansible_facts['distribution_version'] | default(ansible_distribution_version | default('default')) }}"
+    platform_major: "{{ ansible_facts['distribution_major_version'] | default(ansible_distribution_major_version | default('default')) }}"
+    platform_family: "{{ ansible_facts['os_family'] | default(ansible_os_family | default('default')) }}"
+    params:
+      files:
+        - "{{ platform_distro }}-{{ platform_version }}.yml"
+        - "{{ platform_distro }}-{{ platform_major }}.yml"
+        - "{{ platform_distro }}.yml"
+        - "{{ platform_family }}.yml"
+        - "default.yml"
+      paths:
+        - "{{ role_path | default('roles/users') }}/vars"
+        - "roles/users/vars"

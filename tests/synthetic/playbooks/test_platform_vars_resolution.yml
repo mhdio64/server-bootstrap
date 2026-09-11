@@ -1,0 +1,49 @@
+---
+- name: Synthetic | platform vars resolution with Ubuntu 24.04 facts
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_distribution: Ubuntu
+    ansible_distribution_version: "24.04"
+    ansible_distribution_major_version: "24"
+    ansible_os_family: Debian
+  tasks:
+    - name: Synthetic | load common platform vars
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load users platform vars
+      ansible.builtin.import_role:
+        name: users
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load ssh platform vars
+      ansible.builtin.import_role:
+        name: ssh
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load firewall platform vars
+      ansible.builtin.import_role:
+        name: firewall
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load security platform vars
+      ansible.builtin.import_role:
+        name: security
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load docker platform vars
+      ansible.builtin.import_role:
+        name: docker
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | assert expected platform abstractions
+      ansible.builtin.assert:
+        that:
+          - common_package_manager == 'apt'
+          - users_sudo_group == 'sudo'
+          - ssh_service_name == 'ssh'
+          - firewall_backend == 'iptables_nft'
+          - security_backend == 'unattended_upgrades'
+          - docker_package_manager == 'apt'

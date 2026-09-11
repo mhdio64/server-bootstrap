@@ -1,4 +1,7 @@
 ---
+- name: Docker | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Docker | verify containerd service is active
   ansible.builtin.systemd:
     name: "{{ docker_containerd_service_name }}"
