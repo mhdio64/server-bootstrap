@@ -8,14 +8,14 @@ Sanitized real-VM acceptance evidence for target `debian13`.
 |---|---|
 | Target identifier | `debian13` |
 | Toolkit version | `0.1.0` |
-| Git commit | `78e10bc92e6cc3c63f68ecbab80ff2ce52d69141` |
+| Git commit | `edc5eaea7e0ea56a8b441ab7fe93de5d2e2f8956` |
 | Vagrant box | `bento/debian-13` |
 | Vagrant version | `Vagrant 2.4.9` |
 | VirtualBox version | `7.2.16r174877` |
 | Ansible version | `ansible [core 2.20.1]` |
 | Python version | `Python 3.14.4` |
-| Started at (UTC) | 2026-09-11T11:00:09Z |
-| Finished at (UTC) | 2026-09-11T11:08:15Z |
+| Started at (UTC) | 2026-09-11T15:37:04Z |
+| Finished at (UTC) | 2026-09-11T15:46:15Z |
 
 ## Acceptance Gate Results
 
