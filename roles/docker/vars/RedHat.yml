@@ -1,0 +1,19 @@
+---
+# Platform variables for RedHat-family systems in the docker role.
+docker_package_manager: dnf
+docker_dnf_repo_url: https://download.docker.com/linux/centos/docker-ce.repo
+docker_dnf_repo_path: /etc/yum.repos.d/docker-ce.repo
+docker_official_rpm_marker: download.docker.com/linux/centos
+docker_official_apt_marker: download.docker.com/linux/centos
+docker_service_name: docker
+docker_containerd_service_name: containerd
+docker_conflicting_packages:
+  - docker
+  - docker-client
+  - docker-client-latest
+  - docker-common
+  - docker-latest
+  - docker-latest-logrotate
+  - docker-logrotate
+  - docker-engine
+  - podman-docker

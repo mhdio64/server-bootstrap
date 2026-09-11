@@ -1,0 +1,7 @@
+---
+# Platform variables for RedHat-family systems in the security role.
+security_backend: dnf_automatic
+security_packages:
+  - dnf-automatic
+security_dnf_automatic_conf: /etc/dnf/automatic.conf
+security_dnf_automatic_timer: dnf-automatic.timer

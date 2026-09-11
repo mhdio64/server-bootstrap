@@ -2,3 +2,7 @@
 - name: Docker | install official Docker repository via APT backend
   ansible.builtin.include_tasks: backends/apt/repository.yml
   when: docker_package_manager == 'apt'
+
+- name: Docker | install official Docker repository via DNF backend
+  ansible.builtin.include_tasks: backends/dnf/repository.yml
+  when: docker_package_manager == 'dnf'

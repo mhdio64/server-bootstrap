@@ -1,0 +1,35 @@
+---
+- name: Firewall | verify firewalld service is enabled
+  ansible.builtin.systemd:
+    name: "{{ firewall_service_name | default('firewalld') }}"
+  register: firewall_verify_firewalld_service
+  failed_when: firewall_verify_firewalld_service.status.UnitFileState != 'enabled'
+
+- name: Firewall | verify firewalld service is active
+  ansible.builtin.command: firewall-cmd --state
+  changed_when: false
+  register: firewall_verify_firewalld_state
+  failed_when: firewall_verify_firewalld_state.stdout | trim != 'running'
+
+- name: Firewall | verify SSH port or service is allowed in firewalld
+  ansible.builtin.command: >-
+    bash -c 'firewall-cmd --zone={{ firewall_zone | default("public") }}
+    --query-port={{ firewall_target_ssh_port | default(bootstrap_ssh_port | default(22)) }}/tcp
+    || firewall-cmd --zone={{ firewall_zone | default("public") }} --query-service=ssh'
+  changed_when: false
+  register: firewall_verify_ssh_allowance
+  failed_when: firewall_verify_ssh_allowance.rc != 0
+
+- name: Firewall | verify configured TCP ports are allowed in firewalld
+  ansible.builtin.command: "firewall-cmd --zone={{ firewall_zone | default('public') }} --query-port={{ item }}/tcp"
+  changed_when: false
+  loop: "{{ bootstrap_firewall_allowed_tcp_ports | default([]) }}"
+  loop_control:
+    label: "tcp/{{ item }}"
+
+- name: Firewall | verify configured UDP ports are allowed in firewalld
+  ansible.builtin.command: "firewall-cmd --zone={{ firewall_zone | default('public') }} --query-port={{ item }}/udp"
+  changed_when: false
+  loop: "{{ bootstrap_firewall_allowed_udp_ports | default([]) }}"
+  loop_control:
+    label: "udp/{{ item }}"

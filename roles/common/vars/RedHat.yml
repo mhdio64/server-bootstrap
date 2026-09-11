@@ -1,0 +1,9 @@
+---
+# Platform variables for Enterprise Linux / RedHat-family systems in the common role.
+common_package_manager: dnf
+common_timesync_package: chrony
+common_timesync_service: chronyd.service
+common_reboot_required_file: /var/run/reboot-required
+common_dnf_lock_timeout_seconds: 60
+common_dnf_lock_poll_seconds: 2
+common_locale_fallback: C.UTF-8

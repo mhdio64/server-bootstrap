@@ -13,5 +13,8 @@ galaxy_info:
     - name: Debian
       versions:
         - trixie
+    - name: EL
+      versions:
+        - "9"
 
 dependencies: []

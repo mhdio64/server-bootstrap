@@ -1,0 +1,53 @@
+---
+- name: Common | wait for DNF lock release
+  ansible.builtin.command: >
+    bash -c 'end=$((SECONDS+{{ common_dnf_lock_timeout_seconds | default(60) }}));
+    while (( SECONDS < end )); do
+      fuser /var/lib/dnf/lock >/dev/null 2>&1 || fuser /var/run/dnf.pid >/dev/null 2>&1 || exit 0;
+      sleep {{ common_dnf_lock_poll_seconds | default(2) }};
+    done;
+    exit 1'
+  changed_when: false
+  register: common_dnf_lock_wait
+  failed_when: common_dnf_lock_wait.rc != 0
+  when: not ansible_check_mode
+
+- name: Common | check if EPEL repository configuration exists
+  ansible.builtin.stat:
+    path: /etc/yum.repos.d/epel.repo
+  register: common_epel_repo_stat
+
+- name: Common | ensure EPEL repository is present on Enterprise Linux
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+  register: common_epel_install
+  until: common_epel_install is success
+  retries: 3
+  delay: 5
+
+- name: Common | determine effective DNF package list
+  ansible.builtin.set_fact:
+    common_packages_dnf_effective: >-
+      {{
+        common_packages_effective
+        | map('regex_replace', '^gnupg$', 'gnupg2')
+        | map('regex_replace', '^vim$', 'vim-enhanced')
+        | reject('equalto', 'htop' if (ansible_check_mode and not common_epel_repo_stat.stat.exists) else '')
+        | list
+      }}
+
+- name: Common | install baseline packages via DNF
+  ansible.builtin.dnf:
+    name: "{{ common_packages_dnf_effective }}"
+    state: present
+  register: common_baseline_packages_install_dnf
+  until: common_baseline_packages_install_dnf is success
+  retries: 3
+  delay: 5
+
+- name: Common | upgrade all packages via DNF when explicitly enabled  # noqa: package-latest
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+  when: bootstrap_upgrade_packages | bool

@@ -5,3 +5,7 @@
 - name: Security | verify unattended-upgrades backend
   ansible.builtin.include_tasks: backends/unattended_upgrades_verify.yml
   when: security_backend == 'unattended_upgrades'
+
+- name: Security | verify dnf-automatic backend
+  ansible.builtin.include_tasks: backends/dnf_automatic_verify.yml
+  when: security_backend == 'dnf_automatic'

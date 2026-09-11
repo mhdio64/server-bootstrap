@@ -1,0 +1,4 @@
+---
+# Platform variables for Enterprise Linux / RedHat-family systems in the users role.
+users_sudo_group: wheel
+users_sudo_package: sudo

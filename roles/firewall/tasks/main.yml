@@ -2,58 +2,65 @@
 - name: Firewall | load platform-specific variables
   ansible.builtin.include_tasks: load_platform_vars.yml
 
-- name: Firewall | read-only state discovery and classification
-  check_mode: false
+- name: Firewall | execute iptables-nft firewall workflow
+  when: firewall_backend == 'iptables_nft'
   block:
-    - name: Firewall | discover current firewall state
+    - name: Firewall | read-only state discovery and classification
+      check_mode: false
+      block:
+        - name: Firewall | discover current firewall state
+          ansible.builtin.import_tasks: discover_state.yml
+
+        - name: Firewall | classify current firewall state
+          ansible.builtin.import_tasks: classify_state.yml
+
+    - name: Firewall | ensure firewall packages are installed
+      ansible.builtin.package:
+        name: "{{ firewall_packages }}"
+        state: present
+
+    - name: Firewall | refresh discovered firewall state after package install
       ansible.builtin.import_tasks: discover_state.yml
+      check_mode: false
 
-    - name: Firewall | classify current firewall state
-      ansible.builtin.import_tasks: classify_state.yml
+    - name: Firewall | build project-owned firewall rules
+      ansible.builtin.import_tasks: build_rules.yml
 
-- name: Firewall | ensure firewall packages are installed
-  ansible.builtin.package:
-    name: "{{ firewall_packages }}"
-    state: present
+    - name: Firewall | persist firewall restore artifacts
+      ansible.builtin.import_tasks: persist.yml
 
-- name: Firewall | refresh discovered firewall state after package install
-  ansible.builtin.import_tasks: discover_state.yml
-  check_mode: false
+    - name: Firewall | determine whether firewall activation is required
+      ansible.builtin.set_fact:
+        firewall_activation_required: >-
+          {{
+            (firewall_fragment_v4_result.changed | default(false))
+            or (firewall_restore_script_v4.changed | default(false))
+            or (firewall_restore_unit_result.changed | default(false))
+            or (
+              firewall_ipv6_required | bool
+              and (
+                (firewall_fragment_v6_result.changed | default(false))
+                or (firewall_restore_script_v6.changed | default(false))
+              )
+            )
+          }}
 
-- name: Firewall | build project-owned firewall rules
-  ansible.builtin.import_tasks: build_rules.yml
+    - name: Firewall | activate project-owned firewall policy safely
+      when: firewall_activation_required | bool
+      block:
+        - name: Firewall | apply firewall activation workflow
+          ansible.builtin.import_tasks: activate.yml
+      rescue:
+        - name: Firewall | rollback firewall activation after failure
+          ansible.builtin.import_tasks: rollback.yml
+          when: not ansible_check_mode
 
-- name: Firewall | persist firewall restore artifacts
-  ansible.builtin.import_tasks: persist.yml
+        - name: Firewall | fail after firewall activation rollback
+          ansible.builtin.fail:
+            msg: >-
+              Firewall activation failed and the pre-activation ruleset was restored.
+              Verify SSH connectivity and foreign firewall policy before retrying.
 
-- name: Firewall | determine whether firewall activation is required
-  ansible.builtin.set_fact:
-    firewall_activation_required: >-
-      {{
-        (firewall_fragment_v4_result.changed | default(false))
-        or (firewall_restore_script_v4.changed | default(false))
-        or (firewall_restore_unit_result.changed | default(false))
-        or (
-          firewall_ipv6_required | bool
-          and (
-            (firewall_fragment_v6_result.changed | default(false))
-            or (firewall_restore_script_v6.changed | default(false))
-          )
-        )
-      }}
-
-- name: Firewall | activate project-owned firewall policy safely
-  when: firewall_activation_required | bool
-  block:
-    - name: Firewall | apply firewall activation workflow
-      ansible.builtin.import_tasks: activate.yml
-  rescue:
-    - name: Firewall | rollback firewall activation after failure
-      ansible.builtin.import_tasks: rollback.yml
-      when: not ansible_check_mode
-
-    - name: Firewall | fail after firewall activation rollback
-      ansible.builtin.fail:
-        msg: >-
-          Firewall activation failed and the pre-activation ruleset was restored.
-          Verify SSH connectivity and foreign firewall policy before retrying.
+- name: Firewall | execute firewalld firewall workflow
+  ansible.builtin.include_tasks: backends/firewalld/main.yml
+  when: firewall_backend == 'firewalld'

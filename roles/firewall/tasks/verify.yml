@@ -2,54 +2,65 @@
 - name: Firewall | load platform-specific variables
   ansible.builtin.include_tasks: load_platform_vars.yml
 
-- name: Firewall | discover current firewall state
-  ansible.builtin.import_tasks: discover_state.yml
-
-- name: Firewall | build effective allowed TCP port list for verification
+- name: Firewall | determine target SSH port for verification
   ansible.builtin.set_fact:
-    firewall_allowed_tcp_ports_effective: >-
-      {{
-        (
-          bootstrap_firewall_allowed_tcp_ports | default([])
-          | map('int')
-          | reject('equalto', firewall_target_ssh_port | int)
-          | list
-          | union([firewall_target_ssh_port | int])
-          | unique
-          | sort
-        )
-      }}
+    firewall_target_ssh_port: "{{ firewall_target_ssh_port | default(bootstrap_ssh_port | default(22)) | int }}"
 
-- name: Firewall | verify project-owned IPv4 chain exists
-  ansible.builtin.command:
-    cmd: /usr/sbin/iptables -L {{ firewall_chain_name }} -n
-  changed_when: false
+- name: Firewall | execute iptables-nft verification workflow
+  when: firewall_backend == 'iptables_nft'
+  block:
+    - name: Firewall | discover current firewall state
+      ansible.builtin.import_tasks: discover_state.yml
 
-- name: Firewall | verify SSH port is allowed in project chain
-  ansible.builtin.command:
-    cmd: >-
-      /usr/sbin/iptables -C {{ firewall_chain_name }} -p tcp -m tcp
-      --dport {{ firewall_target_ssh_port }} -j ACCEPT
-  changed_when: false
+    - name: Firewall | build effective allowed TCP port list for verification
+      ansible.builtin.set_fact:
+        firewall_allowed_tcp_ports_effective: >-
+          {{
+            (
+              bootstrap_firewall_allowed_tcp_ports | default([])
+              | map('int')
+              | reject('equalto', firewall_target_ssh_port | int)
+              | list
+              | union([firewall_target_ssh_port | int])
+              | unique
+              | sort
+            )
+          }}
 
-- name: Firewall | verify configured TCP ports are allowed in project chain
-  ansible.builtin.command:
-    cmd: >-
-      /usr/sbin/iptables -C {{ firewall_chain_name }} -p tcp -m tcp
-      --dport {{ item }} -j ACCEPT
-  changed_when: false
-  loop: "{{ firewall_allowed_tcp_ports_effective | default([]) }}"
-  loop_control:
-    label: "tcp/{{ item }}"
+    - name: Firewall | verify project-owned IPv4 chain exists
+      ansible.builtin.command:
+        cmd: /usr/sbin/iptables -L {{ firewall_chain_name }} -n
+      changed_when: false
 
-- name: Firewall | verify persistence fragment exists
-  ansible.builtin.stat:
-    path: "{{ firewall_rules_fragment_v4 }}"
-  register: firewall_verify_fragment_v4
-  failed_when: not firewall_verify_fragment_v4.stat.exists
+    - name: Firewall | verify SSH port is allowed in project chain
+      ansible.builtin.command:
+        cmd: >-
+          /usr/sbin/iptables -C {{ firewall_chain_name }} -p tcp -m tcp
+          --dport {{ firewall_target_ssh_port }} -j ACCEPT
+      changed_when: false
 
-- name: Firewall | verify restore service is enabled
-  ansible.builtin.systemd:
-    name: "{{ firewall_restore_unit }}"
-  register: firewall_verify_restore_service
-  failed_when: firewall_verify_restore_service.status.UnitFileState != 'enabled'
+    - name: Firewall | verify configured TCP ports are allowed in project chain
+      ansible.builtin.command:
+        cmd: >-
+          /usr/sbin/iptables -C {{ firewall_chain_name }} -p tcp -m tcp
+          --dport {{ item }} -j ACCEPT
+      changed_when: false
+      loop: "{{ firewall_allowed_tcp_ports_effective | default([]) }}"
+      loop_control:
+        label: "tcp/{{ item }}"
+
+    - name: Firewall | verify persistence fragment exists
+      ansible.builtin.stat:
+        path: "{{ firewall_rules_fragment_v4 }}"
+      register: firewall_verify_fragment_v4
+      failed_when: not firewall_verify_fragment_v4.stat.exists
+
+    - name: Firewall | verify restore service is enabled
+      ansible.builtin.systemd:
+        name: "{{ firewall_restore_unit }}"
+      register: firewall_verify_restore_service
+      failed_when: firewall_verify_restore_service.status.UnitFileState != 'enabled'
+
+- name: Firewall | execute firewalld verification workflow
+  ansible.builtin.include_tasks: backends/firewalld/verify.yml
+  when: firewall_backend == 'firewalld'

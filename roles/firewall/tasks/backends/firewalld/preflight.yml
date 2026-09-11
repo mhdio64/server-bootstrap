@@ -1,0 +1,25 @@
+---
+- name: Firewall | query effective sshd port for firewalld allowances
+  ansible.builtin.command: /usr/sbin/sshd -T
+  changed_when: false
+  register: firewall_sshd_effective_raw
+
+- name: Firewall | derive effective SSH port
+  ansible.builtin.set_fact:
+    firewall_effective_ssh_port: >-
+      {{
+        (
+          firewall_sshd_effective_raw.stdout_lines
+          | select('match', '^port ')
+          | first
+          | default('port 22')
+          | regex_replace('^port ', '')
+        ) | int
+      }}
+
+- name: Firewall | derive target SSH port for reconnect checks
+  ansible.builtin.set_fact:
+    firewall_target_ssh_port: >-
+      {{
+        bootstrap_ssh_port | default(firewall_effective_ssh_port) | int
+      }}

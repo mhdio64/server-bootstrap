@@ -31,8 +31,8 @@ Target: Production multi-distribution support across Ubuntu 22.04, Ubuntu 24.04,
 | **MD-1** | Platform Abstraction | Ubuntu 24.04 | COMPLETE | `feature/multi-distro-support` | `bento/ubuntu-24.04` | PASS | MD-2 |
 | **MD-2** | Ubuntu Server 22.04 LTS Support | Ubuntu 22.04 | COMPLETE | `feature/multi-distro-support` | `bento/ubuntu-22.04` | PASS | MD-3 |
 | **MD-3** | Debian 13 Stable "Trixie" Support | Debian 13 | COMPLETE | `feature/multi-distro-support` | `bento/debian-13` | PASS | MD-4 |
-| **MD-4** | Enterprise Linux & AlmaLinux 9 Support | AlmaLinux 9 | READY TO START | `feature/multi-distro-support` | `almalinux/9` | — | MD-5 |
-| **MD-5** | AlmaLinux 10 Support | AlmaLinux 10 | NOT STARTED | `feature/multi-distro-support` | `almalinux/10` | — | MD-6 |
+| **MD-4** | Enterprise Linux & AlmaLinux 9 Support | AlmaLinux 9 | COMPLETE | `feature/multi-distro-support` | `almalinux/9` | PASS | MD-5 |
+| **MD-5** | AlmaLinux 10 Support | AlmaLinux 10 | READY TO START | `feature/multi-distro-support` | `almalinux/10` | — | MD-6 |
 | **MD-6** | Full 5-Platform Matrix Acceptance | All 5 targets | NOT STARTED | `feature/multi-distro-support` | All 5 boxes | — | MD-7 |
 | **MD-7** | Final Documentation & Release Readiness | All 5 targets | NOT STARTED | `feature/multi-distro-support` | — | — | v0.2.0 Release |
 
@@ -142,5 +142,30 @@ Target: Production multi-distribution support across Ubuntu 22.04, Ubuntu 24.04,
 - **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
 - **Known limitations**: None. Debian 13 fully verified with zero errors, idempotency verified (`changed=0`), non-mutating check mode verified.
 - **Unresolved issues**: None.
-- **Next phase**: MD-4 (Enterprise Linux Architecture & AlmaLinux 9 Support) — awaits human authorization.
+- **Next phase**: MD-4 (Enterprise Linux Architecture & AlmaLinux 9 Support) — COMPLETE.
 - **Last updated**: 2026-09-11
+
+#### Phase MD-4
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Add Enterprise Linux architecture support and certify AlmaLinux 9.x (x86_64) across roles, metadata, package manager (DNF), firewall (`firewalld`), security updates (`dnf-automatic`), and Docker CE upstream repository while maintaining SELinux in default Enforcing mode and zero regressions on existing distributions.
+- **Branch**: `feature/multi-distro-support`
+- **Starting commit**: `13a783ba61025796a2a181a3bdf4d98d265f10d4`
+- **Important files changed**:
+  - `roles/common/vars/RedHat.yml` & tasks (`dnf_preflight.yml`, `dnf_install.yml`, `assert_platform.yml`, `verify.yml`)
+  - `roles/users/vars/RedHat.yml` (`wheel` privilege group)
+  - `roles/ssh/vars/RedHat.yml` (`sshd` service name) & `tasks/main.yml` (common SSH args support)
+  - `roles/firewall/vars/RedHat.yml` & `tasks/backends/firewalld/` (`firewalld` backend support, check-mode resilience, verify tasks)
+  - `roles/security/vars/RedHat.yml`, template `server-bootstrap-automatic.conf.j2`, & tasks (`dnf_automatic.yml`, `dnf_automatic_verify.yml`)
+  - `roles/docker/vars/RedHat.yml` & tasks (`backends/dnf/repository.yml`, `backends/dnf/packages.yml`, `discover_state.yml`, `install_packages.yml`, `verify.yml`)
+  - `roles/*/meta/main.yml` (added `EL 9` to all 6 roles)
+  - `tests/synthetic/playbooks/test_platform_vars_resolution.yml` (added AlmaLinux 9 test play)
+  - `tests/vagrant/evidence/alma9-acceptance-report.md` (14-gate acceptance report)
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint, playbook syntax checks, secret scanning, synthetic preflight tests, Python unit tests, git diff check), real-VM fresh AlmaLinux 9 acceptance flow.
+- **VM target**: `alma9`
+- **Vagrant box**: `almalinux/9`
+- **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
+- **Known limitations**: None. AlmaLinux 9.x fully verified with zero errors, idempotency verified (`changed=0`), non-mutating check mode verified, SELinux enforcing verified.
+- **Unresolved issues**: None.
+- **Next phase**: MD-5 (AlmaLinux 10 Support) — awaits human authorization.
+- **Last updated**: 2026-09-11
+

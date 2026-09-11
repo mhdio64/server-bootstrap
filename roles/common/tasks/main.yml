@@ -11,6 +11,10 @@
   ansible.builtin.include_tasks: package_manager/apt_install.yml
   when: common_package_manager == 'apt'
 
+- name: Common | manage packages via DNF
+  ansible.builtin.include_tasks: package_manager/dnf_install.yml
+  when: common_package_manager == 'dnf'
+
 - name: Common | read current timezone
   ansible.builtin.command: timedatectl show -p Timezone --value
   changed_when: false
@@ -38,6 +42,7 @@
         common_locale_gen.rc == 0 and
         ('already exists' not in (common_locale_gen.stdout | default('') | lower))
       failed_when: common_locale_gen.rc != 0
+      when: ansible_facts['os_family'] == 'Debian'
 
     - name: Common | set system locale
       ansible.builtin.command: "localectl set-locale LANG={{ bootstrap_locale }}"
@@ -57,6 +62,7 @@
         common_locale_fallback_gen.rc == 0 and
         ('already exists' not in (common_locale_fallback_gen.stdout | default('') | lower))
       failed_when: common_locale_fallback_gen.rc != 0
+      when: ansible_facts['os_family'] == 'Debian'
 
     - name: Common | set conservative fallback locale
       ansible.builtin.command: "localectl set-locale LANG={{ common_locale_fallback }}"

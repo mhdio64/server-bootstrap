@@ -19,14 +19,36 @@
   delay: 3
   until: common_verify_timezone.rc == 0 and common_verify_timezone.stdout | trim == bootstrap_timezone
 
-- name: Common | verify baseline packages are installed
+- name: Common | verify baseline packages are installed (APT)
   ansible.builtin.command: "dpkg-query -W -f='${Status}' {{ item }}"
   changed_when: false
-  register: common_verify_package
-  failed_when: "'install ok installed' not in common_verify_package.stdout"
+  register: common_verify_package_apt
+  failed_when: "'install ok installed' not in common_verify_package_apt.stdout"
   loop: "{{ common_packages_effective | default(bootstrap_common_packages) }}"
   loop_control:
     label: "{{ item }}"
+  when: common_package_manager == 'apt'
+
+- name: Common | determine effective DNF package list for verification
+  ansible.builtin.set_fact:
+    common_packages_dnf_verify: >-
+      {{
+        (common_packages_effective | default(bootstrap_common_packages))
+        | map('regex_replace', '^gnupg$', 'gnupg2')
+        | map('regex_replace', '^vim$', 'vim-enhanced')
+        | list
+      }}
+  when: common_package_manager == 'dnf'
+
+- name: Common | verify baseline packages are installed (DNF)  # noqa: command-instead-of-module
+  ansible.builtin.command: "rpm -q {{ item }}"
+  changed_when: false
+  register: common_verify_package_dnf
+  failed_when: common_verify_package_dnf.rc != 0
+  loop: "{{ common_packages_dnf_verify | default([]) }}"
+  loop_control:
+    label: "{{ item }}"
+  when: common_package_manager == 'dnf'
 
 - name: Common | verify time synchronization service is active
   ansible.builtin.systemd:

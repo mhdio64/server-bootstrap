@@ -1,0 +1,37 @@
+---
+- name: Docker | install official Docker packages on fresh hosts
+  ansible.builtin.dnf:
+    name: "{{ docker_package_install_list }}"
+    state: "{{ docker_package_install_state }}"
+    allow_downgrade: false
+  register: docker_fresh_packages_install
+  until: docker_fresh_packages_install is success
+  retries: 3
+  delay: 5
+  when:
+    - not ansible_check_mode
+    - docker_state == 'absent'
+    - docker_package_install_list | length > 0
+
+- name: Docker | reconcile missing official Docker packages on compatible hosts
+  ansible.builtin.dnf:
+    name: "{{ docker_package_install_list }}"
+    state: present
+    allow_downgrade: false
+  register: docker_reconcile_packages_install
+  until: docker_reconcile_packages_install is success
+  retries: 3
+  delay: 5
+  when:
+    - docker_state == 'official_compatible'
+    - docker_package_install_list | default([]) | length > 0
+
+- name: Docker | ensure official Docker packages remain present without implicit upgrade
+  ansible.builtin.dnf:
+    name: "{{ docker_official_packages }}"
+    state: present
+    allow_downgrade: false
+  when:
+    - bootstrap_docker_version == 'latest'
+    - docker_state == 'official_compatible'
+    - (docker_missing_official_packages | default([]) | length == 0)

@@ -31,11 +31,13 @@ common_supported_distribution: Ubuntu
 common_supported_distributions:
   - Ubuntu
   - Debian
+  - AlmaLinux
 common_supported_distribution_version: "24.04"
 common_supported_distribution_versions:
   - "22.04"
   - "24.04"
   - "13"
+  - "9"
 common_supported_architectures:
   - x86_64
 common_apt_lock_timeout_seconds: 60

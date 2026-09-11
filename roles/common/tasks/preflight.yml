@@ -8,3 +8,7 @@
 - name: Common | inspect package manager lock state via APT
   ansible.builtin.include_tasks: package_manager/apt_preflight.yml
   when: common_package_manager == 'apt'
+
+- name: Common | inspect package manager lock state via DNF
+  ansible.builtin.include_tasks: package_manager/dnf_preflight.yml
+  when: common_package_manager == 'dnf'
