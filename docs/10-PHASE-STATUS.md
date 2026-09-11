@@ -29,8 +29,8 @@ Target: Production multi-distribution support across Ubuntu 22.04, Ubuntu 24.04,
 |---|---|---|---|---|---|---|---|
 | **MD-0** | Baseline Audit, Roadmap & Vagrant Harness | Ubuntu 24.04 | COMPLETE | `feature/multi-distro-support` | `bento/ubuntu-24.04` | PASS | MD-1 |
 | **MD-1** | Platform Abstraction | Ubuntu 24.04 | COMPLETE | `feature/multi-distro-support` | `bento/ubuntu-24.04` | PASS | MD-2 |
-| **MD-2** | Ubuntu Server 22.04 LTS Support | Ubuntu 22.04 | READY TO START | `feature/multi-distro-support` | `bento/ubuntu-22.04` | — | MD-3 |
-| **MD-3** | Debian 13 Stable "Trixie" Support | Debian 13 | NOT STARTED | `feature/multi-distro-support` | `generic/debian13` | — | MD-4 |
+| **MD-2** | Ubuntu Server 22.04 LTS Support | Ubuntu 22.04 | COMPLETE | `feature/multi-distro-support` | `bento/ubuntu-22.04` | PASS | MD-3 |
+| **MD-3** | Debian 13 Stable "Trixie" Support | Debian 13 | READY TO START | `feature/multi-distro-support` | `generic/debian13` | — | MD-4 |
 | **MD-4** | Enterprise Linux & AlmaLinux 9 Support | AlmaLinux 9 | NOT STARTED | `feature/multi-distro-support` | `almalinux/9` | — | MD-5 |
 | **MD-5** | AlmaLinux 10 Support | AlmaLinux 10 | NOT STARTED | `feature/multi-distro-support` | `almalinux/10` | — | MD-6 |
 | **MD-6** | Full 5-Platform Matrix Acceptance | All 5 targets | NOT STARTED | `feature/multi-distro-support` | All 5 boxes | — | MD-7 |
@@ -94,5 +94,26 @@ Target: Production multi-distribution support across Ubuntu 22.04, Ubuntu 24.04,
 - **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
 - **Known limitations**: None. Ubuntu 24.04 baseline functionality preserved with zero regression, idempotency verified (`changed=0`), non-mutating check mode verified.
 - **Unresolved issues**: None.
-- **Next phase**: MD-2 (Ubuntu Server 22.04 LTS Support) — awaits human authorization.
+- **Next phase**: MD-2 (Ubuntu Server 22.04 LTS Support) — COMPLETE.
+- **Last updated**: 2026-09-11
+
+#### Phase MD-2
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Add and certify Ubuntu Server 22.04 LTS ("Jammy", amd64) support across roles, metadata, and assertions without behavior regressions for Ubuntu 24.04.
+- **Branch**: `feature/multi-distro-support`
+- **Starting commit**: `f2ab7a34c3d31173eccb709aae26ec45b03bcd97`
+- **Important files changed**:
+  - `roles/common/defaults/main.yml` (`common_supported_distribution_versions: ["22.04", "24.04"]`)
+  - `roles/common/tasks/assert_platform.yml` (multi-version assertion support)
+  - `roles/*/meta/main.yml` (added `jammy` to all 6 roles)
+  - `tests/synthetic/playbooks/test_platform_vars_resolution.yml` (added Ubuntu 22.04 test play)
+  - `tests/vagrant/evidence/ubuntu2204-acceptance-report.md` (14-gate acceptance report)
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint, playbook syntax checks, secret scanning, synthetic preflight tests, Python unit tests, git diff check), real-VM fresh Ubuntu 22.04 acceptance flow.
+- **VM target**: `ubuntu2204`
+- **Vagrant box**: `bento/ubuntu-22.04`
+- **Box version**: `202510.26.0`
+- **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
+- **Known limitations**: None. Ubuntu 22.04 LTS fully verified with zero errors, idempotency verified (`changed=0`), non-mutating check mode verified.
+- **Unresolved issues**: None.
+- **Next phase**: MD-3 (Debian 13 Stable "Trixie" Support) — awaits human authorization.
 - **Last updated**: 2026-09-11
