@@ -1,4 +1,7 @@
 ---
+- name: Users | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Users | build effective authorized key list for verification
   ansible.builtin.import_tasks: build_authorized_keys.yml
 
@@ -21,7 +24,8 @@
       project-managed authorized_keys block.
   loop: "{{ users_authorized_keys_effective }}"
   loop_control:
-    label: "authorized key {{ ansible_loop.index }}"
+    index_var: key_index
+    label: "authorized key {{ key_index + 1 }}"
 
 - name: Users | verify passwordless sudo for admin account
   ansible.builtin.command:

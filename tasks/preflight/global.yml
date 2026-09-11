@@ -24,7 +24,8 @@
       bootstrap_admin_authorized_keys contains an empty entry.
   loop: "{{ bootstrap_admin_authorized_keys | default([]) }}"
   loop_control:
-    label: "authorized key {{ ansible_loop.index }}"
+    index_var: key_index
+    label: "authorized key {{ key_index + 1 }}"
   when: bootstrap_admin_authorized_keys | default([]) | length > 0
 
 - name: Preflight | verify administrative privileges

@@ -1,4 +1,7 @@
 ---
+- name: Users | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Users | build effective authorized key list
   ansible.builtin.import_tasks: build_authorized_keys.yml
 
@@ -11,6 +14,12 @@
       Account {{ bootstrap_admin_user }} already exists as a system account (UID
       {{ users_admin_uid }}). Choose a different bootstrap_admin_user.
   when: users_admin_state == 'system_reserved'
+
+- name: Users | ensure privilege escalation package is installed
+  ansible.builtin.package:
+    name: "{{ users_sudo_package }}"
+    state: present
+  when: users_sudo_package is defined
 
 - name: Users | create new admin account
   ansible.builtin.user:

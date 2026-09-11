@@ -104,13 +104,50 @@ Current architectural policy:
 - native Docker nftables backend is not part of v0.1.0
 - Docker daemon logging defaults/settings must be revalidated at implementation time
 
-## OpenSSH
+## Docker Engine Across Target Distributions
 
-Primary source for configuration semantics:
+Primary sources:
+- Ubuntu: https://docs.docker.com/engine/install/ubuntu/
+- Debian: https://docs.docker.com/engine/install/debian/
+- RHEL / CentOS / AlmaLinux:
+  - https://docs.docker.com/engine/install/rhel/
+  - https://docs.docker.com/engine/install/centos/
+  - https://wiki.almalinux.org/documentation/docker.html
 
-- https://man.openbsd.org/sshd_config.5
+Repository & Key URLs:
+- Ubuntu APT repo: `https://download.docker.com/linux/ubuntu` (GPG: `https://download.docker.com/linux/ubuntu/gpg`)
+- Debian APT repo: `https://download.docker.com/linux/debian` (GPG: `https://download.docker.com/linux/debian/gpg`)
+- AlmaLinux DNF repo: `https://download.docker.com/linux/centos/docker-ce.repo` (GPG: `https://download.docker.com/linux/centos/gpg`)
 
-Implementation must validate both syntax and effective configuration.
+## Target Operating Systems & Upstream Sources
+
+### Ubuntu Server (22.04 LTS & 24.04 LTS)
+- Ubuntu 22.04 LTS (Jammy Jellyfish): https://releases.ubuntu.com/jammy/
+- Ubuntu 24.04 LTS (Noble Numbat): https://releases.ubuntu.com/noble/
+- Unattended upgrades: https://help.ubuntu.com/community/AutomaticSecurityUpdates
+- Firewall stack: `iptables` / `iptables-nft` via netfilter
+
+### Debian 13 "Trixie" (Stable Target)
+- Debian Testing / Trixie Release: https://www.debian.org/releases/trixie/
+- Debian Security Tracker: https://security-tracker.debian.org/
+- Debian UnattendedUpgrades: https://wiki.debian.org/UnattendedUpgrades
+- Differences from Ubuntu: Minimal installations may lack `sudo` (must be installed via `apt`); user group is `sudo`; DEB822 format in `/etc/apt/sources.list.d/`.
+
+### AlmaLinux 9 & 10
+- AlmaLinux 9 Documentation: https://wiki.almalinux.org/release-notes/9.html
+- AlmaLinux 10 Documentation: https://wiki.almalinux.org/
+- Red Hat Enterprise Linux 9 / 10 Documentation: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
+- Automatic Security Updates: `dnf-automatic` (`/etc/dnf/automatic.conf`, service timer `dnf-automatic.timer`).
+- Firewall: `firewalld` managing nftables backend.
+- SELinux: Enforcing by default; policies managed via `policycoreutils` and `setools-console`.
+
+## Vagrant Test Boxes (Verified VirtualBox Providers)
+
+- `ubuntu2404`: `bento/ubuntu-24.04` (https://app.vagrantup.com/bento/boxes/ubuntu-24.04)
+- `ubuntu2204`: `bento/ubuntu-22.04` (https://app.vagrantup.com/bento/boxes/ubuntu-22.04)
+- `debian13`: `generic/debian13` (https://app.vagrantup.com/generic/boxes/debian13)
+- `alma9`: `almalinux/9` (https://app.vagrantup.com/almalinux/boxes/9)
+- `alma10`: `almalinux/10` (https://app.vagrantup.com/almalinux/boxes/10)
 
 ## Rule for stale facts
 

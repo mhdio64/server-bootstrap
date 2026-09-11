@@ -1,8 +1,8 @@
-# Troubleshooting — v0.1.0
+# Troubleshooting
 
 ## Quick checks
 
-1. Confirm platform support: Ubuntu Server 24.04 LTS, amd64 only.
+1. Confirm platform support: Ubuntu Server 22.04 / 24.04 LTS, Debian 13, AlmaLinux 9 / 10 (amd64 / x86_64).
 2. Confirm control node Python 3.12–3.14 and Ansible from `requirements-dev.txt`.
 3. Run `./bootstrap check -i inventory.yml` before apply when practical.
 4. Run `./bootstrap verify -i inventory.yml` after apply.
@@ -30,11 +30,11 @@ The SSH role rolls back the project-owned drop-in if reconnect verification fail
 
 - Use provider console or out-of-band access.
 - Remove or fix `/etc/ssh/sshd_config.d/00-server-bootstrap.conf`.
-- Reload SSH and restore key-based access before retrying.
+- Reload SSH (`systemctl reload ssh` on Debian/Ubuntu, `systemctl reload sshd` on Enterprise Linux) and restore key-based access before retrying.
 
 ## Firewall
 
-### Preflight stops on foreign firewall policy
+### Preflight stops on foreign firewall policy (Debian / Ubuntu)
 
 Unknown consequential firewall state stops before mutation. Common causes:
 
@@ -44,9 +44,29 @@ Unknown consequential firewall state stops before mutation. Common causes:
 
 Disable conflicting managers only after understanding the impact. This project does not globally flush rules.
 
+### Enterprise Linux (`firewalld` backend)
+
+On AlmaLinux 9 and 10, the firewall role configures dedicated permanent rich-rules and service allowances through `firewalld`:
+
+- Verify service status: `systemctl status firewalld`.
+- Inspect active rules: `firewall-cmd --list-all`.
+- Ensure external interfaces are assigned to the default zone or explicit allowed zones.
+
 ### SSH works but other ports do not
 
-Only ports listed in `bootstrap_firewall_allowed_tcp_ports` / `bootstrap_firewall_allowed_udp_ports` are opened, plus SSH. Published Docker container ports are not managed by this MVP.
+Only ports listed in `bootstrap_firewall_allowed_tcp_ports` / `bootstrap_firewall_allowed_udp_ports` are opened, plus SSH. Published Docker container ports are not managed by this baseline.
+
+## Automatic Security Updates
+
+### Debian / Ubuntu (`unattended-upgrades`)
+
+- Check service: `systemctl status unattended-upgrades`.
+- Inspect update logs: `/var/log/unattended-upgrades/unattended-upgrades.log`.
+
+### Enterprise Linux (`dnf-automatic`)
+
+- Check timer: `systemctl status dnf-automatic.timer` (or `dnf-automatic-install.timer`).
+- Verify configuration: `/etc/dnf/automatic.conf`.
 
 ## Docker
 
@@ -54,8 +74,12 @@ Only ports listed in `bootstrap_firewall_allowed_tcp_ports` / `bootstrap_firewal
 
 Preflight classifies existing Docker state. Only `absent` and `official_compatible` may proceed automatically.
 
-- Remove conflicting packages such as `docker.io` manually, or
+- Remove conflicting packages such as distribution-packaged `docker.io` or `podman-docker` manually, or
 - reconcile to an official compatible install before retrying.
+
+### Kernel modules on Enterprise Linux 10
+
+Docker requires bridge and NAT netfilter modules (`xt_addrtype`, `br_netfilter`). On AlmaLinux 10, ensure `kernel-modules-extra` is installed for the running kernel (`roles/docker` installs this automatically).
 
 ### Downgrade requested
 
@@ -64,6 +88,16 @@ Preflight classifies existing Docker state. Only `absent` and `official_compatib
 ### `docker` group membership
 
 Users are not added to the `docker` group unless listed in `bootstrap_docker_users`.
+
+## SELinux on Enterprise Linux
+
+The toolkit is designed to run with SELinux in default `Enforcing` mode on AlmaLinux 9 and 10:
+
+- If permission issues occur with custom paths outside standard system locations, check the audit log:
+  ```bash
+  ausearch -m avc -ts recent
+  ```
+- Ensure file security contexts are restored if files are copied manually outside Ansible (`restorecon -Rv /path`).
 
 ## Idempotency and check mode
 
@@ -77,14 +111,15 @@ Inspect the PLAY RECAP and task names. Common causes:
 
 ### Check mode appears to fail on discovery tasks
 
-v0.1.0 runs read-only preflight and discovery outside Ansible check mode so validation remains honest. Check mode should still not mutate the host.
+Read-only preflight and discovery run outside Ansible check mode so validation remains honest. Check mode should still not mutate the host.
 
 ## Reboot required
 
-If `/var/run/reboot-required` exists, bootstrap completes successfully with a warning. Reboot manually or set `bootstrap_reboot_if_required: true` on a later run.
+If `/var/run/reboot-required` (Debian/Ubuntu) or `needs-restarting -r` (Enterprise Linux) indicates a reboot is pending after package upgrades, bootstrap completes successfully with a warning. Reboot manually or set `bootstrap_reboot_if_required: true` on a subsequent run.
 
 ## Getting more help
 
 - Configuration: `docs/13-CONFIGURATION-REFERENCE.md`
 - Safety model: `docs/03-SECURITY-SAFETY.md`
+- Release evidence: `docs/15-RELEASE-EVIDENCE.md`
 - Security reports: `SECURITY.md`

@@ -2,31 +2,31 @@
 
 # server-bootstrap
 
-> Safely bootstrap Ubuntu Server 24.04 LTS (amd64) hosts into a secure, manageable, Docker-ready baseline with Ansible.
+> Safely bootstrap Ubuntu Server (22.04 / 24.04 LTS), Debian 13 (Trixie), and Enterprise Linux (AlmaLinux 9 / 10) hosts into a secure, manageable, Docker-ready baseline with Ansible.
 
-`server-bootstrap` is the first component of a personal DevOps Toolkit. v0.1.0 delivers a narrow, production-usable MVP:
+`server-bootstrap` is the first component of a personal DevOps Toolkit. It delivers a production-usable, multi-distribution baseline:
 
-- OS baseline and time sync
-- admin user with SSH public keys and passwordless sudo
-- SSH hardening via a project-owned drop-in
-- host firewall using `iptables-nft`
-- unattended security updates
-- official Docker CE + Compose plugin
+- OS baseline, essential tooling, and time sync (`systemd-timesyncd` or `chrony`)
+- admin user with SSH public keys and passwordless privilege escalation (`sudo` or `wheel`)
+- SSH hardening via a project-owned drop-in with syntax pre-validation and reconnect rollback
+- host firewall using project-owned rules (`iptables-nft` on Debian/Ubuntu, `firewalld` on Enterprise Linux) with emergency watchdog
+- unattended security updates (`unattended-upgrades` on Debian/Ubuntu, `dnf-automatic` on Enterprise Linux)
+- official Docker CE + Compose plugin from official upstream repositories
 
 ## Supported platforms
 
 | | Supported |
 |---|---|
-| Target OS | Ubuntu Server 24.04 LTS |
+| Target OS | Ubuntu Server 24.04 LTS (Noble)<br>Ubuntu Server 22.04 LTS (Jammy)<br>Debian 13.x (Trixie)<br>AlmaLinux 9.x<br>AlmaLinux 10.x |
 | Target architecture | amd64 / x86_64 |
 | Control node | Linux, Python 3.12–3.14 |
 | Ansible | `ansible-core` 2.21.x |
 
-See `docs/15-RELEASE-EVIDENCE.md` for the full matrix and limitations.
+See `docs/15-RELEASE-EVIDENCE.md` and `docs/16-MULTI-DISTRO-ROADMAP.md` for the full matrix and verification evidence.
 
 ## Quick start
 
-1. Checkout this repository (proposed release: `v0.1.0`).
+1. Checkout this repository.
 2. Create your project config outside the toolkit repo:
 
 ```text
@@ -70,32 +70,36 @@ Full reference: `docs/13-CONFIGURATION-REFERENCE.md`.
 
 ## Quality bar
 
-- second identical apply must produce `changed=0`
+- second identical apply must produce `changed=0` across all supported platforms
 - useful non-mutating check mode where technically honest
 - critical post-apply verification
-- Scenario 1 real-VM validation harness under `tests/scenario1/`
+- 5-platform automated Vagrant acceptance matrix under `tests/vagrant/` certifying all 5 distributions across 14 acceptance gates (70/70 gates passed)
 
 ## Important caveats
 
 ### Firewall
 
-- Uses project-owned `iptables-nft` chains only; never globally flushes rules.
+- **Debian / Ubuntu**: Uses project-owned `iptables-nft` chains only; never globally flushes rules. Stops on unknown consequential foreign firewall policy (for example active UFW).
+- **Enterprise Linux (AlmaLinux 9 / 10)**: Uses permanent `firewalld` rich rules and service entries without disturbing foreign active zones.
 - Does not manage Docker-generated chains or published container ports.
-- Stops on unknown consequential foreign firewall policy (for example active UFW).
 
 ### Docker
 
-- Installs from the official Docker APT repository only.
+- Installs from official upstream Docker repositories (APT repository on Debian/Ubuntu, DNF/RPM repository on Enterprise Linux).
 - Classifies existing Docker state; does not silently replace conflicting installs.
 - `bootstrap_docker_version: latest` preserves compatible existing official installs without implicit upgrade.
 - `docker` group membership is opt-in via `bootstrap_docker_users`.
+
+### Enterprise Linux & SELinux
+
+- Fully compatible with SELinux in default `Enforcing` mode on AlmaLinux 9 and 10.
+- Resolves distribution-specific kernel dependencies (such as `kernel-modules-extra` on EL10) required for bridge and overlay networking.
 
 ### Scope & focus
 
 - single target host per invocation for explicit operator oversight
 - automatic rollback guards for critical access points (SSH and firewall), relying on idempotent rerun for general convergence
 - focuses on baseline provisioning: reverse proxies, TLS certificates, monitoring agents, and application workloads are deployed after this stage
-- Scenario 2 existing-server validation on pre-configured hosts is post-MVP
 
 ## Documentation
 
@@ -103,7 +107,8 @@ Full reference: `docs/13-CONFIGURATION-REFERENCE.md`.
 |---|---|
 | `docs/13-CONFIGURATION-REFERENCE.md` | Public `bootstrap_*` API |
 | `docs/14-TROUBLESHOOTING.md` | Common failures and recovery |
-| `docs/15-RELEASE-EVIDENCE.md` | v0.1.0 release gate evidence |
+| `docs/15-RELEASE-EVIDENCE.md` | Release gate evidence & matrix |
+| `docs/16-MULTI-DISTRO-ROADMAP.md` | Multi-distribution roadmap & architecture |
 | `docs/03-SECURITY-SAFETY.md` | Safety invariants |
 | `docs/05-TESTING-RELEASE.md` | Testing and release strategy |
 | `AGENTS.md` | Contributor/agent instructions |
@@ -116,6 +121,7 @@ ansible-lint
 ansible-playbook site.yml --syntax-check
 ansible-playbook verify.yml --syntax-check
 python -m unittest discover -s tests/unit -p 'test_*.py'
+ansible-playbook tests/synthetic/playbooks/test_platform_vars_resolution.yml -i localhost, -c local
 ./tests/synthetic/run-phase1-preflight-tests.sh
 ./scripts/secret-scan.sh
 ./scripts/test-secret-gate-negative.sh

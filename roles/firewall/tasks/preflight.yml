@@ -1,4 +1,7 @@
 ---
+- name: Firewall | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Firewall | validate configured TCP port entries
   ansible.builtin.assert:
     that:
@@ -23,8 +26,15 @@
   loop_control:
     label: "udp/{{ item }}"
 
-- name: Firewall | discover current firewall state
-  ansible.builtin.import_tasks: discover_state.yml
+- name: Firewall | execute iptables-nft preflight discovery and classification
+  when: firewall_backend == 'iptables_nft'
+  block:
+    - name: Firewall | discover current firewall state
+      ansible.builtin.import_tasks: discover_state.yml
 
-- name: Firewall | classify current firewall state
-  ansible.builtin.import_tasks: classify_state.yml
+    - name: Firewall | classify current firewall state
+      ansible.builtin.import_tasks: classify_state.yml
+
+- name: Firewall | execute firewalld preflight tasks
+  ansible.builtin.include_tasks: backends/firewalld/preflight.yml
+  when: firewall_backend == 'firewalld'

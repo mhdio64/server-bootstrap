@@ -1,0 +1,5 @@
+---
+# Platform variables for Debian-family systems in the firewall role.
+firewall_backend: iptables_nft
+firewall_packages:
+  - iptables

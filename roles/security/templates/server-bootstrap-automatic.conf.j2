@@ -1,0 +1,14 @@
+# Ansible managed: server-bootstrap
+# Automatic security updates configuration for Enterprise Linux
+
+[commands]
+upgrade_type = security
+random_sleep = 0
+download_updates = yes
+apply_updates = yes
+reboot = never
+
+[emitters]
+emit_via = stdio
+
+[base]

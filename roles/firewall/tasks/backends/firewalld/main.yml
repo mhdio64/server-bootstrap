@@ -1,0 +1,51 @@
+---
+- name: Firewall | ensure firewalld package is installed
+  ansible.builtin.package:
+    name: "{{ firewall_packages }}"
+    state: present
+
+- name: Firewall | check if firewalld service is active
+  ansible.builtin.systemd:
+    name: "{{ firewall_service_name | default('firewalld') }}"
+  register: firewall_firewalld_active_status
+
+- name: Firewall | ensure firewalld service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ firewall_service_name | default('firewalld') }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+  when: not ansible_check_mode or (firewall_firewalld_active_status.status.LoadState | default('not-found') != 'not-found')
+
+- name: Firewall | allow SSH port in firewalld
+  ansible.posix.firewalld:
+    port: "{{ firewall_target_ssh_port | default(bootstrap_ssh_port | default(22)) }}/tcp"
+    zone: "{{ firewall_zone | default('public') }}"
+    permanent: true
+    immediate: "{{ not ansible_check_mode or (firewall_firewalld_active_status.status.ActiveState | default('') == 'active') }}"
+    state: enabled
+  when: not ansible_check_mode or (firewall_firewalld_active_status.status.ActiveState | default('') == 'active')
+
+- name: Firewall | allow configured TCP ports in firewalld
+  ansible.posix.firewalld:
+    port: "{{ item }}/tcp"
+    zone: "{{ firewall_zone | default('public') }}"
+    permanent: true
+    immediate: "{{ not ansible_check_mode or (firewall_firewalld_active_status.status.ActiveState | default('') == 'active') }}"
+    state: enabled
+  loop: "{{ bootstrap_firewall_allowed_tcp_ports | default([]) }}"
+  loop_control:
+    label: "{{ item }}/tcp"
+  when: not ansible_check_mode or (firewall_firewalld_active_status.status.ActiveState | default('') == 'active')
+
+- name: Firewall | allow configured UDP ports in firewalld
+  ansible.posix.firewalld:
+    port: "{{ item }}/udp"
+    zone: "{{ firewall_zone | default('public') }}"
+    permanent: true
+    immediate: "{{ not ansible_check_mode or (firewall_firewalld_active_status.status.ActiveState | default('') == 'active') }}"
+    state: enabled
+  loop: "{{ bootstrap_firewall_allowed_udp_ports | default([]) }}"
+  loop_control:
+    label: "{{ item }}/udp"
+  when: not ansible_check_mode or (firewall_firewalld_active_status.status.ActiveState | default('') == 'active')

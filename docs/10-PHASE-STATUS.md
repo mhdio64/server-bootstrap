@@ -19,12 +19,216 @@ Current state: **Phase 10 implemented on feature branch; release prepared, not t
 | 7 | Verification + summary + metadata | MERGED |
 | 8 | Thin wrapper | MERGED |
 | 9 | Scenario 1 real-VM validation | MERGED |
-| 10 | Documentation + v0.1.0 release preparation | IMPLEMENTED (PR pending review) |
+| 10 | Documentation + v0.1.0 release preparation | MERGED |
 
-## Current approval boundary
+## Multi-Distribution Initiative (MD Phases)
 
-Phase 10 implementation is complete on branch `feat/phase-10-docs-v0.1.0-release-prep`.
+Target: Production multi-distribution support across Ubuntu 22.04, Ubuntu 24.04, Debian 13, AlmaLinux 9, and AlmaLinux 10.
 
-Phase 10 delivers user-facing documentation, release evidence, `VERSION` set to `0.1.0`, and a proposed release checklist.
+| Phase | Name | Target | Status | Branch | VM Box | Result | Next Phase |
+|---|---|---|---|---|---|---|---|
+| **MD-0** | Baseline Audit, Roadmap & Vagrant Harness | Ubuntu 24.04 | COMPLETE | `feature/multi-distro-support` | `bento/ubuntu-24.04` | PASS | MD-1 |
+| **MD-1** | Platform Abstraction | Ubuntu 24.04 | COMPLETE | `feature/multi-distro-support` | `bento/ubuntu-24.04` | PASS | MD-2 |
+| **MD-2** | Ubuntu Server 22.04 LTS Support | Ubuntu 22.04 | COMPLETE | `feature/multi-distro-support` | `bento/ubuntu-22.04` | PASS | MD-3 |
+| **MD-3** | Debian 13 Stable "Trixie" Support | Debian 13 | COMPLETE | `feature/multi-distro-support` | `bento/debian-13` | PASS | MD-4 |
+| **MD-4** | Enterprise Linux & AlmaLinux 9 Support | AlmaLinux 9 | COMPLETE | `feature/multi-distro-support` | `almalinux/9` | PASS | MD-5 |
+| **MD-5** | AlmaLinux 10 Support | AlmaLinux 10 | COMPLETE | `feature/multi-distro-support` | `almalinux/10` | PASS | MD-6 |
+| **MD-6** | Full 5-Platform Matrix Acceptance | All 5 targets | COMPLETE | `feature/multi-distro-support` | All 5 boxes | PASS | MD-7 |
+| **MD-7** | Final Documentation & Release Readiness | All 5 targets | COMPLETE | `feature/multi-distro-support` | — | PASS | Ready for Review |
 
-**Git tag and GitHub Release for `v0.1.0` require explicit human approval** and are intentionally not created by this phase.
+### MD Phase Detail Tracking
+
+#### Phase MD-0
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Full workspace audit, multi-distro roadmap (`docs/16-MULTI-DISTRO-ROADMAP.md`), reusable Vagrant test harness (`tests/vagrant/`), upstream sources update (`docs/09-VERSION-SOURCES.md`), and fresh Ubuntu 24.04 real-VM baseline acceptance across all 14 gates.
+- **Branch**: `feature/multi-distro-support`
+- **Starting commit**: `66fcb37caa7b1c592e2c72072f4f15348b7ea0ac`
+- **Ending commit**: `398f44d03923d51b32d203991278ff56f4d2579b`
+- **Important files changed**:
+  - `docs/16-MULTI-DISTRO-ROADMAP.md`
+  - `docs/10-PHASE-STATUS.md`
+  - `docs/00-CONTEXT-INDEX.md`
+  - `docs/09-VERSION-SOURCES.md`
+  - `AGENTS.md`
+  - `.gitignore`
+  - `.yamllint`
+  - `roles/common/tasks/verify.yml`
+  - `roles/docker/handlers/main.yml`
+  - `roles/docker/tasks/install_packages.yml`
+  - `roles/ssh/tasks/validate_control_node_identity.yml`
+  - `roles/users/tasks/build_authorized_keys.yml`
+  - `roles/users/tasks/verify.yml`
+  - `tasks/preflight/global.yml`
+  - `tests/vagrant/Vagrantfile`
+  - `tests/vagrant/run`
+  - `tests/vagrant/README.md`
+  - `tests/vagrant/evidence/ubuntu2404-acceptance-report.md`
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint, playbook syntax checks, secret scanning, synthetic preflight tests, Python unit tests, git diff check), real-VM fresh Ubuntu 24.04 acceptance flow.
+- **VM target**: `ubuntu2404`
+- **Vagrant box**: `bento/ubuntu-24.04`
+- **Box version**: `202510.26.0`
+- **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
+- **Known limitations**: None. Baseline Ubuntu 24.04 is solid, idempotent, and non-mutating in check mode.
+- **Unresolved issues**: None.
+- **Next phase**: MD-1 (Platform Abstraction) — in progress.
+- **Last updated**: 2026-09-11
+
+#### Phase MD-1
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Establish platform abstraction layer across roles, dynamically load OS-family/distro variables, isolate package manager and backend operational mechanics, preserve zero regression for Ubuntu Server 24.04.
+- **Branch**: `feature/multi-distro-support`
+- **Starting commit**: `d936fa76cc6490938e09e9f71cb75b14ad8c97b0`
+- **Important files changed**:
+  - `roles/common/` (vars, package_manager sub-tasks, load_platform_vars)
+  - `roles/users/` (vars, sudo group abstraction, load_platform_vars)
+  - `roles/ssh/` (vars, service name abstraction, load_platform_vars)
+  - `roles/firewall/` (vars, backend abstraction, load_platform_vars)
+  - `roles/security/` (vars, unattended-upgrades backend sub-tasks, load_platform_vars)
+  - `roles/docker/` (vars, repository and package backend sub-tasks, load_platform_vars)
+  - `tests/synthetic/playbooks/test_platform_vars_resolution.yml`
+  - `tests/synthetic/run-phase1-preflight-tests.sh`
+  - `tests/vagrant/evidence/ubuntu2404-acceptance-report.md`
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint, playbook syntax checks, secret scanning, synthetic preflight tests, Python unit tests, git diff check), real-VM fresh Ubuntu 24.04 acceptance flow.
+- **VM target**: `ubuntu2404`
+- **Vagrant box**: `bento/ubuntu-24.04`
+- **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
+- **Known limitations**: None. Ubuntu 24.04 baseline functionality preserved with zero regression, idempotency verified (`changed=0`), non-mutating check mode verified.
+- **Unresolved issues**: None.
+- **Next phase**: MD-2 (Ubuntu Server 22.04 LTS Support) — COMPLETE.
+- **Last updated**: 2026-09-11
+
+#### Phase MD-2
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Add and certify Ubuntu Server 22.04 LTS ("Jammy", amd64) support across roles, metadata, and assertions without behavior regressions for Ubuntu 24.04.
+- **Branch**: `feature/multi-distro-support`
+- **Starting commit**: `f2ab7a34c3d31173eccb709aae26ec45b03bcd97`
+- **Important files changed**:
+  - `roles/common/defaults/main.yml` (`common_supported_distribution_versions: ["22.04", "24.04"]`)
+  - `roles/common/tasks/assert_platform.yml` (multi-version assertion support)
+  - `roles/*/meta/main.yml` (added `jammy` to all 6 roles)
+  - `tests/synthetic/playbooks/test_platform_vars_resolution.yml` (added Ubuntu 22.04 test play)
+  - `tests/vagrant/evidence/ubuntu2204-acceptance-report.md` (14-gate acceptance report)
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint, playbook syntax checks, secret scanning, synthetic preflight tests, Python unit tests, git diff check), real-VM fresh Ubuntu 22.04 acceptance flow.
+- **VM target**: `ubuntu2204`
+- **Vagrant box**: `bento/ubuntu-22.04`
+- **Box version**: `202510.26.0`
+- **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
+- **Known limitations**: None. Ubuntu 22.04 LTS fully verified with zero errors, idempotency verified (`changed=0`), non-mutating check mode verified.
+- **Unresolved issues**: None.
+- **Next phase**: MD-3 (Debian 13 Stable "Trixie" Support) — COMPLETE.
+- **Last updated**: 2026-09-11
+
+#### Phase MD-3
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Add and certify Debian 13 Stable ("Trixie", amd64) support across roles, metadata, security update origins, and privilege escalation handling without behavior regressions for Ubuntu 22.04 or 24.04.
+- **Branch**: `feature/multi-distro-support`
+- **Starting commit**: `78e10bc75f10b7f8373b5eb4833ae819e6ec1d15`
+- **Important files changed**:
+  - `roles/common/defaults/main.yml` (added Debian to supported distributions and 13 to versions)
+  - `roles/common/tasks/assert_platform.yml` (multi-distribution and multi-version assertion)
+  - `roles/users/vars/Debian.yml` & `vars/default.yml` (`users_sudo_package: sudo`)
+  - `roles/users/tasks/main.yml` (ensured sudo package installed before user management)
+  - `roles/security/templates/50server-bootstrap-unattended-upgrades.j2` (Debian security origins)
+  - `roles/firewall/tasks/discover_state.yml` (resilient iptables-save detection on minimal images)
+  - `roles/firewall/tasks/classify_state.yml` (resilient ufw and iptables version checks)
+  - `roles/*/meta/main.yml` (added Debian trixie to all 6 roles)
+  - `tests/vagrant/Vagrantfile` (configured `bento/debian-13`)
+  - `tests/synthetic/playbooks/test_platform_vars_resolution.yml` (added Debian 13 test play)
+  - `tests/vagrant/evidence/debian13-acceptance-report.md` (14-gate acceptance report)
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint, playbook syntax checks, secret scanning, synthetic preflight tests, Python unit tests, git diff check), real-VM fresh Debian 13 acceptance flow.
+- **VM target**: `debian13`
+- **Vagrant box**: `bento/debian-13`
+- **Box version**: `202510.26.0`
+- **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
+- **Known limitations**: None. Debian 13 fully verified with zero errors, idempotency verified (`changed=0`), non-mutating check mode verified.
+- **Unresolved issues**: None.
+- **Next phase**: MD-4 (Enterprise Linux Architecture & AlmaLinux 9 Support) — COMPLETE.
+- **Last updated**: 2026-09-11
+
+#### Phase MD-4
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Add Enterprise Linux architecture support and certify AlmaLinux 9.x (x86_64) across roles, metadata, package manager (DNF), firewall (`firewalld`), security updates (`dnf-automatic`), and Docker CE upstream repository while maintaining SELinux in default Enforcing mode and zero regressions on existing distributions.
+- **Branch**: `feature/multi-distro-support`
+- **Starting commit**: `13a783ba61025796a2a181a3bdf4d98d265f10d4`
+- **Important files changed**:
+  - `roles/common/vars/RedHat.yml` & tasks (`dnf_preflight.yml`, `dnf_install.yml`, `assert_platform.yml`, `verify.yml`)
+  - `roles/users/vars/RedHat.yml` (`wheel` privilege group)
+  - `roles/ssh/vars/RedHat.yml` (`sshd` service name) & `tasks/main.yml` (common SSH args support)
+  - `roles/firewall/vars/RedHat.yml` & `tasks/backends/firewalld/` (`firewalld` backend support, check-mode resilience, verify tasks)
+  - `roles/security/vars/RedHat.yml`, template `server-bootstrap-automatic.conf.j2`, & tasks (`dnf_automatic.yml`, `dnf_automatic_verify.yml`)
+  - `roles/docker/vars/RedHat.yml` & tasks (`backends/dnf/repository.yml`, `backends/dnf/packages.yml`, `discover_state.yml`, `install_packages.yml`, `verify.yml`)
+  - `roles/*/meta/main.yml` (added `EL 9` to all 6 roles)
+  - `tests/synthetic/playbooks/test_platform_vars_resolution.yml` (added AlmaLinux 9 test play)
+  - `tests/vagrant/evidence/alma9-acceptance-report.md` (14-gate acceptance report)
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint, playbook syntax checks, secret scanning, synthetic preflight tests, Python unit tests, git diff check), real-VM fresh AlmaLinux 9 acceptance flow.
+- **VM target**: `alma9`
+- **Vagrant box**: `almalinux/9`
+- **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
+- **Known limitations**: None. AlmaLinux 9.x fully verified with zero errors, idempotency verified (`changed=0`), non-mutating check mode verified, SELinux enforcing verified.
+- **Unresolved issues**: None.
+- **Next phase**: MD-5 (AlmaLinux 10 Support) — COMPLETE.
+- **Last updated**: 2026-09-11
+
+#### Phase MD-5
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Extend Enterprise Linux certification to AlmaLinux 10.x (x86_64), resolve EL10 kernel module dependencies (`kernel-modules-extra` for `xt_addrtype` / bridge NAT networking under Docker daemon), update platform assertions, and validate the full 14-gate acceptance pipeline on a fresh AlmaLinux 10 VM.
+- **Branch**: `feature/multi-distro-support`
+- **Starting commit**: `e3888b3c32af937488f58e27ee59821116bbf43e`
+- **Important files changed**:
+  - `roles/common/defaults/main.yml` (added "10" to supported distribution versions)
+  - `roles/common/tasks/assert_platform.yml` (expanded version check to include AlmaLinux 10)
+  - `roles/*/meta/main.yml` (added `10` under `EL` across all 6 roles)
+  - `roles/docker/tasks/backends/dnf/packages.yml` (ensured `kernel-modules-extra` for running kernel with `allow_downgrade: true`)
+  - `tests/synthetic/playbooks/test_platform_vars_resolution.yml` (added AlmaLinux 10 test play)
+  - `tests/vagrant/run` (increased SSH reachability timeout for EL10 reboot)
+  - `tests/vagrant/evidence/alma10-acceptance-report.md` (14-gate acceptance report)
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint, playbook syntax checks, secret scanning, synthetic preflight tests, Python unit tests, git diff check), real-VM fresh AlmaLinux 10 acceptance flow.
+- **VM target**: `alma10`
+- **Vagrant box**: `almalinux/10`
+- **Box version**: `10.0.0`
+- **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
+- **Known limitations**: None. AlmaLinux 10.x fully verified with zero errors, idempotency verified (`changed=0`), non-mutating check mode verified, SELinux enforcing verified.
+- **Unresolved issues**: None.
+- **Next phase**: MD-6 (Full 5-Platform Matrix Acceptance) — COMPLETE.
+- **Last updated**: 2026-09-11
+
+#### Phase MD-6
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Execute autonomous, sequential end-to-end fresh VM acceptance across all 5 supported operating systems (`ubuntu2404`, `ubuntu2204`, `debian13`, `alma9`, `alma10`), ensuring zero cross-platform regressions, 100% pass rate across 70 total gates (14 per platform), automatic intermediate VM destruction to conserve host RAM, and generate consolidated matrix acceptance evidence.
+- **Branch**: `feature/multi-distro-support`
+- **Starting commit**: `edc5eaea7e0ea56a8b441ab7fe93de5d2e2f8956`
+- **Important files changed**:
+  - `tests/vagrant/run` (added `generate_matrix_report`, intermediate VM teardown in `all` mode, `GRUB_RECORDFAIL_TIMEOUT=0` quick-boot optimization, 180s SSH timeout)
+  - `tests/vagrant/evidence/ubuntu2404-acceptance-report.md` (updated fresh-VM evidence)
+  - `tests/vagrant/evidence/ubuntu2204-acceptance-report.md` (updated fresh-VM evidence)
+  - `tests/vagrant/evidence/debian13-acceptance-report.md` (updated fresh-VM evidence)
+  - `tests/vagrant/evidence/alma9-acceptance-report.md` (updated fresh-VM evidence)
+  - `tests/vagrant/evidence/alma10-acceptance-report.md` (updated fresh-VM evidence)
+  - `tests/vagrant/evidence/full-matrix-acceptance-report.md` (consolidated 5x14 matrix evidence)
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint on 166 files, playbook syntax checks, synthetic 35-assertion test on 5 distros, Python unit tests, git diff check), sequential real-VM acceptance across all 5 platforms (`./tests/vagrant/run all test`).
+- **VM targets**: `ubuntu2404`, `ubuntu2204`, `debian13`, `alma9`, `alma10`
+- **Total acceptance gates passed**: 70 / 70 (100% PASS)
+- **Test result**: PASS (all 5 platforms passed all 14 gates on fresh VMs, consolidated matrix report generated)
+- **Known limitations**: None. All 5 platforms certified with zero errors, idempotency verified (`changed=0`), non-mutating check mode verified, reboot survival verified, Docker smoke test verified.
+- **Unresolved issues**: None.
+- **Next phase**: MD-7 (Final Documentation & Release Readiness) — COMPLETE.
+- **Last updated**: 2026-09-11
+
+#### Phase MD-7
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Align all project documentation, bilingual READMEs (`README.md` and `README.fa.md`), troubleshooting guides, configuration references, release evidence, and changelog with the completed 5-distribution support matrix (Ubuntu 22.04/24.04, Debian 13, AlmaLinux 9/10), verifying zero stale references and 100% static validation pass.
+- **Branch**: `feature/multi-distro-support`
+- **Important files changed**:
+  - `README.md` (multi-distro tagline, supported platforms matrix, backend caveats, quality bar)
+  - `README.fa.md` (full Persian translation parity with multi-distro README)
+  - `docs/15-RELEASE-EVIDENCE.md` (multi-distro matrix, 70/70 gates evidence link, SELinux compliance)
+  - `docs/14-TROUBLESHOOTING.md` (multi-distro quick checks, firewalld, dnf-automatic, SELinux)
+  - `docs/13-CONFIGURATION-REFERENCE.md` (multi-distro API operational notes)
+  - `CHANGELOG.md` (comprehensive Unreleased section covering all MD phases)
+  - `docs/10-PHASE-STATUS.md` (marked MD-7 and Multi-Distro Roadmap complete)
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint on 166 files, playbook syntax checks, secret scanning, synthetic preflight tests, multi-distro vars resolution test on 5 distros, Python unit tests, git diff check).
+- **Test result**: PASS (all static validation checks clean; real-VM matrix recorded at 70/70 PASS)
+- **Known limitations**: None. Multi-distro baseline fully documented and certified.
+- **Unresolved issues**: None.
+- **Next step**: Human review and PR creation/authorization per `AGENTS.md`. No tag or release without explicit human approval.
+- **Last updated**: 2026-09-11

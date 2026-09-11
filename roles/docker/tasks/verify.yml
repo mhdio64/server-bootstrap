@@ -1,4 +1,7 @@
 ---
+- name: Docker | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Docker | verify containerd service is active
   ansible.builtin.systemd:
     name: "{{ docker_containerd_service_name }}"
@@ -34,3 +37,11 @@
     path: "{{ docker_apt_sources_path }}"
   register: docker_verify_apt_sources
   failed_when: not docker_verify_apt_sources.stat.exists
+  when: docker_package_manager == 'apt'
+
+- name: Docker | verify project-owned Docker DNF repository exists after installation
+  ansible.builtin.stat:
+    path: "{{ docker_dnf_repo_path }}"
+  register: docker_verify_dnf_repo
+  failed_when: not docker_verify_dnf_repo.stat.exists
+  when: docker_package_manager == 'dnf'

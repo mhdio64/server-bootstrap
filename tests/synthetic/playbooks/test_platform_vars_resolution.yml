@@ -1,0 +1,248 @@
+---
+- name: Synthetic | platform vars resolution with Ubuntu 24.04 facts
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_distribution: Ubuntu
+    ansible_distribution_version: "24.04"
+    ansible_distribution_major_version: "24"
+    ansible_os_family: Debian
+  tasks:
+    - name: Synthetic | load common platform vars
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load users platform vars
+      ansible.builtin.import_role:
+        name: users
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load ssh platform vars
+      ansible.builtin.import_role:
+        name: ssh
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load firewall platform vars
+      ansible.builtin.import_role:
+        name: firewall
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load security platform vars
+      ansible.builtin.import_role:
+        name: security
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load docker platform vars
+      ansible.builtin.import_role:
+        name: docker
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | assert expected platform abstractions
+      ansible.builtin.assert:
+        that:
+          - common_package_manager == 'apt'
+          - users_sudo_group == 'sudo'
+          - ssh_service_name == 'ssh'
+          - firewall_backend == 'iptables_nft'
+          - security_backend == 'unattended_upgrades'
+          - docker_package_manager == 'apt'
+
+- name: Synthetic | platform vars resolution with Ubuntu 22.04 facts
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_distribution: Ubuntu
+    ansible_distribution_version: "22.04"
+    ansible_distribution_major_version: "22"
+    ansible_distribution_release: jammy
+    ansible_os_family: Debian
+  tasks:
+    - name: Synthetic | load common platform vars (22.04)
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load users platform vars (22.04)
+      ansible.builtin.import_role:
+        name: users
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load ssh platform vars (22.04)
+      ansible.builtin.import_role:
+        name: ssh
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load firewall platform vars (22.04)
+      ansible.builtin.import_role:
+        name: firewall
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load security platform vars (22.04)
+      ansible.builtin.import_role:
+        name: security
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load docker platform vars (22.04)
+      ansible.builtin.import_role:
+        name: docker
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | assert expected platform abstractions (22.04)
+      ansible.builtin.assert:
+        that:
+          - common_package_manager == 'apt'
+          - users_sudo_group == 'sudo'
+          - ssh_service_name == 'ssh'
+          - firewall_backend == 'iptables_nft'
+          - security_backend == 'unattended_upgrades'
+          - docker_package_manager == 'apt'
+
+- name: Synthetic | platform vars resolution with Debian 13 facts
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_distribution: Debian
+    ansible_distribution_version: "13"
+    ansible_distribution_major_version: "13"
+    ansible_distribution_release: trixie
+    ansible_os_family: Debian
+  tasks:
+    - name: Synthetic | load common platform vars (Debian 13)
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load users platform vars (Debian 13)
+      ansible.builtin.import_role:
+        name: users
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load ssh platform vars (Debian 13)
+      ansible.builtin.import_role:
+        name: ssh
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load firewall platform vars (Debian 13)
+      ansible.builtin.import_role:
+        name: firewall
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load security platform vars (Debian 13)
+      ansible.builtin.import_role:
+        name: security
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load docker platform vars (Debian 13)
+      ansible.builtin.import_role:
+        name: docker
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | assert expected platform abstractions (Debian 13)
+      ansible.builtin.assert:
+        that:
+          - common_package_manager == 'apt'
+          - users_sudo_group == 'sudo'
+          - users_sudo_package == 'sudo'
+          - ssh_service_name == 'ssh'
+          - firewall_backend == 'iptables_nft'
+          - security_backend == 'unattended_upgrades'
+          - docker_package_manager == 'apt'
+
+- name: Synthetic | platform vars resolution with AlmaLinux 9 facts
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_distribution: AlmaLinux
+    ansible_distribution_version: "9.5"
+    ansible_distribution_major_version: "9"
+    ansible_os_family: RedHat
+  tasks:
+    - name: Synthetic | load common platform vars (AlmaLinux 9)
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load users platform vars (AlmaLinux 9)
+      ansible.builtin.import_role:
+        name: users
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load ssh platform vars (AlmaLinux 9)
+      ansible.builtin.import_role:
+        name: ssh
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load firewall platform vars (AlmaLinux 9)
+      ansible.builtin.import_role:
+        name: firewall
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load security platform vars (AlmaLinux 9)
+      ansible.builtin.import_role:
+        name: security
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load docker platform vars (AlmaLinux 9)
+      ansible.builtin.import_role:
+        name: docker
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | assert expected platform abstractions (AlmaLinux 9)
+      ansible.builtin.assert:
+        that:
+          - common_package_manager == 'dnf'
+          - users_sudo_group == 'wheel'
+          - ssh_service_name == 'sshd'
+          - firewall_backend == 'firewalld'
+          - security_backend == 'dnf_automatic'
+          - docker_package_manager == 'dnf'
+
+- name: Synthetic | platform vars resolution with AlmaLinux 10 facts
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_distribution: AlmaLinux
+    ansible_distribution_version: "10.0"
+    ansible_distribution_major_version: "10"
+    ansible_os_family: RedHat
+  tasks:
+    - name: Synthetic | load common platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load users platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: users
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load ssh platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: ssh
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load firewall platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: firewall
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load security platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: security
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load docker platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: docker
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | assert expected platform abstractions (AlmaLinux 10)
+      ansible.builtin.assert:
+        that:
+          - common_package_manager == 'dnf'
+          - users_sudo_group == 'wheel'
+          - ssh_service_name == 'sshd'
+          - firewall_backend == 'firewalld'
+          - security_backend == 'dnf_automatic'
+          - docker_package_manager == 'dnf'

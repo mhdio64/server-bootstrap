@@ -73,4 +73,4 @@
 - name: Users | build effective authorized key list
   ansible.builtin.set_fact:
     users_authorized_keys_effective: >-
-      {{ users_keys_from_inline | union(users_keys_from_files | default([])) | unique }}
+      {{ users_keys_from_inline | union(users_keys_from_files | default([])) | unique | sort }}

@@ -33,6 +33,7 @@ Do not load every document into context unless necessary.
 | `13-CONFIGURATION-REFERENCE.md` | Public `bootstrap_*` configuration API |
 | `14-TROUBLESHOOTING.md` | Operator troubleshooting guide |
 | `15-RELEASE-EVIDENCE.md` | v0.1.0 release gate evidence and checklist |
+| `16-MULTI-DISTRO-ROADMAP.md` | Multi-distribution initiative architecture, roadmap, and phase definitions |
 
 ## Conflict policy
 

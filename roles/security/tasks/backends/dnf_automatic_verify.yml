@@ -1,0 +1,31 @@
+---
+- name: Security | verify dnf-automatic package is installed  # noqa: command-instead-of-module
+  ansible.builtin.command: rpm -q {{ item }}
+  changed_when: false
+  register: security_verify_package
+  failed_when: security_verify_package.rc != 0
+  loop: "{{ security_packages }}"
+
+- name: Security | verify project-owned dnf-automatic configuration exists
+  ansible.builtin.stat:
+    path: "{{ security_dnf_automatic_conf }}"
+  register: security_verify_dnf_automatic_conf
+  failed_when: not security_verify_dnf_automatic_conf.stat.exists
+
+- name: Security | verify dnf-automatic config content
+  ansible.builtin.slurp:
+    path: "{{ security_dnf_automatic_conf }}"
+  register: security_verify_dnf_conf_content
+
+- name: Security | assert dnf-automatic policy applies security updates without reboot
+  ansible.builtin.assert:
+    that:
+      - "'upgrade_type = security' in (security_verify_dnf_conf_content.content | b64decode)"
+      - "'apply_updates = yes' in (security_verify_dnf_conf_content.content | b64decode)"
+      - "'reboot = never' in (security_verify_dnf_conf_content.content | b64decode)"
+
+- name: Security | verify dnf-automatic timer is enabled
+  ansible.builtin.systemd:
+    name: "{{ security_dnf_automatic_timer }}"
+  register: security_verify_timer
+  failed_when: security_verify_timer.status.UnitFileState != 'enabled'

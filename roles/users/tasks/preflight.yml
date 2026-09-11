@@ -1,4 +1,7 @@
 ---
+- name: Users | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Users | reject reserved root admin account name
   ansible.builtin.assert:
     that:

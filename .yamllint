@@ -21,3 +21,4 @@ ignore: |
   .venv/
   .git/
   graphify-out/
+  tests/vagrant/tmp/

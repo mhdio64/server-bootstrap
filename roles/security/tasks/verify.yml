@@ -1,37 +1,11 @@
 ---
-- name: Security | verify unattended security upgrade packages are installed
-  ansible.builtin.command: dpkg -s {{ item }}
-  changed_when: false
-  register: security_verify_package
-  failed_when: security_verify_package.rc != 0
-  loop: "{{ security_packages }}"
+- name: Security | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
 
-- name: Security | verify project-owned APT periodic policy drop-in exists
-  ansible.builtin.stat:
-    path: "{{ security_apt_periodic_dropin }}"
-  register: security_verify_apt_periodic_dropin
-  failed_when: not security_verify_apt_periodic_dropin.stat.exists
+- name: Security | verify unattended-upgrades backend
+  ansible.builtin.include_tasks: backends/unattended_upgrades_verify.yml
+  when: security_backend == 'unattended_upgrades'
 
-- name: Security | verify project-owned unattended-upgrades policy drop-in exists
-  ansible.builtin.stat:
-    path: "{{ security_unattended_upgrades_dropin }}"
-  register: security_verify_unattended_upgrades_dropin
-  failed_when: not security_verify_unattended_upgrades_dropin.stat.exists
-
-- name: Security | verify unattended-upgrades policy disables automatic reboot
-  ansible.builtin.slurp:
-    path: "{{ security_unattended_upgrades_dropin }}"
-  register: security_verify_unattended_upgrades_content
-
-- name: Security | assert unattended-upgrades policy disables automatic reboot
-  ansible.builtin.assert:
-    that:
-      - >-
-        'Unattended-Upgrade::Automatic-Reboot "false";'
-        in (security_verify_unattended_upgrades_content.content | b64decode)
-
-- name: Security | verify unattended security upgrade timer is enabled
-  ansible.builtin.systemd:
-    name: "{{ security_unattended_upgrades_timer }}"
-  register: security_verify_timer
-  failed_when: security_verify_timer.status.UnitFileState != 'enabled'
+- name: Security | verify dnf-automatic backend
+  ansible.builtin.include_tasks: backends/dnf_automatic_verify.yml
+  when: security_backend == 'dnf_automatic'

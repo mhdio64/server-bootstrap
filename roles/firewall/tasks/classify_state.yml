@@ -3,17 +3,21 @@
   ansible.builtin.command: /usr/sbin/iptables --version
   changed_when: false
   register: firewall_iptables_version
+  when: firewall_iptables_save_bin.stat.exists | default(false)
 
 - name: Firewall | fail when iptables backend is not nftables-based
   ansible.builtin.fail:
     msg: >-
       server-bootstrap v0.1.0 requires the iptables-nft backend. Detected:
       {{ firewall_iptables_version.stdout | default('unknown') }}.
-  when: "'nf_tables' not in firewall_iptables_version.stdout"
+  when:
+    - firewall_iptables_save_bin.stat.exists | default(false)
+    - "'nf_tables' not in (firewall_iptables_version.stdout | default(''))"
 
 - name: Firewall | inspect UFW enforcement state
   ansible.builtin.command: ufw status
   changed_when: false
+  failed_when: false
   register: firewall_ufw_status
 
 - name: Firewall | fail when UFW is enforcing firewall policy
@@ -22,7 +26,9 @@
       UFW is enforcing firewall policy on this host. server-bootstrap manages
       host firewall policy through project-owned iptables-nft chains and stops
       on active foreign backends. Disable UFW before continuing.
-  when: firewall_ufw_status.stdout is search('(?m)^Status:\\s+active\\s*$')
+  when:
+    - firewall_ufw_status.rc | default(1) == 0
+    - firewall_ufw_status.stdout | default('') is search('(?m)^Status:\\s+active\\s*$')
 
 - name: Firewall | parse IPv4 chain policies from iptables-save
   ansible.builtin.set_fact:

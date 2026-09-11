@@ -1,0 +1,9 @@
+---
+# Platform variables for Debian-family systems in the security role.
+security_backend: unattended_upgrades
+security_packages:
+  - unattended-upgrades
+security_apt_periodic_dropin: /etc/apt/apt.conf.d/20server-bootstrap-auto-upgrades
+security_unattended_upgrades_dropin: /etc/apt/apt.conf.d/50server-bootstrap-unattended-upgrades
+security_unattended_upgrades_timer: apt-daily-upgrade.timer
+security_apt_daily_timer: apt-daily.timer

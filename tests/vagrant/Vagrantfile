@@ -1,0 +1,69 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrant configuration for server-bootstrap multi-distribution acceptance testing.
+# Defines isolated VirtualBox test nodes for each supported target distribution.
+
+VAGRANTFILE_API_VERSION = "2"
+
+TARGETS = {
+  "ubuntu2404" => {
+    box: "bento/ubuntu-24.04",
+    ip: "192.168.56.24",
+    cpus: 2,
+    memory: 2048
+  },
+  "ubuntu2204" => {
+    box: "bento/ubuntu-22.04",
+    ip: "192.168.56.22",
+    cpus: 2,
+    memory: 2048
+  },
+  "debian13" => {
+    box: "bento/debian-13",
+    ip: "192.168.56.13",
+    cpus: 2,
+    memory: 2048
+  },
+  "alma9" => {
+    box: "almalinux/9",
+    ip: "192.168.56.90",
+    cpus: 2,
+    memory: 2048
+  },
+  "alma10" => {
+    box: "almalinux/10",
+    ip: "192.168.56.10",
+    cpus: 2,
+    memory: 2048
+  }
+}
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  TARGETS.each do |name, settings|
+    config.vm.define name, autostart: false do |node|
+      node.vm.box = settings[:box]
+      node.vm.hostname = "sb-test-#{name}"
+
+      # Disable shared host folder to emulate a real remote server over SSH
+      node.vm.synced_folder ".", "/vagrant", disabled: true
+
+      # Configure private network for direct static routing
+      node.vm.network "private_network", ip: settings[:ip]
+
+      node.vm.provider "virtualbox" do |vb|
+        vb.name = "sb-test-#{name}"
+        vb.cpus = settings[:cpus]
+        vb.memory = settings[:memory]
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      end
+
+      # Neutralize VirtualBox Guest Additions time-sync conflict (vboxadd-service has Conflicts=systemd-timesyncd.service)
+      node.vm.provision "shell", inline: <<-SHELL
+        if systemctl list-unit-files | grep -q vboxadd-service; then
+          systemctl disable --now vboxadd-service || true
+        fi
+      SHELL
+    end
+  end
+end

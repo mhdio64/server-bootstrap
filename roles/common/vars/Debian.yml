@@ -1,0 +1,9 @@
+---
+# Platform variables for Debian-family systems in the common role.
+common_package_manager: apt
+common_timesync_package: systemd-timesyncd
+common_timesync_service: systemd-timesyncd.service
+common_reboot_required_file: /var/run/reboot-required
+common_apt_lock_timeout_seconds: 60
+common_apt_lock_poll_seconds: 2
+common_locale_fallback: C.UTF-8

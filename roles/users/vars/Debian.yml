@@ -1,0 +1,4 @@
+---
+# Platform variables for Debian-family systems in the users role.
+users_sudo_group: sudo
+users_sudo_package: sudo

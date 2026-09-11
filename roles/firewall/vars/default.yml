@@ -1,0 +1,5 @@
+---
+# Default fallback platform variables for the firewall role.
+firewall_backend: iptables_nft
+firewall_packages:
+  - iptables

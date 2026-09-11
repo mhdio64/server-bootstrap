@@ -1,0 +1,32 @@
+---
+- name: Common | wait for APT/dpkg lock release
+  ansible.builtin.command: >
+    bash -c 'end=$((SECONDS+{{ common_apt_lock_timeout_seconds }}));
+    while (( SECONDS < end )); do
+      fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || exit 0;
+      sleep {{ common_apt_lock_poll_seconds }};
+    done;
+    exit 1'
+  changed_when: false
+  register: common_apt_lock_wait
+  failed_when: common_apt_lock_wait.rc != 0
+  when: not ansible_check_mode
+
+- name: Common | refresh APT package cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Common | install baseline packages
+  ansible.builtin.apt:
+    name: "{{ common_packages_effective }}"
+    state: present
+  register: common_baseline_packages_install
+  until: common_baseline_packages_install is success
+  retries: 3
+  delay: 5
+
+- name: Common | upgrade all packages when explicitly enabled
+  ansible.builtin.apt:
+    upgrade: dist
+  when: bootstrap_upgrade_packages | bool

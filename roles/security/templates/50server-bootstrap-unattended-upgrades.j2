@@ -1,6 +1,12 @@
 # Managed by server-bootstrap. Do not edit manually.
 Unattended-Upgrade::Allowed-Origins {
+{% if ansible_facts['distribution'] | lower == 'debian' %}
+    "Debian:{{ ansible_facts['distribution_release'] }}-security";
+    "Debian-Security:{{ ansible_facts['distribution_release'] }}-security";
+    "origin=Debian,codename={{ ansible_facts['distribution_release'] }}-security,label=Debian-Security";
+{% else %}
     "{{ ansible_facts['distribution'] | lower }}:{{ ansible_facts['distribution_release'] }}-security";
+{% endif %}
 };
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
 Unattended-Upgrade::Automatic-Reboot "false";

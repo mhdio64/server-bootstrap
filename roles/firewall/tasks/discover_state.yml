@@ -28,11 +28,10 @@
   ansible.builtin.set_fact:
     firewall_ipv6_required: >-
       {{
-        ansible_all_ipv6_addresses | default([]) | length > 0
+        (ansible_facts['all_ipv6_addresses'] | default(ansible_all_ipv6_addresses | default([])) | length > 0)
         or (
-          ansible_default_ipv6 is defined
-          and ansible_default_ipv6.address is defined
-          and ansible_default_ipv6.address not in ['', '::1']
+          (ansible_facts['default_ipv6'] | default(ansible_default_ipv6 | default({}))).address is defined
+          and (ansible_facts['default_ipv6'] | default(ansible_default_ipv6 | default({}))).address not in ['', '::1']
         )
       }}
 
@@ -53,13 +52,46 @@
         )
       }}
 
+- name: Firewall | check if iptables-save is installed
+  ansible.builtin.stat:
+    path: /usr/sbin/iptables-save
+  register: firewall_iptables_save_bin
+
 - name: Firewall | capture current IPv4 filter rules
   ansible.builtin.command: /usr/sbin/iptables-save -t filter
   changed_when: false
-  register: firewall_iptables_save_v4
+  register: firewall_iptables_save_v4_raw
+  when: firewall_iptables_save_bin.stat.exists
+
+- name: Firewall | set IPv4 filter rules structure
+  ansible.builtin.set_fact:
+    firewall_iptables_save_v4: >-
+      {{
+        firewall_iptables_save_v4_raw
+        if (firewall_iptables_save_bin.stat.exists | default(false))
+        else {
+          'stdout': "*filter\n:INPUT ACCEPT [0:0]\n:FORWARD ACCEPT [0:0]\n:OUTPUT ACCEPT [0:0]\nCOMMIT\n",
+          'stdout_lines': ["*filter", ":INPUT ACCEPT [0:0]", ":FORWARD ACCEPT [0:0]", ":OUTPUT ACCEPT [0:0]", "COMMIT"]
+        }
+      }}
 
 - name: Firewall | capture current IPv6 filter rules when required
   ansible.builtin.command: /usr/sbin/ip6tables-save -t filter
   changed_when: false
-  register: firewall_iptables_save_v6
+  register: firewall_iptables_save_v6_raw
+  when:
+    - firewall_ipv6_required | bool
+    - firewall_iptables_save_bin.stat.exists
+
+- name: Firewall | set IPv6 filter rules structure
+  ansible.builtin.set_fact:
+    firewall_iptables_save_v6: >-
+      {{
+        firewall_iptables_save_v6_raw
+        if (firewall_iptables_save_bin.stat.exists | default(false))
+        else {
+          'stdout': "*filter\n:INPUT ACCEPT [0:0]\n:FORWARD ACCEPT [0:0]\n:OUTPUT ACCEPT [0:0]\nCOMMIT\n",
+          'stdout_lines': ["*filter", ":INPUT ACCEPT [0:0]", ":FORWARD ACCEPT [0:0]", ":OUTPUT ACCEPT [0:0]", "COMMIT"]
+        }
+      }}
   when: firewall_ipv6_required | bool

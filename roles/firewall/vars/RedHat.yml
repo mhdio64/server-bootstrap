@@ -1,0 +1,7 @@
+---
+# Platform variables for Enterprise Linux / RedHat-family systems in the firewall role.
+firewall_backend: firewalld
+firewall_packages:
+  - firewalld
+firewall_service_name: firewalld
+firewall_zone: public

@@ -1,0 +1,3 @@
+---
+# Platform variables for Enterprise Linux / RedHat-family systems in the ssh role.
+ssh_service_name: sshd

@@ -1,0 +1,16 @@
+---
+- name: Common | inspect DNF lock state
+  ansible.builtin.command: >
+    bash -c 'fuser /var/lib/dnf/lock >/dev/null 2>&1 || fuser /var/run/dnf.pid >/dev/null 2>&1; echo $?'
+  changed_when: false
+  register: common_dnf_lock_state
+  failed_when: false
+
+- name: Common | fail when DNF lock is held
+  ansible.builtin.fail:
+    msg: >-
+      DNF lock is held by another process. Wait for the other package manager
+      operation to finish, then rerun bootstrap. server-bootstrap never kills DNF
+      or deletes lock files.
+  when:
+    - common_dnf_lock_state.stdout | trim == '0'

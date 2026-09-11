@@ -1,4 +1,7 @@
 ---
+- name: Docker | load platform-specific variables
+  ansible.builtin.include_tasks: load_platform_vars.yml
+
 - name: Docker | validate docker group users exist when configured
   ansible.builtin.assert:
     that:

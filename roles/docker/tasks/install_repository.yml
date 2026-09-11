@@ -1,37 +1,8 @@
 ---
-- name: Docker | map target architecture for Docker APT repository
-  ansible.builtin.set_fact:
-    docker_apt_architecture: >-
-      {{
-        'amd64' if ansible_facts['architecture'] in ['x86_64', 'amd64']
-        else ansible_facts['architecture']
-      }}
+- name: Docker | install official Docker repository via APT backend
+  ansible.builtin.include_tasks: backends/apt/repository.yml
+  when: docker_package_manager == 'apt'
 
-- name: Docker | ensure APT keyrings directory exists
-  ansible.builtin.file:
-    path: "{{ docker_apt_key_path | dirname }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-
-- name: Docker | install project-owned Docker APT signing key
-  ansible.builtin.get_url:
-    url: "{{ docker_apt_key_url }}"
-    dest: "{{ docker_apt_key_path }}"
-    owner: root
-    group: root
-    mode: "0644"
-
-- name: Docker | install project-owned Docker APT source definition
-  ansible.builtin.template:
-    src: server-bootstrap-docker.sources.j2
-    dest: "{{ docker_apt_sources_path }}"
-    owner: root
-    group: root
-    mode: "0644"
-
-- name: Docker | refresh APT cache after Docker repository configuration
-  ansible.builtin.apt:
-    update_cache: true
-    cache_valid_time: 0
+- name: Docker | install official Docker repository via DNF backend
+  ansible.builtin.include_tasks: backends/dnf/repository.yml
+  when: docker_package_manager == 'dnf'
