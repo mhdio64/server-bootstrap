@@ -1,8 +1,8 @@
 # Phase Status
 
-Target release: `v0.1.0`
+Target release: `v0.2.0`
 
-Current state: **Phase 10 implemented on feature branch; release prepared, not tagged**
+Current state: **Multi-Distribution baseline (v0.2.0) released and certified**
 
 ## Status table
 

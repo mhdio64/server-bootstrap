@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-11
+
 Multi-distribution expansion delivering full support and real-VM certification across 5 target operating systems.
 
 ### Added
@@ -73,6 +75,7 @@ First usable MVP for safely bootstrapping Ubuntu Server 24.04 LTS (amd64) hosts.
 
 - Pre-implementation project context, architecture, safety model, and phased implementation plan.
 
-[Unreleased]: https://github.com/mhdio64/server-bootstrap/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/mhdio64/server-bootstrap/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/mhdio64/server-bootstrap/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/mhdio64/server-bootstrap/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/mhdio64/server-bootstrap/releases/tag/v0.0.1
