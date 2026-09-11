@@ -1,3 +1,4 @@
 ---
 # Default fallback platform variables for the users role.
 users_sudo_group: sudo
+users_sudo_package: sudo

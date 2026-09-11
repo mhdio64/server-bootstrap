@@ -15,6 +15,12 @@
       {{ users_admin_uid }}). Choose a different bootstrap_admin_user.
   when: users_admin_state == 'system_reserved'
 
+- name: Users | ensure privilege escalation package is installed
+  ansible.builtin.package:
+    name: "{{ users_sudo_package }}"
+    state: present
+  when: users_sudo_package is defined
+
 - name: Users | create new admin account
   ansible.builtin.user:
     name: "{{ bootstrap_admin_user }}"
