@@ -197,3 +197,52 @@
           - firewall_backend == 'firewalld'
           - security_backend == 'dnf_automatic'
           - docker_package_manager == 'dnf'
+
+- name: Synthetic | platform vars resolution with AlmaLinux 10 facts
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_distribution: AlmaLinux
+    ansible_distribution_version: "10.0"
+    ansible_distribution_major_version: "10"
+    ansible_os_family: RedHat
+  tasks:
+    - name: Synthetic | load common platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load users platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: users
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load ssh platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: ssh
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load firewall platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: firewall
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load security platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: security
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | load docker platform vars (AlmaLinux 10)
+      ansible.builtin.import_role:
+        name: docker
+        tasks_from: load_platform_vars
+
+    - name: Synthetic | assert expected platform abstractions (AlmaLinux 10)
+      ansible.builtin.assert:
+        that:
+          - common_package_manager == 'dnf'
+          - users_sudo_group == 'wheel'
+          - ssh_service_name == 'sshd'
+          - firewall_backend == 'firewalld'
+          - security_backend == 'dnf_automatic'
+          - docker_package_manager == 'dnf'

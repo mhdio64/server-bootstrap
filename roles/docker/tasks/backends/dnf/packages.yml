@@ -1,4 +1,20 @@
 ---
+- name: Docker | install running kernel extra modules for container networking (EL10+)
+  ansible.builtin.dnf:
+    name:
+      - kernel-modules-extra
+      - "kernel-modules-extra-{{ ansible_facts['kernel'] | default(ansible_kernel) }}"
+    state: present
+    allow_downgrade: true
+  register: docker_kernel_modules_extra_install
+  until: docker_kernel_modules_extra_install is success
+  retries: 3
+  delay: 5
+  when:
+    - not ansible_check_mode or (docker_state | default('absent')) != 'absent'
+    - (ansible_facts['os_family'] | default(ansible_os_family)) == 'RedHat'
+    - (ansible_facts['distribution_major_version'] | default(ansible_distribution_major_version) | int) >= 10
+
 - name: Docker | install official Docker packages on fresh hosts
   ansible.builtin.dnf:
     name: "{{ docker_package_install_list }}"

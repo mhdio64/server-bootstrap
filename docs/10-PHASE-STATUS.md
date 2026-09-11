@@ -32,8 +32,8 @@ Target: Production multi-distribution support across Ubuntu 22.04, Ubuntu 24.04,
 | **MD-2** | Ubuntu Server 22.04 LTS Support | Ubuntu 22.04 | COMPLETE | `feature/multi-distro-support` | `bento/ubuntu-22.04` | PASS | MD-3 |
 | **MD-3** | Debian 13 Stable "Trixie" Support | Debian 13 | COMPLETE | `feature/multi-distro-support` | `bento/debian-13` | PASS | MD-4 |
 | **MD-4** | Enterprise Linux & AlmaLinux 9 Support | AlmaLinux 9 | COMPLETE | `feature/multi-distro-support` | `almalinux/9` | PASS | MD-5 |
-| **MD-5** | AlmaLinux 10 Support | AlmaLinux 10 | READY TO START | `feature/multi-distro-support` | `almalinux/10` | — | MD-6 |
-| **MD-6** | Full 5-Platform Matrix Acceptance | All 5 targets | NOT STARTED | `feature/multi-distro-support` | All 5 boxes | — | MD-7 |
+| **MD-5** | AlmaLinux 10 Support | AlmaLinux 10 | COMPLETE | `feature/multi-distro-support` | `almalinux/10` | PASS | MD-6 |
+| **MD-6** | Full 5-Platform Matrix Acceptance | All 5 targets | READY TO START | `feature/multi-distro-support` | All 5 boxes | — | MD-7 |
 | **MD-7** | Final Documentation & Release Readiness | All 5 targets | NOT STARTED | `feature/multi-distro-support` | — | — | v0.2.0 Release |
 
 ### MD Phase Detail Tracking
@@ -166,6 +166,30 @@ Target: Production multi-distribution support across Ubuntu 22.04, Ubuntu 24.04,
 - **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
 - **Known limitations**: None. AlmaLinux 9.x fully verified with zero errors, idempotency verified (`changed=0`), non-mutating check mode verified, SELinux enforcing verified.
 - **Unresolved issues**: None.
-- **Next phase**: MD-5 (AlmaLinux 10 Support) — awaits human authorization.
+- **Next phase**: MD-5 (AlmaLinux 10 Support) — COMPLETE.
 - **Last updated**: 2026-09-11
+
+#### Phase MD-5
+- **Status**: COMPLETE / READY FOR REVIEW
+- **Objective**: Extend Enterprise Linux certification to AlmaLinux 10.x (x86_64), resolve EL10 kernel module dependencies (`kernel-modules-extra` for `xt_addrtype` / bridge NAT networking under Docker daemon), update platform assertions, and validate the full 14-gate acceptance pipeline on a fresh AlmaLinux 10 VM.
+- **Branch**: `feature/multi-distro-support`
+- **Starting commit**: `e3888b3c32af937488f58e27ee59821116bbf43e`
+- **Important files changed**:
+  - `roles/common/defaults/main.yml` (added "10" to supported distribution versions)
+  - `roles/common/tasks/assert_platform.yml` (expanded version check to include AlmaLinux 10)
+  - `roles/*/meta/main.yml` (added `10` under `EL` across all 6 roles)
+  - `roles/docker/tasks/backends/dnf/packages.yml` (ensured `kernel-modules-extra` for running kernel with `allow_downgrade: true`)
+  - `tests/synthetic/playbooks/test_platform_vars_resolution.yml` (added AlmaLinux 10 test play)
+  - `tests/vagrant/run` (increased SSH reachability timeout for EL10 reboot)
+  - `tests/vagrant/evidence/alma10-acceptance-report.md` (14-gate acceptance report)
+- **Tests executed**: Full static validation suite (yamllint, ansible-lint, playbook syntax checks, secret scanning, synthetic preflight tests, Python unit tests, git diff check), real-VM fresh AlmaLinux 10 acceptance flow.
+- **VM target**: `alma10`
+- **Vagrant box**: `almalinux/10`
+- **Box version**: `10.0.0`
+- **Test result**: PASS (all 14 acceptance gates passed on fresh VM, evidence captured)
+- **Known limitations**: None. AlmaLinux 10.x fully verified with zero errors, idempotency verified (`changed=0`), non-mutating check mode verified, SELinux enforcing verified.
+- **Unresolved issues**: None.
+- **Next phase**: MD-6 (Full 5-Platform Matrix Acceptance) — awaits human authorization.
+- **Last updated**: 2026-09-11
+
 

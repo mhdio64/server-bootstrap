@@ -164,7 +164,7 @@ wait_for_ssh_reachability() {
   local target="$1"
   local target_ip="${TARGET_IPS[$target]}"
   log "Waiting for target $target ($target_ip:22) to accept SSH..."
-  local max_attempts=30
+  local max_attempts=60
   local attempt=1
   while [[ $attempt -le $max_attempts ]]; do
     if nc -z -w 2 "$target_ip" 22 >/dev/null 2>&1 || timeout 2 bash -c "</dev/tcp/$target_ip/22" >/dev/null 2>&1; then
