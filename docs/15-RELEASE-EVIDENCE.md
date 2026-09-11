@@ -1,26 +1,22 @@
-# Release Evidence — proposed v0.1.0
+# Release Evidence — Multi-Distribution Expansion
 
-This document summarizes release-gate evidence for the first usable MVP. It does **not** create a Git tag or GitHub Release.
+This document summarizes release-gate evidence for the multi-distribution baseline. It does **not** create a Git tag or GitHub Release.
 
-## Proposed version
+## Release Readiness
 
-```text
-v0.1.0
-```
-
-`VERSION` in the repository root is set to `0.1.0` as release preparation only. Tagging and publishing require explicit human approval.
+Tagging and publishing require explicit human approval per `AGENTS.md`.
 
 ## Supported matrix
 
-| Component | Supported in v0.1.0 |
+| Component | Supported |
 |---|---|
-| Target OS | Ubuntu Server 24.04 LTS |
+| Target OS | Ubuntu Server 24.04 LTS (Noble)<br>Ubuntu Server 22.04 LTS (Jammy)<br>Debian 13.x (Trixie)<br>AlmaLinux 9.x<br>AlmaLinux 10.x |
 | Target architecture | amd64 / x86_64 |
 | Control node OS | Linux |
 | Control node Python | 3.12, 3.13, 3.14 |
 | Ansible | `ansible-core` 2.21.x (pinned in `requirements-dev.txt`) |
 
-Not supported in v0.1.0: Ubuntu 22.04, ARM64, Windows/macOS control nodes, Kubernetes, monitoring agents, application deployment, UFW-managed hosts, Docker Swarm, rootless Docker.
+Not supported: ARM64, Windows/macOS control nodes, Kubernetes, monitoring agents, application deployment, foreign firewall managers outside project-owned rules (e.g., UFW), Docker Swarm, rootless Docker.
 
 ## Static validation (CI)
 
@@ -28,54 +24,68 @@ GitHub Actions on `main` runs, per Python 3.12/3.13/3.14:
 
 - dependency install sanity
 - `yamllint`
-- `ansible-lint`
+- `ansible-lint` (166 files across roles, playbooks, and tasks)
 - Ansible syntax checks for `site.yml` and `verify.yml`
 - secret scanning and negative secret-gate test
-- synthetic classifier/preflight tests
-- wrapper unit tests
+- synthetic multi-distro variable resolution tests (`test_platform_vars_resolution.yml`)
+- synthetic classifier/preflight tests (`run-phase1-preflight-tests.sh`)
+- wrapper unit tests (`python3 -m unittest discover tests/unit`)
 - `git diff --check`
 
-## Synthetic coverage
+## Full 5-Platform Acceptance Matrix
 
-`tests/synthetic/run-phase1-preflight-tests.sh` covers:
+All 5 platforms are certified on clean, isolated virtual machines using the automated Vagrant harness in `tests/vagrant/`.
 
-- missing required configuration
-- unsupported platform rejection
-- SSH, firewall, and Docker classifier logic
-- summary and metadata helpers
+Consolidated report:
+- `tests/vagrant/evidence/full-matrix-acceptance-report.md`
 
-## Scenario 1 real-VM validation
+Target-specific acceptance reports:
+- Ubuntu Server 24.04 LTS: `tests/vagrant/evidence/ubuntu2404-acceptance-report.md`
+- Ubuntu Server 22.04 LTS: `tests/vagrant/evidence/ubuntu2204-acceptance-report.md`
+- Debian 13 (Trixie): `tests/vagrant/evidence/debian13-acceptance-report.md`
+- AlmaLinux 9.x: `tests/vagrant/evidence/alma9-acceptance-report.md`
+- AlmaLinux 10.x: `tests/vagrant/evidence/alma10-acceptance-report.md`
 
-Sanitized evidence:
+### 14 Acceptance Gates per Target (70 / 70 Gates Passed)
 
-- `tests/scenario1/evidence/scenario1-report.md`
-- harness: `tests/scenario1/run-scenario1.sh`
+Every target independently passed the full 14-gate acceptance flow:
 
-Required Scenario 1 results recorded as **PASS**:
+| # | Acceptance Gate | Verification | Result |
+|---|---|---|---|
+| 1 | Box availability & initialization | Vagrant provision & inventory generation | PASS |
+| 2 | Preflight syntax & connection | Ping and fact discovery | PASS |
+| 3 | Safe check mode preview | Execution with zero host mutation | PASS |
+| 4 | First bootstrap apply | Full run with expected tasks changed | PASS |
+| 5 | Admin SSH & privilege escalation | Key authentication & passwordless sudo/wheel | PASS |
+| 6 | Direct root SSH disabled | Root key/password login rejected | PASS |
+| 7 | Password authentication disabled | Password-based login rejected | PASS |
+| 8 | Host firewall active | `iptables-nft` or `firewalld` active, ports verified | PASS |
+| 9 | Automatic security updates | `unattended-upgrades` or `dnf-automatic` active | PASS |
+| 10 | Docker CE engine & Compose | Engine and Compose operational | PASS |
+| 11 | Post-apply verification playbook | All verify assertions pass | PASS |
+| 12 | Second apply idempotency | Playbook runs with `changed=0` | PASS |
+| 13 | Reboot recovery | VM reboots and returns to healthy state | PASS |
+| 14 | Post-reboot verify & Docker smoke | All assertions pass; `hello-world` container runs | PASS |
 
-- check mode without host mutation
-- first apply
-- first verify
-- second apply `changed=0`
-- reboot recovery
-- post-reboot verify
-- Docker `hello-world` smoke test
+### Enterprise Linux & SELinux Compliance
 
-Scenario 2 (existing configured production-like host) is explicitly post-MVP.
+On AlmaLinux 9 and 10:
+- Verified with SELinux in default `Enforcing` mode.
+- Zero SELinux policy violations or access denials encountered.
+- Docker daemon bridge and overlay networking verified with appropriate kernel modules (`kernel-modules-extra` on EL10).
 
 ## Known limitations
 
-- Single target per invocation.
-- No automatic full rollback system.
-- Firewall manages project-owned policy only; Docker-generated chains and published container ports are out of scope.
+- Single target per invocation for explicit operator oversight.
+- Automatic rollback guards protect critical access points (SSH and firewall); general convergence relies on idempotent rerun.
+- Firewall manages project-owned policy only (`iptables-nft` chains on Debian/Ubuntu, dedicated rich-rules/services in `firewalld` on EL); Docker-generated chains and published container ports are out of scope.
 - `bootstrap_docker_version: latest` preserves compatible existing installs without implicit upgrade.
-- Existing-server behavior beyond Scenario 1 is covered synthetically, not by a second real VM.
 
 ## Human release checklist
 
-Before tagging `v0.1.0`:
+Before tagging a release:
 
-1. Confirm `main` CI is green.
-2. Re-run `./tests/scenario1/run-scenario1.sh` on a fresh or approved VM snapshot if material changes landed after the recorded evidence.
-3. Review `CHANGELOG.md` and `README.md`.
-4. Explicitly approve Git tag and GitHub Release creation.
+1. Confirm `main` CI is green across Python 3.12, 3.13, and 3.14.
+2. Confirm `./tests/vagrant/run all test` passed and matrix evidence is recorded.
+3. Review `CHANGELOG.md`, `README.md`, and `README.fa.md`.
+4. Explicitly approve Git tag and GitHub Release creation per `AGENTS.md`.
