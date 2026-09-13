@@ -100,6 +100,34 @@ After a successful apply, the toolkit may write:
 
 This file records the bootstrap toolkit version only. It is troubleshooting metadata, not source of truth. A second identical apply does not rewrite it unless the toolkit version changes.
 
+## Wrapper CLI (`./bootstrap`)
+
+The wrapper provides a controlled interface to run Ansible playbooks with safety and host trust checks. Supported subcommands: `check`, `apply`, and `verify`.
+
+| Option | Short | Subcommands | Description |
+|---|---|---|---|
+| `--inventory` | `-i` | `check`, `apply`, `verify` | Path to inventory file with connection data for exactly one target host (required). |
+| `--extra-vars` | `-e` | `check`, `apply`, `verify` | Path to `bootstrap.yml` (defaults to `bootstrap.yml` beside `inventory.yml`). |
+| `--expected-host-fingerprint` | | `check`, `apply`, `verify` | Expected SSH host-key fingerprint (`SHA256:...`) for out-of-band trust enrollment. |
+| `--ask-pass` | `-k` | `check`, `apply`, `verify` | Prompt for SSH connection password (requires `sshpass` on control node). |
+| `--ask-become-pass` | `-K` | `check`, `apply`, `verify` | Prompt for privilege escalation (`sudo`) password. |
+| `--yes` | | `apply` | Skip interactive apply confirmation. |
+
+### Common CLI invocations
+
+- **Standard run (key-based SSH with root or passwordless sudo):**
+  ```bash
+  ./bootstrap apply -i inventory.yml
+  ```
+- **Initial run with non-root user and password (prompts for SSH & sudo passwords):**
+  ```bash
+  ./bootstrap apply -i inventory.yml -k -K
+  ```
+- **SSH key login, but non-root user requires sudo password:**
+  ```bash
+  ./bootstrap apply -i inventory.yml -K
+  ```
+
 ## Example
 
 See `examples/minimal/bootstrap.yml` and `examples/minimal/inventory.yml`.

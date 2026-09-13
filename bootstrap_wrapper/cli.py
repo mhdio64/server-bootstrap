@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 from pathlib import Path
 
@@ -47,6 +48,18 @@ def build_parser() -> argparse.ArgumentParser:
             "Expected SSH host-key fingerprint (SHA256:...). "
             "Required for non-interactive first-time host trust."
         ),
+    )
+    common.add_argument(
+        "-k",
+        "--ask-pass",
+        action="store_true",
+        help="Prompt for SSH connection password (requires sshpass on control node).",
+    )
+    common.add_argument(
+        "-K",
+        "--ask-become-pass",
+        action="store_true",
+        help="Prompt for privilege escalation (sudo) password.",
     )
 
     subparsers.add_parser(
@@ -105,6 +118,17 @@ def run_command(args: argparse.Namespace) -> int:
     connect_host, port = resolve_connection_target(inventory_path, root, host_name)
 
     allow_interactive = sys.stdin.isatty()
+    if (args.ask_pass or args.ask_become_pass) and not allow_interactive:
+        raise BootstrapWrapperError(
+            "Password prompts (--ask-pass / --ask-become-pass) require an interactive terminal (TTY)."
+        )
+
+    if args.ask_pass and shutil.which("sshpass") is None:
+        raise BootstrapWrapperError(
+            "--ask-pass requires 'sshpass' to be installed on the control node. "
+            "Install it via your package manager (e.g. 'apt install sshpass' or 'dnf install sshpass')."
+        )
+
     ensure_host_trust(
         connect_host,
         port,
@@ -127,6 +151,8 @@ def run_command(args: argparse.Namespace) -> int:
         inventory_path=inventory_path,
         extra_vars_path=extra_vars_path,
         check_mode=args.command == "check",
+        ask_pass=args.ask_pass,
+        ask_become_pass=args.ask_become_pass,
     )
 
     log_path = new_log_path(args.command)

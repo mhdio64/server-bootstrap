@@ -6,4 +6,8 @@ all:
   hosts:
     bootstrap-target:
       ansible_host: 203.0.113.10
+      # Initial connection user (root or a non-root sudo-capable account).
+      # If connecting with password, run `./bootstrap apply -i inventory.yml -k -K`.
+      # If connecting with SSH key but sudo requires password, pass `-K`.
+      # After initial bootstrap, update ansible_user to your bootstrap_admin_user.
       ansible_user: root

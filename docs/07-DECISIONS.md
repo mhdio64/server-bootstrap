@@ -210,6 +210,8 @@ v0.1.0 includes a thin Python stdlib wrapper with `check`, `apply`, and `verify`
 
 Host trust must support `--expected-host-fingerprint` and interactive approval. Silent trust-on-first-use is forbidden.
 
+Interactive authentication prompts are supported via `-k` (`--ask-pass`) and `-K` (`--ask-become-pass`) without writing secrets to files or logs.
+
 Interactive `apply` requires explicit confirmation; `--yes` enables automation.
 
 Each invocation accepts exactly one target host.
