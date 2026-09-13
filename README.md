@@ -50,10 +50,68 @@ pip install -r requirements-dev.txt
 
 `bootstrap.yml` is expected beside `inventory.yml` unless you pass `--extra-vars`.
 
+### Authentication & escalation prompts
+
+When bootstrapping a fresh host without prior key setup or where privilege escalation requires a password, the wrapper supports secure interactive password prompts without storing credentials in files or logs.
+
+#### Flag quick reference
+
+| Server Access State | Required Flags | Control Node Prerequisite |
+|---|---|---|
+| **Non-root user + password** (no SSH key yet) | `-k -K` | Install `sshpass` |
+| **Root user + password** (no SSH key yet) | `-k` | Install `sshpass` |
+| **SSH key login**, but `sudo` requires password | `-K` | None |
+| **Root with SSH key** or user with `NOPASSWD` | *No flags needed* | None |
+
+#### Scenario 1: Initial access via non-root user and password
+
+1. **Install `sshpass` on control machine:**
+   ```bash
+   sudo apt install sshpass   # Debian / Ubuntu
+   sudo dnf install sshpass   # AlmaLinux / Fedora
+   ```
+
+2. **Configure `inventory.yml` with the initial user:**
+   ```yaml
+   all:
+     hosts:
+       bootstrap-target:
+         ansible_host: 198.51.100.20
+         ansible_user: operator   # provided user
+   ```
+
+3. **Configure `bootstrap.yml` with the final admin user and your SSH public key:**
+   ```yaml
+   bootstrap_admin_user: deploy
+   bootstrap_admin_authorized_keys:
+     - "ssh-ed25519 AAAAC3... user@laptop"
+   ```
+   > **Security Note:** You must hold the matching private key locally (in `~/.ssh/` or loaded into `ssh-agent`). SSH hardening disables password authentication upon completion to eliminate brute-force attack vectors. If no matching private key is found on your control machine, preflight aborts early to prevent accidental lockout.
+
+4. **Run apply with `-k -K`:**
+   ```bash
+   ./bootstrap apply -i /path/to/inventory.yml -k -K
+   ```
+   You will be securely prompted for `SSH password:` and `BECOME password[sudo]:`.
+
+5. **Subsequent runs:**
+   Update `ansible_user: deploy` in `inventory.yml`. The new admin user has passwordless sudo (`NOPASSWD: ALL`) and key-based SSH, so no passwords or flags are required for future operations.
+
+#### Scenario 2: SSH key login, but non-root user requires sudo password
+
+If you connect with an SSH key but Ansible reports `Missing sudo password` or `sudo: a password is required`, simply pass `-K`:
+
+```bash
+./bootstrap apply -i /path/to/inventory.yml -K
+```
+
+Ansible prompts for `BECOME password[sudo]:`. Once applied, the admin user receives passwordless sudo for future invocations.
+
 ### Wrapper safety
 
 - First-time SSH host trust requires interactive approval or `--expected-host-fingerprint`.
 - Interactive `apply` requires confirmation; use `--yes` for automation.
+- Passwords are never written to config files or logs.
 - Logs: `${XDG_STATE_HOME:-~/.local/state}/server-bootstrap/logs`.
 
 ## Configuration

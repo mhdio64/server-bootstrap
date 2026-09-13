@@ -16,6 +16,8 @@ def build_playbook_command(
     inventory_path: Path,
     extra_vars_path: Path,
     check_mode: bool = False,
+    ask_pass: bool = False,
+    ask_become_pass: bool = False,
 ) -> list[str]:
     command = [
         "ansible-playbook",
@@ -29,6 +31,10 @@ def build_playbook_command(
     ]
     if check_mode:
         command.extend(["--check", "--diff"])
+    if ask_pass:
+        command.append("--ask-pass")
+    if ask_become_pass:
+        command.append("--ask-become-pass")
     return command
 
 

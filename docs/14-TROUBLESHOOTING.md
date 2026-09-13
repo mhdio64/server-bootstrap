@@ -32,6 +32,43 @@ The SSH role rolls back the project-owned drop-in if reconnect verification fail
 - Remove or fix `/etc/ssh/sshd_config.d/00-server-bootstrap.conf`.
 - Reload SSH (`systemctl reload ssh` on Debian/Ubuntu, `systemctl reload sshd` on Enterprise Linux) and restore key-based access before retrying.
 
+### Missing sudo password or privilege escalation error
+
+When connecting as a non-root user that requires a password for `sudo`, Ansible fails with `Missing sudo password` or `sudo: a password is required`.
+
+- Re-run with `-K` or `--ask-become-pass` to prompt interactively for the user's sudo password:
+  ```bash
+  ./bootstrap apply -i inventory.yml -K
+  ```
+- After bootstrap completes, `bootstrap_admin_user` is configured with passwordless sudo (`NOPASSWD:ALL`) in `/etc/sudoers.d/`, so subsequent runs will not prompt for a sudo password.
+
+### Initial password-based connection (no SSH key on target host)
+
+When bootstrapping a server provided with only a username and password:
+
+- Install `sshpass` on the control node (`sudo apt install sshpass` or `sudo dnf install sshpass`).
+- Pass `-k` (or `--ask-pass`) for SSH password authentication, and `-K` (or `--ask-become-pass`) if the non-root user needs a sudo password:
+  ```bash
+  ./bootstrap apply -i inventory.yml -k -K
+  ```
+- Ensure the control node has an SSH key loaded in `ssh-agent` or in `~/.ssh/` matching `bootstrap_admin_authorized_keys`, because SSH hardening will disable password authentication upon completion.
+
+### Permission denied (publickey,password) or missing sshpass
+
+- If you receive `ERROR: --ask-pass requires 'sshpass' to be installed on the control node`, install `sshpass` using your system package manager (`apt install sshpass` or `dnf install sshpass`).
+- If you receive `Permission denied (publickey,password)` on a fresh host, Ansible attempted key-based SSH while the target host only allows password access. Add `-k` (and `-K` for non-root users) to enable interactive password prompts.
+
+### "No control-node SSH identity matches configured admin keys"
+
+Preflight verifies that your control node possesses the private key corresponding to `bootstrap_admin_authorized_keys` before SSH hardening disables password logins:
+
+- If you connected using password auth, you still must have your future admin SSH key on the control machine.
+- Load the matching private key into `ssh-agent`:
+  ```bash
+  ssh-add ~/.ssh/id_ed25519
+  ```
+- Or set `ansible_ssh_private_key_file: ~/.ssh/id_ed25519` in `inventory.yml`.
+
 ## Firewall
 
 ### Preflight stops on foreign firewall policy (Debian / Ubuntu)

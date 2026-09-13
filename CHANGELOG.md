@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Wrapper Authentication & Privilege Escalation Prompts**:
+  - Added `-k` / `--ask-pass` and `-K` / `--ask-become-pass` flags to the `./bootstrap` wrapper CLI across `check`, `apply`, and `verify`.
+  - Added terminal (TTY) enforcement for password prompts to avoid hangs in non-interactive pipelines.
+  - Added prerequisite validation ensuring `sshpass` is installed on the control node before attempting `--ask-pass`.
+  - Added comprehensive unit tests for argument parsing, TTY validation, and prerequisite checks in `tests/unit/test_bootstrap_wrapper.py`.
+  - Documented fresh-server onboarding workflows for initial non-root password connection and password-protected sudo in `README.md`, `README.fa.md`, `docs/13-CONFIGURATION-REFERENCE.md`, and `docs/14-TROUBLESHOOTING.md`.
+
 ## [0.2.0] - 2026-09-11
 
 Multi-distribution expansion delivering full support and real-VM certification across 5 target operating systems.
