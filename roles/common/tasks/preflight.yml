@@ -5,6 +5,18 @@
 - name: Common | preflight platform checks
   ansible.builtin.import_tasks: assert_platform.yml
 
+- name: Common | validate configured hostname format
+  ansible.builtin.assert:
+    that:
+      - bootstrap_hostname | length > 0
+      - bootstrap_hostname | length <= 253
+      - bootstrap_hostname is match('^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$')
+    fail_msg: >-
+      bootstrap_hostname '{{ bootstrap_hostname }}' is invalid. Hostnames must comply with RFC 1123:
+      only alphanumeric characters (a-z, 0-9) and hyphens (-) are allowed, separated by dots for FQDNs.
+      Underscores, spaces, and leading/trailing hyphens are not permitted.
+  when: bootstrap_hostname is defined
+
 - name: Common | inspect package manager lock state via APT
   ansible.builtin.include_tasks: package_manager/apt_preflight.yml
   when: common_package_manager == 'apt'

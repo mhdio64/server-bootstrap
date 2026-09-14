@@ -1,0 +1,18 @@
+---
+- name: Synthetic | invalid hostname must fail preflight
+  hosts: localhost
+  gather_facts: false
+  vars:
+    bootstrap_hostname: lab_02
+  tasks:
+    - name: Synthetic | validate configured hostname format
+      ansible.builtin.assert:
+        that:
+          - bootstrap_hostname | length > 0
+          - bootstrap_hostname | length <= 253
+          - bootstrap_hostname is match('^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$')
+        fail_msg: >-
+          bootstrap_hostname '{{ bootstrap_hostname }}' is invalid. Hostnames must comply with RFC 1123:
+          only alphanumeric characters (a-z, 0-9) and hyphens (-) are allowed, separated by dots for FQDNs.
+          Underscores, spaces, and leading/trailing hyphens are not permitted.
+      when: bootstrap_hostname is defined
