@@ -12,14 +12,35 @@
     label: "{{ item }}"
   when: bootstrap_docker_users | default([]) | length > 0
 
-- name: Docker | verify configured docker group users exist
+- name: Docker | inspect configured docker group users
   ansible.builtin.getent:
     database: passwd
     key: "{{ item }}"
+  register: docker_configured_users_getent
+  failed_when: false
   loop: "{{ bootstrap_docker_users | default([]) }}"
   loop_control:
     label: "{{ item }}"
-  when: bootstrap_docker_users | default([]) | length > 0
+  when:
+    - bootstrap_docker_users | default([]) | length > 0
+    - not (item == (bootstrap_admin_user | default('')) and (bootstrap_users_enabled | default(true) | bool))
+
+- name: Docker | verify configured docker group users exist on host
+  ansible.builtin.assert:
+    that:
+      - item.ansible_facts.getent_passwd is defined
+      - item.item in item.ansible_facts.getent_passwd
+    fail_msg: >-
+      User '{{ item.item }}' configured in bootstrap_docker_users was not found on the host.
+      In server-bootstrap, only bootstrap_admin_user ('{{ bootstrap_admin_user | default('') }}')
+      is created automatically. Any other users in bootstrap_docker_users must exist prior to running bootstrap.
+  loop: "{{ docker_configured_users_getent.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - docker_configured_users_getent is defined
+    - docker_configured_users_getent.results is defined
+    - not (item.skipped | default(false))
 
 - name: Docker | discover existing Docker installation state
   ansible.builtin.import_tasks: discover_state.yml

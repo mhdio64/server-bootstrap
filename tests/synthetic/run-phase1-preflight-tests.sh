@@ -95,6 +95,14 @@ run_expect_failure \
   "Docker downgrade rejection"
 
 run_expect_success \
+  tests/synthetic/playbooks/test_docker_preflight_docker_users.yml \
+  "docker preflight admin user allowance"
+
+run_expect_failure \
+  tests/synthetic/playbooks/test_docker_preflight_missing_user.yml \
+  "missing non-admin docker user rejection"
+
+run_expect_success \
   tests/synthetic/playbooks/test_system_uid_classification.yml \
   "system UID classification"
 
