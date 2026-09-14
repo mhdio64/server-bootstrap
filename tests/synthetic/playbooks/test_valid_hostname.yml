@@ -1,0 +1,23 @@
+---
+- name: Synthetic | valid hostname formats must pass preflight
+  hosts: localhost
+  gather_facts: false
+  vars:
+    test_hostnames:
+      - lab-02
+      - lab02
+      - dev
+      - app-01.example.com
+      - node1.sub-domain.internal
+  tasks:
+    - name: Synthetic | validate configured hostname formats
+      ansible.builtin.assert:
+        that:
+          - item | length > 0
+          - item | length <= 253
+          - item is match('^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$')
+        fail_msg: >-
+          Hostname '{{ item }}' unexpectedly failed RFC 1123 validation.
+      loop: "{{ test_hostnames }}"
+      loop_control:
+        label: "{{ item }}"

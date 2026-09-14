@@ -39,6 +39,14 @@ run_expect_failure \
   "root bootstrap_admin_user rejection"
 
 run_expect_failure \
+  tests/synthetic/playbooks/test_invalid_hostname.yml \
+  "invalid bootstrap_hostname rejection"
+
+run_expect_success \
+  tests/synthetic/playbooks/test_valid_hostname.yml \
+  "valid bootstrap_hostname formats"
+
+run_expect_failure \
   tests/synthetic/playbooks/test_missing_authorized_keys.yml \
   "missing authorized keys users preflight"
 
