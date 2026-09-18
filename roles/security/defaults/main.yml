@@ -1,6 +1,14 @@
 ---
 # Public API defaults for the security role.
 bootstrap_security_enabled: true
+bootstrap_security_auditd_enabled: true
+bootstrap_security_sysctl_enabled: true
+bootstrap_security_modprobe_blacklist_enabled: true
+bootstrap_security_coredump_disabled: true
+bootstrap_security_login_defs_enabled: true
+bootstrap_security_banner_enabled: true
+bootstrap_security_file_permissions_enabled: true
+bootstrap_security_fail2ban_enabled: true
 
 # Role-internal defaults (not public API).
 security_packages:
@@ -9,3 +17,17 @@ security_apt_periodic_dropin: /etc/apt/apt.conf.d/20server-bootstrap-auto-upgrad
 security_unattended_upgrades_dropin: /etc/apt/apt.conf.d/50server-bootstrap-unattended-upgrades
 security_unattended_upgrades_timer: apt-daily-upgrade.timer
 security_apt_daily_timer: apt-daily.timer
+
+security_auditd_service: auditd
+security_auditd_rules_dir: /etc/audit/rules.d
+security_auditd_rules_file: /etc/audit/rules.d/99-server-bootstrap.rules
+
+security_sysctl_dropin: /etc/sysctl.d/99-server-bootstrap-hardening.conf
+security_modprobe_dropin: /etc/modprobe.d/99-server-bootstrap-blacklist.conf
+security_limits_dropin: /etc/security/limits.d/10-server-bootstrap-limits.conf
+
+security_banner_text: >-
+  Authorized access only. Unauthorized access is strictly prohibited and
+  subject to legal action.
+security_banner_issue_path: /etc/issue
+security_banner_issue_net_path: /etc/issue.net

@@ -1,0 +1,40 @@
+---
+- name: Security | install auditd packages
+  ansible.builtin.package:
+    name: "{{ security_auditd_packages }}"
+    state: present
+  when:
+    - security_auditd_packages is defined
+    - security_auditd_packages | length > 0
+
+- name: Security | ensure audit rules directory exists
+  ansible.builtin.file:
+    path: "{{ security_auditd_rules_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Security | install project-owned audit rules
+  ansible.builtin.template:
+    src: 99-server-bootstrap-audit.rules.j2
+    dest: "{{ security_auditd_rules_file }}"
+    owner: root
+    group: root
+    mode: "0640"
+  register: security_audit_rules_install
+
+- name: Security | reload audit rules into kernel
+  ansible.builtin.command: augenrules --load
+  changed_when: false
+  failed_when: false
+  when:
+    - not ansible_check_mode
+    - security_audit_rules_install.changed
+
+- name: Security | enable and start auditd service
+  ansible.builtin.service:
+    name: "{{ security_auditd_service }}"
+    enabled: true
+    state: started
+  when: not ansible_check_mode

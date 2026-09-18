@@ -11,3 +11,13 @@
       PasswordAuthentication no
       KbdInteractiveAuthentication no
       PermitRootLogin prohibit-password
+      LogLevel {{ ssh_log_level | default('VERBOSE') }}
+      MaxAuthTries {{ ssh_max_auth_tries | default(3) }}
+      MaxSessions {{ ssh_max_sessions | default(2) }}
+      ClientAliveInterval {{ ssh_client_alive_interval | default(300) }}
+
+      ClientAliveCountMax {{ ssh_client_alive_count_max | default(2) }}
+      TCPKeepAlive {{ ssh_tcp_keep_alive | default('no') }}
+      X11Forwarding {{ ssh_x11_forwarding | default('no') }}
+      AllowAgentForwarding {{ ssh_allow_agent_forwarding | default('no') }}
+      Banner {{ ssh_banner_path | default('/etc/issue.net') }}

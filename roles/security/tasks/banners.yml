@@ -1,0 +1,16 @@
+---
+- name: Security | deploy legal warning banner to /etc/issue
+  ansible.builtin.copy:
+    dest: "{{ security_banner_issue_path }}"
+    content: "{{ security_banner_text }}\n"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Security | deploy legal warning banner to /etc/issue.net
+  ansible.builtin.copy:
+    dest: "{{ security_banner_issue_net_path }}"
+    content: "{{ security_banner_text }}\n"
+    owner: root
+    group: root
+    mode: "0644"

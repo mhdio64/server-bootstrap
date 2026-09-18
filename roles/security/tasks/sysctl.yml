@@ -1,0 +1,17 @@
+---
+- name: Security | install sysctl hardening drop-in
+  ansible.builtin.template:
+    src: 99-server-bootstrap-hardening.conf.j2
+    dest: "{{ security_sysctl_dropin }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: security_sysctl_install
+
+- name: Security | apply sysctl hardening parameters
+  ansible.builtin.command: "sysctl -p {{ security_sysctl_dropin }}"
+  changed_when: false
+  failed_when: false
+  when:
+    - not ansible_check_mode
+    - security_sysctl_install.changed

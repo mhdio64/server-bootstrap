@@ -1,0 +1,8 @@
+---
+- name: Security | install coredump restriction drop-in
+  ansible.builtin.template:
+    src: 10-server-bootstrap-limits.conf.j2
+    dest: "{{ security_limits_dropin }}"
+    owner: root
+    group: root
+    mode: "0644"

@@ -34,13 +34,15 @@ TARGETS = {
   "alma10" => {
     box: "almalinux/10",
     ip: "192.168.56.10",
-    cpus: 2,
+    cpus: 1,
     memory: 2048
   }
 }
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.boot_timeout = 600
   TARGETS.each do |name, settings|
+
     config.vm.define name, autostart: false do |node|
       node.vm.box = settings[:box]
       node.vm.hostname = "sb-test-#{name}"

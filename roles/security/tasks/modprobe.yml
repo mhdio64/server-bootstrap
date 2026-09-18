@@ -1,0 +1,8 @@
+---
+- name: Security | install modprobe blacklist drop-in
+  ansible.builtin.template:
+    src: 99-server-bootstrap-blacklist.conf.j2
+    dest: "{{ security_modprobe_dropin }}"
+    owner: root
+    group: root
+    mode: "0644"

@@ -1,0 +1,46 @@
+# Managed by server-bootstrap. Do not edit manually.
+
+# Protection against SYN flood attacks and network abuse
+net.ipv4.tcp_syncookies = 1
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+
+# Reverse path filtering (source address validation)
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+
+# Do not accept or send ICMP redirects
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+
+# Do not accept source-routed packets
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.default.accept_source_route = 0
+net.ipv6.conf.all.accept_source_route = 0
+net.ipv6.conf.default.accept_source_route = 0
+
+# Log packets with impossible addresses (martians)
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
+
+# Protect FIFOs, symlinks, and regular files
+fs.protected_fifos = 2
+fs.protected_regular = 2
+fs.protected_hardlinks = 1
+fs.protected_symlinks = 1
+
+# Disable SUID coredumps and enforce PID in core files
+fs.suid_dumpable = 0
+kernel.core_uses_pid = 1
+
+# Memory and pointer restrictions
+kernel.kptr_restrict = 2
+kernel.dmesg_restrict = 1
+kernel.sysrq = 0
+kernel.yama.ptrace_scope = 1
+net.core.bpf_jit_harden = 2
+dev.tty.ldisc_autoload = 0
