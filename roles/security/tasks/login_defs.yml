@@ -1,0 +1,35 @@
+---
+- name: Security | configure UMASK in /etc/login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^UMASK\s+'
+    line: 'UMASK 027'
+    state: present
+
+- name: Security | configure PASS_MAX_DAYS in /etc/login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^PASS_MAX_DAYS\s+'
+    line: 'PASS_MAX_DAYS 90'
+    state: present
+
+- name: Security | configure PASS_MIN_DAYS in /etc/login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^PASS_MIN_DAYS\s+'
+    line: 'PASS_MIN_DAYS 7'
+    state: present
+
+- name: Security | configure PASS_WARN_AGE in /etc/login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^PASS_WARN_AGE\s+'
+    line: 'PASS_WARN_AGE 7'
+    state: present
+
+- name: Security | configure SHA_CRYPT_MIN_ROUNDS in /etc/login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^SHA_CRYPT_MIN_ROUNDS\s+'
+    line: 'SHA_CRYPT_MIN_ROUNDS 5000'
+    state: present

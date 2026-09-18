@@ -7,15 +7,15 @@ Sanitized real-VM acceptance evidence for target `ubuntu2404`.
 | Field | Value |
 |---|---|
 | Target identifier | `ubuntu2404` |
-| Toolkit version | `0.1.0` |
-| Git commit | `edc5eaea7e0ea56a8b441ab7fe93de5d2e2f8956` |
+| Toolkit version | `0.2.0` |
+| Git commit | `12611118fb66b19d7604879da86fd70960cb0ed4` |
 | Vagrant box | `bento/ubuntu-24.04` |
 | Vagrant version | `Vagrant 2.4.9` |
 | VirtualBox version | `7.2.16r174877` |
 | Ansible version | `ansible [core 2.20.1]` |
 | Python version | `Python 3.14.4` |
-| Started at (UTC) | 2026-09-11T15:18:42Z |
-| Finished at (UTC) | 2026-09-11T15:28:47Z |
+| Started at (UTC) | 2026-09-18T16:52:45Z |
+| Finished at (UTC) | 2026-09-18T17:00:20Z |
 
 ## Acceptance Gate Results
 

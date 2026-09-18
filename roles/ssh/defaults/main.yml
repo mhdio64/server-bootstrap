@@ -7,6 +7,15 @@ ssh_dropin_filename: 00-server-bootstrap.conf
 ssh_dropin_path: "/etc/ssh/sshd_config.d/{{ ssh_dropin_filename }}"
 ssh_service_name: ssh
 ssh_reconnect_timeout: 15
+ssh_log_level: VERBOSE
+ssh_max_auth_tries: 3
+ssh_max_sessions: 2
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 2
+ssh_tcp_keep_alive: "no"
+ssh_x11_forwarding: "no"
+ssh_allow_agent_forwarding: "no"
+ssh_banner_path: /etc/issue.net
 ssh_managed_directives:
   - port
   - pubkeyauthentication
@@ -14,11 +23,30 @@ ssh_managed_directives:
   - passwordauthentication
   - kbdinteractiveauthentication
   - permitrootlogin
+  - loglevel
+  - maxauthtries
+  - maxsessions
+  - clientaliveinterval
+  - clientalivecountmax
+  - tcpkeepalive
+  - x11forwarding
+  - allowagentforwarding
+  - banner
 ssh_expected_effective:
   pubkeyauthentication: "yes"
   permitemptypasswords: "no"
   passwordauthentication: "no"
   kbdinteractiveauthentication: "no"
+  loglevel: "VERBOSE"
+  maxauthtries: "3"
+  maxsessions: "2"
+
+  clientaliveinterval: "300"
+  clientalivecountmax: "2"
+  tcpkeepalive: "no"
+  x11forwarding: "no"
+  allowagentforwarding: "no"
+  banner: "/etc/issue.net"
 ssh_permitrootlogin_accepted_values:
   - prohibit-password
   - without-password

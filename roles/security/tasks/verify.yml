@@ -9,3 +9,51 @@
 - name: Security | verify dnf-automatic backend
   ansible.builtin.include_tasks: backends/dnf_automatic_verify.yml
   when: security_backend == 'dnf_automatic'
+
+- name: Security | verify auditd service is active
+  ansible.builtin.systemd:
+    name: "{{ security_auditd_service }}"
+  register: security_verify_auditd
+  failed_when: security_verify_auditd.status.ActiveState | default('') != 'active'
+  when: bootstrap_security_auditd_enabled | default(true) | bool
+
+- name: Security | verify sysctl hardening drop-in exists
+  ansible.builtin.stat:
+    path: "{{ security_sysctl_dropin }}"
+  register: security_verify_sysctl
+  failed_when: not security_verify_sysctl.stat.exists
+  when: bootstrap_security_sysctl_enabled | default(true) | bool
+
+- name: Security | verify modprobe blacklist drop-in exists
+  ansible.builtin.stat:
+    path: "{{ security_modprobe_dropin }}"
+  register: security_verify_modprobe
+  failed_when: not security_verify_modprobe.stat.exists
+  when: bootstrap_security_modprobe_blacklist_enabled | default(true) | bool
+
+- name: Security | verify coredump limits drop-in exists
+  ansible.builtin.stat:
+    path: "{{ security_limits_dropin }}"
+  register: security_verify_limits
+  failed_when: not security_verify_limits.stat.exists
+  when: bootstrap_security_coredump_disabled | default(true) | bool
+
+- name: Security | verify legal banners exist
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: security_verify_banners
+  failed_when: not security_verify_banners.stat.exists
+  loop:
+    - "{{ security_banner_issue_path }}"
+    - "{{ security_banner_issue_net_path }}"
+  when: bootstrap_security_banner_enabled | default(true) | bool
+
+- name: Security | verify fail2ban service is active when enabled
+  ansible.builtin.systemd:
+    name: fail2ban
+  register: security_verify_fail2ban
+  failed_when: security_verify_fail2ban.status.ActiveState | default('') != 'active'
+  when:
+    - bootstrap_security_fail2ban_enabled | default(true) | bool
+    - security_fail2ban_package is defined
+    - security_fail2ban_package | length > 0

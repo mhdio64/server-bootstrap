@@ -1,0 +1,32 @@
+---
+- name: Security | install fail2ban package
+  ansible.builtin.package:
+    name: "{{ security_fail2ban_package }}"
+    state: present
+  when:
+    - security_fail2ban_package is defined
+    - security_fail2ban_package | length > 0
+
+- name: Security | ensure initial fail2ban jail.local exists
+  ansible.builtin.copy:
+    src: /etc/fail2ban/jail.conf
+    dest: /etc/fail2ban/jail.local
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+    force: false
+  when:
+    - not ansible_check_mode
+    - security_fail2ban_package is defined
+    - security_fail2ban_package | length > 0
+
+- name: Security | ensure fail2ban service is enabled and started
+  ansible.builtin.service:
+    name: fail2ban
+    enabled: true
+    state: started
+  when:
+    - not ansible_check_mode
+    - security_fail2ban_package is defined
+    - security_fail2ban_package | length > 0

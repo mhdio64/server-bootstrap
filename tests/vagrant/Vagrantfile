@@ -40,7 +40,9 @@ TARGETS = {
 }
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.boot_timeout = 600
   TARGETS.each do |name, settings|
+
     config.vm.define name, autostart: false do |node|
       node.vm.box = settings[:box]
       node.vm.hostname = "sb-test-#{name}"

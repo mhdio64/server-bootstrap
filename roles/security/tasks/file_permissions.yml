@@ -1,0 +1,48 @@
+---
+- name: Security | check if /etc/crontab exists
+  ansible.builtin.stat:
+    path: /etc/crontab
+  register: security_crontab_stat
+
+- name: Security | harden /etc/crontab file permissions
+  ansible.builtin.file:
+    path: /etc/crontab
+    owner: root
+    group: root
+    mode: "0600"
+  when: security_crontab_stat.stat.exists
+
+- name: Security | check if /etc/ssh/sshd_config exists
+  ansible.builtin.stat:
+    path: /etc/ssh/sshd_config
+  register: security_sshd_config_stat
+
+- name: Security | harden /etc/ssh/sshd_config file permissions
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: "0600"
+  when: security_sshd_config_stat.stat.exists
+
+- name: Security | check cron directories
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /etc/cron.d
+    - /etc/cron.daily
+    - /etc/cron.hourly
+    - /etc/cron.weekly
+    - /etc/cron.monthly
+  register: security_cron_dirs_stat
+
+- name: Security | harden cron directory permissions
+  ansible.builtin.file:
+    path: "{{ item.stat.path }}"
+    owner: root
+    group: root
+    mode: "0700"
+  loop: "{{ security_cron_dirs_stat.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.stat.exists and item.stat.isdir

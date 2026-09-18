@@ -76,14 +76,28 @@ Backend specifics:
 
 Public API accepts individual ports only. Ranges and source-based rules are out of scope for the current baseline.
 
-## Security updates
+## Security updates and hardening
 
 Automatic reboot after unattended upgrades is disabled by default.
 
 - **Debian / Ubuntu**: Configures `unattended-upgrades` targeting official distribution security suites.
 - **Enterprise Linux (AlmaLinux 9 / 10)**: Configures `dnf-automatic` with security update filters and enabled systemd timer.
 
+### Hardening controls
+
+| Variable | Default | Description |
+|---|---|---|
+| `bootstrap_security_auditd_enabled` | `true` | Installs and enables `auditd` with rules monitoring critical authentication and system configuration files. |
+| `bootstrap_security_sysctl_enabled` | `true` | Deploys `/etc/sysctl.d/99-server-bootstrap-hardening.conf` (SYN cookies, reverse path filtering, martian logging, redirect disabling, ASLR/ptrace restrictions) while preserving container bridge forwarding. |
+| `bootstrap_security_modprobe_blacklist_enabled` | `true` | Blacklists uncommon legacy protocols (`dccp`, `sctp`, `rds`, `tipc`) and obsolete filesystems (`cramfs`, `freevxfs`, `jffs2`, `hfs`, `hfsplus`, `udf`) and `usb-storage`. |
+| `bootstrap_security_coredump_disabled` | `true` | Disables core dumps for all users via `/etc/security/limits.d/10-server-bootstrap-limits.conf`. |
+| `bootstrap_security_login_defs_enabled` | `true` | Configures `UMASK 027`, password aging policies (`PASS_MAX_DAYS 90`), and cryptographic rounds (`SHA_CRYPT_MIN_ROUNDS 5000`) in `/etc/login.defs`. |
+| `bootstrap_security_banner_enabled` | `true` | Deploys legal warning notices to `/etc/issue` and `/etc/issue.net`. |
+| `bootstrap_security_file_permissions_enabled` | `true` | Restricts permissions on sensitive system files (`/etc/crontab` to 0600, `/etc/cron.*` to 0700, `/etc/ssh/sshd_config` to 0600). |
+| `bootstrap_security_fail2ban_enabled` | `true` | Installs and enables `fail2ban` service on supported distributions (Debian/Ubuntu). |
+
 ## Docker
+
 
 | Variable | Default | Description |
 |---|---|---|

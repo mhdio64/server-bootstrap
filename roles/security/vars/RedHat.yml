@@ -5,3 +5,6 @@ security_packages:
   - dnf-automatic
 security_dnf_automatic_conf: /etc/dnf/automatic.conf
 security_dnf_automatic_timer: dnf-automatic.timer
+security_auditd_packages:
+  - audit
+security_fail2ban_package: ""
