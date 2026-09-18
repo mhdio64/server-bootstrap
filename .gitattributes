@@ -1,0 +1,29 @@
+# Git Attributes for server-bootstrap
+
+# Exclude developer, CI, and internal tooling from exported release archives
+.github export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore
+.ansible-lint export-ignore
+.yamllint export-ignore
+.secrets.baseline export-ignore
+requirements-dev.txt export-ignore
+scripts export-ignore
+tests export-ignore
+AGENTS.md export-ignore
+docs/00-CONTEXT-INDEX.md export-ignore
+docs/01-PROJECT-SPEC.md export-ignore
+docs/02-ARCHITECTURE.md export-ignore
+docs/03-SECURITY-SAFETY.md export-ignore
+docs/04-IMPLEMENTATION-PLAN.md export-ignore
+docs/05-TESTING-RELEASE.md export-ignore
+docs/06-CURSOR-WORKFLOW.md export-ignore
+docs/07-DECISIONS.md export-ignore
+docs/08-RISKS-ASSUMPTIONS.md export-ignore
+docs/09-VERSION-SOURCES.md export-ignore
+docs/10-PHASE-STATUS.md export-ignore
+docs/11-INTERVIEW-DECISIONS.md export-ignore
+docs/12-GRAPHIFY.md export-ignore
+docs/15-RELEASE-EVIDENCE.md export-ignore
+docs/16-MULTI-DISTRO-ROADMAP.md export-ignore
+docs/MANIFEST.md export-ignore
