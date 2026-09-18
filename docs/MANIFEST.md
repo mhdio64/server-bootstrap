@@ -11,7 +11,6 @@ Files:
 - `.cursor/rules/30-tests-ci.mdc`
 - `.cursor/skills/implement-approved-phase/SKILL.md`
 - `AGENTS.md`
-- `PLAN.md`
 - `README.md`
 - `docs/00-CONTEXT-INDEX.md`
 - `docs/01-PROJECT-SPEC.md`

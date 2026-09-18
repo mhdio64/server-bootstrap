@@ -44,7 +44,7 @@ local/
 tests/vagrant/.vagrant/
 tests/vagrant/tmp/
 
-# Graphify local-only artifacts
-graphify-out/cost.json
-graphify-out/cache/
-graphify-out/.graphify_*
+# Developer and agent tooling artifacts
+.cursor/
+graphify-out/
+PLAN.md
