@@ -7,15 +7,15 @@ Sanitized real-VM acceptance evidence for target `ubuntu2204`.
 | Field | Value |
 |---|---|
 | Target identifier | `ubuntu2204` |
-| Toolkit version | `0.1.0` |
-| Git commit | `edc5eaea7e0ea56a8b441ab7fe93de5d2e2f8956` |
+| Toolkit version | `0.2.0` |
+| Git commit | `eba1096527b9fefcd954ccfff4bc2c5cbb0685bf` |
 | Vagrant box | `bento/ubuntu-22.04` |
 | Vagrant version | `Vagrant 2.4.9` |
 | VirtualBox version | `7.2.16r174877` |
 | Ansible version | `ansible [core 2.20.1]` |
 | Python version | `Python 3.14.4` |
-| Started at (UTC) | 2026-09-11T15:28:51Z |
-| Finished at (UTC) | 2026-09-11T15:37:00Z |
+| Started at (UTC) | 2026-09-18T17:09:12Z |
+| Finished at (UTC) | 2026-09-18T17:18:41Z |
 
 ## Acceptance Gate Results
 

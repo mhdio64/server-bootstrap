@@ -7,15 +7,15 @@ Sanitized real-VM acceptance evidence for target `alma9`.
 | Field | Value |
 |---|---|
 | Target identifier | `alma9` |
-| Toolkit version | `0.1.0` |
-| Git commit | `edc5eaea7e0ea56a8b441ab7fe93de5d2e2f8956` |
+| Toolkit version | `0.2.0` |
+| Git commit | `eba1096527b9fefcd954ccfff4bc2c5cbb0685bf` |
 | Vagrant box | `almalinux/9` |
 | Vagrant version | `Vagrant 2.4.9` |
 | VirtualBox version | `7.2.16r174877` |
 | Ansible version | `ansible [core 2.20.1]` |
 | Python version | `Python 3.14.4` |
-| Started at (UTC) | 2026-09-11T15:46:19Z |
-| Finished at (UTC) | 2026-09-11T16:14:35Z |
+| Started at (UTC) | 2026-09-18T18:40:09Z |
+| Finished at (UTC) | 2026-09-18T18:48:48Z |
 
 ## Acceptance Gate Results
 
