@@ -92,9 +92,11 @@ Automatic reboot after unattended upgrades is disabled by default.
 | `bootstrap_security_modprobe_blacklist_enabled` | `true` | Blacklists uncommon legacy protocols (`dccp`, `sctp`, `rds`, `tipc`) and obsolete filesystems (`cramfs`, `freevxfs`, `jffs2`, `hfs`, `hfsplus`, `udf`) and `usb-storage`. |
 | `bootstrap_security_coredump_disabled` | `true` | Disables core dumps for all users via `/etc/security/limits.d/10-server-bootstrap-limits.conf`. |
 | `bootstrap_security_login_defs_enabled` | `true` | Configures `UMASK 027`, password aging policies (`PASS_MAX_DAYS 90`), and cryptographic rounds (`SHA_CRYPT_MIN_ROUNDS 5000`) in `/etc/login.defs`. |
-| `bootstrap_security_banner_enabled` | `true` | Deploys legal warning notices to `/etc/issue` and `/etc/issue.net`. |
-| `bootstrap_security_file_permissions_enabled` | `true` | Restricts permissions on sensitive system files (`/etc/crontab` to 0600, `/etc/cron.*` to 0700, `/etc/ssh/sshd_config` to 0600). |
+| `bootstrap_security_banner_enabled` | `true` | Deploys a standardized, professional legal warning banner (CIS / NIST SP 800-171 compliant) to `/etc/issue` and `/etc/issue.net`. |
+| `bootstrap_security_file_permissions_enabled` | `true` | Restricts permissions on sensitive system files (`/etc/crontab` to 0600, `/etc/cron.*` to 0700, `/etc/ssh/sshd_config` to 0600, `/etc/sudoers` to 0440, `/etc/sudoers.d` to 0750, and `/boot/grub/grub.cfg` to 0600). |
 | `bootstrap_security_fail2ban_enabled` | `true` | Installs and enables `fail2ban` service on supported distributions (Debian/Ubuntu). |
+| `bootstrap_security_accounting_enabled` | `true` | Installs and enables system accounting services (`sysstat` and `acct` / `psacct`) and configures periodic `debsums` integrity checks. |
+| `bootstrap_security_restrict_compilers` | `true` | Restricts system compiler binaries (`/usr/bin/as`) to root execution only (`0700`). |
 
 ## Docker
 

@@ -10,3 +10,6 @@ security_apt_daily_timer: apt-daily.timer
 security_auditd_packages:
   - auditd
 security_fail2ban_package: ""
+security_accounting_packages: []
+security_sysstat_service: sysstat
+security_acct_service: acct

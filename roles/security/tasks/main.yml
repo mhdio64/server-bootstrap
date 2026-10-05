@@ -41,3 +41,7 @@
 - name: Security | configure fail2ban intrusion prevention
   ansible.builtin.include_tasks: fail2ban.yml
   when: bootstrap_security_fail2ban_enabled | default(true) | bool
+
+- name: Security | configure system accounting and audit tools
+  ansible.builtin.include_tasks: accounting.yml
+  when: bootstrap_security_accounting_enabled | default(true) | bool

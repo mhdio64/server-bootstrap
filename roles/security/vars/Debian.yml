@@ -4,7 +4,9 @@ security_backend: unattended_upgrades
 security_packages:
   - unattended-upgrades
   - libpam-tmpdir
+  - libpam-pwquality
   - debsums
+  - apt-show-versions
 security_apt_periodic_dropin: /etc/apt/apt.conf.d/20server-bootstrap-auto-upgrades
 security_unattended_upgrades_dropin: /etc/apt/apt.conf.d/50server-bootstrap-unattended-upgrades
 security_unattended_upgrades_timer: apt-daily-upgrade.timer
@@ -13,3 +15,8 @@ security_auditd_packages:
   - auditd
   - audispd-plugins
 security_fail2ban_package: fail2ban
+security_accounting_packages:
+  - sysstat
+  - acct
+security_sysstat_service: sysstat
+security_acct_service: acct
