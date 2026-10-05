@@ -1,0 +1,44 @@
+---
+- name: Security | install accounting packages
+  ansible.builtin.package:
+    name: "{{ security_accounting_packages }}"
+    state: present
+  when:
+    - security_accounting_packages is defined
+    - security_accounting_packages | length > 0
+
+- name: Security | enable sysstat data collection on Debian family
+  ansible.builtin.lineinfile:
+    path: /etc/default/sysstat
+    regexp: '^ENABLED='
+    line: 'ENABLED="true"'
+    state: present
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+    - security_sysstat_service is defined
+
+- name: Security | enable and start sysstat service
+  ansible.builtin.systemd:
+    name: "{{ security_sysstat_service }}"
+    enabled: true
+    state: started
+  when:
+    - security_sysstat_service is defined
+    - security_sysstat_service | length > 0
+
+- name: Security | enable and start process accounting service
+  ansible.builtin.systemd:
+    name: "{{ security_acct_service }}"
+    enabled: true
+    state: started
+  when:
+    - security_acct_service is defined
+    - security_acct_service | length > 0
+
+- name: Security | configure debsums periodic check on Debian family
+  ansible.builtin.lineinfile:
+    path: /etc/default/debsums
+    regexp: '^CRON_CHECK='
+    line: 'CRON_CHECK=daily'
+    state: present
+  when: ansible_facts['os_family'] == 'Debian'

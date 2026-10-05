@@ -57,3 +57,23 @@
     - bootstrap_security_fail2ban_enabled | default(true) | bool
     - security_fail2ban_package is defined
     - security_fail2ban_package | length > 0
+
+- name: Security | verify sysstat service is active when enabled
+  ansible.builtin.systemd:
+    name: "{{ security_sysstat_service }}"
+  register: security_verify_sysstat
+  failed_when: security_verify_sysstat.status.ActiveState | default('') != 'active'
+  when:
+    - bootstrap_security_accounting_enabled | default(true) | bool
+    - security_sysstat_service is defined
+    - security_sysstat_service | length > 0
+
+- name: Security | verify process accounting service is active when enabled
+  ansible.builtin.systemd:
+    name: "{{ security_acct_service }}"
+  register: security_verify_acct
+  failed_when: security_verify_acct.status.ActiveState | default('') != 'active'
+  when:
+    - bootstrap_security_accounting_enabled | default(true) | bool
+    - security_acct_service is defined
+    - security_acct_service | length > 0

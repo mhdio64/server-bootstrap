@@ -3,8 +3,14 @@
 security_backend: dnf_automatic
 security_packages:
   - dnf-automatic
+  - pam_pwquality
 security_dnf_automatic_conf: /etc/dnf/automatic.conf
 security_dnf_automatic_timer: dnf-automatic.timer
 security_auditd_packages:
   - audit
 security_fail2ban_package: ""
+security_accounting_packages:
+  - sysstat
+  - psacct
+security_sysstat_service: sysstat
+security_acct_service: psacct

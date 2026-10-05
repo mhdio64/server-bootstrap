@@ -80,6 +80,37 @@
     name: "{{ common_timesync_package }}"
     state: present
 
+- name: Common | ensure systemd-timesyncd drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/timesyncd.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: common_timesync_service == 'systemd-timesyncd'
+
+- name: Common | configure systemd-timesyncd reliable NTP servers
+  ansible.builtin.copy:
+    dest: /etc/systemd/timesyncd.conf.d/00-server-bootstrap-ntp.conf
+    content: |
+      [Time]
+      NTP={{ bootstrap_ntp_servers | default('time.cloudflare.com pool.ntp.org time.google.com') }}
+      FallbackNTP=ntp.ubuntu.com
+    owner: root
+    group: root
+    mode: "0644"
+  register: common_timesyncd_config
+  when: common_timesync_service == 'systemd-timesyncd'
+
+- name: Common | restart systemd-timesyncd on configuration change
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    state: restarted
+  when:
+    - common_timesync_service == 'systemd-timesyncd'
+    - common_timesyncd_config is changed
+    - not ansible_check_mode
+
 - name: Common | enable and start time synchronization service
   ansible.builtin.systemd:
     name: "{{ common_timesync_service }}"

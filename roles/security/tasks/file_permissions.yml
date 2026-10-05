@@ -46,3 +46,62 @@
   loop_control:
     label: "{{ item.item }}"
   when: item.stat.exists and item.stat.isdir
+
+- name: Security | check sudoers files and directories
+  ansible.builtin.stat:
+    path: "{{ item.path }}"
+  loop:
+    - { path: /etc/sudoers, mode: "0440" }
+    - { path: /etc/sudoers.d, mode: "0750" }
+  register: security_sudoers_stat
+
+- name: Security | harden sudoers permissions
+  ansible.builtin.file:
+    path: "{{ item.item.path }}"
+    owner: root
+    group: root
+    mode: "{{ item.item.mode }}"
+  loop: "{{ security_sudoers_stat.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+  when: item.stat.exists
+
+- name: Security | check grub boot configuration files
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /boot/grub/grub.cfg
+    - /boot/grub2/grub.cfg
+  register: security_grub_stat
+
+- name: Security | harden grub configuration permissions
+  ansible.builtin.file:
+    path: "{{ item.stat.path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ security_grub_stat.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.stat.exists and item.stat.isreg
+
+- name: Security | check system compiler binaries
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /usr/bin/as
+  register: security_compilers_stat
+  when: bootstrap_security_restrict_compilers | default(true) | bool
+
+- name: Security | restrict system compiler permissions to root
+  ansible.builtin.file:
+    path: "{{ item.stat.path }}"
+    owner: root
+    group: root
+    mode: "0700"
+  loop: "{{ security_compilers_stat.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - bootstrap_security_restrict_compilers | default(true) | bool
+    - item.stat.exists and item.stat.isreg

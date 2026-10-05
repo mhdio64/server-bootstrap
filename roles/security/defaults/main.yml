@@ -9,6 +9,8 @@ bootstrap_security_login_defs_enabled: true
 bootstrap_security_banner_enabled: true
 bootstrap_security_file_permissions_enabled: true
 bootstrap_security_fail2ban_enabled: true
+bootstrap_security_accounting_enabled: true
+bootstrap_security_restrict_compilers: true
 
 # Role-internal defaults (not public API).
 security_packages:
@@ -26,8 +28,17 @@ security_sysctl_dropin: /etc/sysctl.d/99-server-bootstrap-hardening.conf
 security_modprobe_dropin: /etc/modprobe.d/99-server-bootstrap-blacklist.conf
 security_limits_dropin: /etc/security/limits.d/10-server-bootstrap-limits.conf
 
-security_banner_text: >-
-  Authorized access only. Unauthorized access is strictly prohibited and
-  subject to legal action.
+security_banner_text: |
+  *******************************************************************************
+                              AUTHORIZED ACCESS ONLY
+  *******************************************************************************
+  This system is restricted to authorized users for legitimate business purposes
+  only. All activities on this system are logged and monitored. Unauthorized
+  access, use, or modification is strictly prohibited and may result in
+  administrative action, civil liability, and criminal prosecution.
+
+  By continuing to access this system, you explicitly consent to monitoring
+  and agree to adhere to all applicable security policies.
+  *******************************************************************************
 security_banner_issue_path: /etc/issue
 security_banner_issue_net_path: /etc/issue.net
