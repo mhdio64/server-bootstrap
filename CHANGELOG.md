@@ -5,6 +5,29 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-06
+
+Production server hardening refinement, CIS/NIST legal SSH banner, and process accounting.
+
+### Added
+
+- **Standard Legal Warning Notice (CIS Benchmark 5.4.1 / NIST SP 800-171)**:
+  - Deployed comprehensive, professional legal warning banner to `/etc/issue` and `/etc/issue.net` without disclosing OS or host identifiers to prevent reconnaissance.
+- **Enhanced Hardening Baseline (Certified Lynis Score >= 80 on Live Production Hosts)**:
+  - Restricted directory permissions on `/etc/sudoers.d` to `0750` and `/etc/sudoers` to `0440` (resolves Lynis sudoers directory warning).
+  - Restricted bootloader configuration permissions on `/boot/grub/grub.cfg` and `/boot/grub2/grub.cfg` to `0600`.
+  - Added system compiler restriction control (`bootstrap_security_restrict_compilers: true`) restricting `/usr/bin/as` to root (`0700`).
+  - Integrated PAM password strength checking (`libpam-pwquality` on Debian family, `pam_pwquality` on RedHat family).
+  - Deployed patch management and package verification tooling (`apt-show-versions` and periodic `debsums` daily cron checking).
+- **System & Process Accounting**:
+  - Added `roles/security/tasks/accounting.yml` managing system performance monitoring (`sysstat`) and kernel process accounting (`acct` on Debian family, `psacct` on RedHat family) under `bootstrap_security_accounting_enabled`.
+- **Resilient Time Synchronization**:
+  - Configured high-reliability NTP pool drop-in (`time.cloudflare.com pool.ntp.org time.google.com`) for `systemd-timesyncd` in `roles/common` with automatic restart on configuration change, resolving timesyncd timeouts when default vendor NTP endpoints are unreachable.
+- **Production Validation & Docker Compatibility**:
+  - Verified Lynis Hardening Index score of **82** on a live Ubuntu Server host.
+  - Confirmed 100% Docker CE engine and bridge/NAT container networking compatibility.
+  - Confirmed zero-mutation check mode and strict idempotency (`changed=0`).
+
 ## [0.3.0] - 2026-09-18
 
 Comprehensive server hardening engine and interactive authentication prompts.
